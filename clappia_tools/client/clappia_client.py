@@ -1,7 +1,7 @@
 import json
 from typing import Dict, Any, Optional, Tuple
 from clappia_tools._utils.api_utils import ClappiaAPIUtils
-from clappia_tools._utils.validators import ClappiaInputValidator
+from clappia_tools._utils.validators import ClappiaInputValidator, ClappiaValidator
 from clappia_tools._utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
@@ -10,7 +10,7 @@ logger = get_logger(__name__)
 class ClappiaClient:
     """
     Unified client for all Clappia API operations
-    
+
     This is the main interface for interacting with Clappia APIs.
     All functionality is accessible through this client.
     """
@@ -226,3 +226,138 @@ class ClappiaClient:
         }
 
         return f"Successfully retrieved app definition:\n\nSUMMARY:\n{json.dumps(app_info, indent=2)}\n\nFULL DEFINITION:\n{json.dumps(response_data, indent=2)}"
+
+    def update_submission_owners(
+        self,
+        app_id: str,
+        submission_id: str,
+        requesting_user_email_address: str,
+        email_ids: list[str],
+    ) -> str:
+        is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)
+        if not is_valid:
+            return f"Error: Invalid app_id - {error_msg}"
+
+        is_valid, error_msg = ClappiaInputValidator.validate_submission_id(
+            submission_id
+        )
+        if not is_valid:
+            return f"Error: Invalid submission_id - {error_msg}"
+
+        if (
+            not requesting_user_email_address
+            or not requesting_user_email_address.strip()
+        ):
+            return (
+                "Error: requesting_user_email_address is required and cannot be empty"
+            )
+
+        if not ClappiaInputValidator.validate_email(requesting_user_email_address):
+            return "Error: requesting_user_email_address must be a valid email address"
+
+        is_valid, validation_msg, valid_emails = (
+            ClappiaInputValidator.validate_email_list(email_ids)
+        )
+        if not is_valid:
+            return f"Error: {validation_msg}"
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return f"Error: {env_error}"
+
+        payload = {
+            "workplaceId": self.api_utils.workplace_id,
+            "appId": app_id.strip(),
+            "submissionId": submission_id.strip(),
+            "requestingUserEmailAddress": requesting_user_email_address.strip(),
+            "emailIds": valid_emails,
+        }
+
+        logger.info(
+            f"Updating submission owners for app_id: {app_id} with payload: {payload}"
+        )
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="submissions/updateSubmissionOwners",
+            data=payload,
+        )
+
+        if not success:
+            return f"Error: {error_message}"
+
+        owners_info = {
+            "submissionId": submission_id,
+            "appId": app_id,
+            "requestingUser": requesting_user_email_address,
+            "newOwnersCount": len(valid_emails),
+            "newOwners": valid_emails,
+            "status": "updated",
+        }
+
+        result = f"Successfully updated submission owners:\n\nSUMMARY:\n{json.dumps(owners_info, indent=2)}"
+        if validation_msg:
+            result += f"\n\nWARNING: {validation_msg}"
+        result += f"\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
+        return result
+
+    def update_submission_status(
+        self,
+        app_id: str,
+        submission_id: str,
+        requesting_user_email_address: str,
+        status_name: str,
+        comments: str,
+    ) -> str:
+        is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)
+        if not is_valid:
+            return f"Error: Invalid app_id - {error_msg}"
+
+        is_valid, error_msg = ClappiaInputValidator.validate_submission_id(submission_id)
+        if not is_valid:
+            return f"Error: Invalid submission_id - {error_msg}"
+
+        if not requesting_user_email_address or not requesting_user_email_address.strip():
+            return "Error: requesting_user_email_address is required and cannot be empty"
+
+        if not ClappiaInputValidator.validate_email(requesting_user_email_address):
+            return "Error: requesting_user_email_address must be a valid email address"
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return f"Error: {env_error}"
+
+        payload = {
+            "workplaceId": self.api_utils.workplace_id,
+            "appId": app_id.strip(),
+            "submissionId": submission_id.strip(),
+            "requestingUserEmailAddress": requesting_user_email_address.strip(),
+            "status": {
+                "name": status_name,
+                "comments": comments,
+            },
+        }
+
+        logger.info(f"Updating submission status for app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="submissions/updateStatus",
+            data=payload,
+        )
+
+        if not success:
+            return f"Error: {error_message}"
+
+        status_info = {
+            "submissionId": submission_id,
+            "appId": app_id,
+            "requestingUser": requesting_user_email_address,
+            "newStatus": status_name,
+            "comments": comments,
+            "updateStatus": "completed",
+        }
+
+        result = f"Successfully updated submission status:\n\nSUMMARY:\n{json.dumps(status_info, indent=2)}"
+        result += f"\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
+        return result

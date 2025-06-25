@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class FilterOperator(Enum):
     CONTAINS = "CONTAINS"
     NOT_IN = "NOT_IN"
@@ -15,16 +14,13 @@ class FilterOperator(Enum):
     GTE = "GTE"
     LTE = "LTE"
 
-
 class LogicalOperator(Enum):
     AND = "AND"
     OR = "OR"
 
-
 class FilterKeyType(Enum):
     STANDARD = "STANDARD"
     CUSTOM = "CUSTOM"
-
 
 class AggregationType(Enum):
     COUNT = "count"
@@ -34,16 +30,13 @@ class AggregationType(Enum):
     MAXIMUM = "maximum"
     UNIQUE = "unique"
 
-
 class DimensionType(Enum):
     STANDARD = "STANDARD"
     CUSTOM = "CUSTOM"
 
-
 class SortDirection(Enum):
     ASC = "asc"
     DESC = "desc"
-
 
 class DataType(Enum):
     TEXT = "text"
@@ -53,13 +46,11 @@ class DataType(Enum):
     SELECT = "select"
     TEXT_INPUT = "textInput"
 
-
 class LanguageCode(Enum):
     ENGLISH = "en"
     SPANISH = "es"
     FRENCH = "fr"
     GERMAN = "de"
-
 
 class FieldType(Enum):
     SINGLE_LINE_TEXT = "singleLineText"

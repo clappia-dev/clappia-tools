@@ -1,9 +1,7 @@
-from langchain.tools import tool
+
 from typing import Dict, Any
 from clappia_tools.client.clappia_client import ClappiaClient
 
-
-@tool(parse_docstring=True)
 def get_app_definition(
     app_id: str,
     language: str = "en",

@@ -1,9 +1,7 @@
-from langchain.tools import tool
+
 from typing import Dict, Any
 from clappia_tools.client.clappia_client import ClappiaClient
 
-
-@tool(parse_docstring=True)
 def edit_clappia_submission(
     app_id: str,
     submission_id: str,

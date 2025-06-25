@@ -1,6 +1,6 @@
 import re
 from typing import Optional, Tuple, List
-from clappia_tools._enums.tools_enum import (
+from clappia_tools._enums.enums import (
     FilterOperator,
     LogicalOperator,
     FilterKeyType,
@@ -26,28 +26,6 @@ class ClappiaValidator:
         "updatedAt",
         "state",
     }
-
-    @staticmethod
-    def validate_status(status: dict) -> Tuple[bool, str]:
-        """Validate the status dictionary structure"""
-        if not isinstance(status, dict):
-            return False, "status must be a dictionary"
-
-        if not status:
-            return False, "status cannot be empty"
-
-        if "statusName" not in status and "name" not in status:
-            return False, "status must contain 'statusName' or 'name' field"
-
-        status_value = status.get("statusName") or status.get("name")
-        if (
-            not status_value
-            or not isinstance(status_value, str)
-            or not status_value.strip()
-        ):
-            return False, "status name must be a non-empty string"
-
-        return True, ""
 
     @staticmethod
     def validate_condition(condition: dict) -> Tuple[bool, str]:
