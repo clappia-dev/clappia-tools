@@ -4,6 +4,13 @@ from typing import List, Optional
 
 @dataclass
 class Field:
+    """Field model for creating an app"""
+    """
+    fieldType: str
+    label: str
+    options: Optional[List[str]] = None
+    """
+
     fieldType: str
     label: str
     options: Optional[List[str]] = None
@@ -18,6 +25,12 @@ class Field:
 
 @dataclass
 class Section:
+    """Section model for creating an app"""
+    """
+    sectionName: str
+    fields: List[Field]
+    """
+    
     sectionName: str
     fields: List[Field]
     def to_dict(self) -> dict:

@@ -50,11 +50,10 @@ class AppManagementClient(BaseClappiaClient):
         for section_dict in sections:
             fields = []
             for field_dict in section_dict.get("fields", []):
-                from clappia_tools._models.model import Field
                 field = Field(
                     fieldType=field_dict["fieldType"],
                     label=field_dict["label"],
-                    options=field_dict["options"]
+                    options=field_dict.get("options")
                 )
                 fields.append(field)
             

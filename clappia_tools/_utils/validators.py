@@ -39,6 +39,11 @@ class ClappiaInputValidator:
             "timeSelector",
             "phoneNumber"  
         ]
+        options_field_types = [
+            "singleSelector",
+            "multiSelector",
+            "dropDown"
+        ]
         
         if not sections or not isinstance(sections, list):
             return False, "Sections must be a non-empty list"
@@ -46,7 +51,7 @@ class ClappiaInputValidator:
             if not section.sectionName or not section.sectionName.strip():
                 return False, "Section name is required and cannot be empty"
             if not section.fields or not isinstance(section.fields, list):
-                return False, f"Section '{section.sectionName}' must have a non-empty list of fields with fieldType, label and options (optional) as keys"
+                return False, f"Section '{section.sectionName}' must have a non-empty list of fields with fieldType, label and options (optional) as keys and fieldType must be one of {create_app_field_types} and options must be a list of strings if fieldType is one of {options_field_types}"
             for field in section.fields:
                 if field.fieldType not in create_app_field_types:
                     return False, f"Invalid field type '{field.fieldType}' in section '{section.sectionName}, allowed field types are {create_app_field_types}"
