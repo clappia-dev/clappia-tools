@@ -1,363 +1,204 @@
-import json
-from typing import Dict, Any, Optional, Tuple
-from clappia_tools._utils.api_utils import ClappiaAPIUtils
-from clappia_tools._utils.validators import ClappiaInputValidator, ClappiaValidator
-from clappia_tools._utils.logging_utils import get_logger
-
-logger = get_logger(__name__)
-
+from typing import Optional, Dict, Any, List
+from .submission_client import SubmissionClient
+from .app_definition_client import AppDefinitionClient
+from .app_management_client import AppManagementClient
 
 class ClappiaClient:
+    """Main Clappia client that provides unified access to all Clappia functionality.
+    
+    This client acts as a facade that combines all specialized clients (SubmissionClient,
+    AppDefinitionClient, AppManagementClient) into a single, easy-to-use interface.
+    
+    Users can access functionality in two ways:
+    1. Through specialized client properties (client.submissions.create_submission())
+    2. Through direct methods for backward compatibility (client.create_submission())
+    
+    Attributes:
+        submissions: SubmissionClient for managing submissions
+        app_definition: AppDefinitionClient for retrieving app definitions  
+        app_management: AppManagementClient for creating and modifying apps
     """
-    Unified client for all Clappia API operations
 
-    This is the main interface for interacting with Clappia APIs.
-    All functionality is accessible through this client.
-    """
-
-    def __init__(
-        self,
-        api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
-        workplace_id: Optional[str] = None,
-        timeout: int = 30,
-    ):
-        """
-        Initialize Clappia client
+    def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None, 
+                 workplace_id: Optional[str] = None, timeout: int = 30):
+        """Initialize the main Clappia client with all specialized clients.
 
         Args:
-            api_key: Clappia API key
-            base_url: API base URL
-            workplace_id: Workspace ID
-            timeout: Request timeout in seconds
+            api_key: Clappia API key. If None, will be read from environment variables.
+            base_url: API base URL. If None, will use default Clappia API URL.
+            workplace_id: Workspace ID. If None, will be read from environment variables.
+            timeout: Request timeout in seconds. Defaults to 30.
         """
-        self.api_utils = ClappiaAPIUtils(api_key, base_url, workplace_id, timeout)
+        # Initialize all specialized clients
+        self.submissions = SubmissionClient(api_key, base_url, workplace_id, timeout)
+        self.app_definition = AppDefinitionClient(api_key, base_url, workplace_id, timeout)
+        self.app_management = AppManagementClient(api_key, base_url, workplace_id, timeout)
+
+    # =============================================================================
+    # SUBMISSION METHODS - Direct access for backward compatibility
+    # =============================================================================
 
     def create_submission(self, app_id: str, data: Dict[str, Any], email: str) -> str:
-        """
-        Create a new submission in Clappia app
-
+        """Creates a new submission in a Clappia application.
+        
+        This is a convenience method that delegates to self.submissions.create_submission().
+        
         Args:
-            app_id: Application ID
-            data: Submission data
-            email: User email
-
+            app_id: Application ID in uppercase letters and numbers format.
+            data: Dictionary of field data to submit.
+            email: Email address of the user creating the submission.
+            
         Returns:
-            Formatted result string
+            str: Formatted response with submission details and status.
         """
-        is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)
-        if not is_valid:
-            return f"Error: Invalid app_id - {error_msg}"
+        return self.submissions.create_submission(app_id, data, email)
 
-        if not email or not email.strip():
-            return "Error: email is required and cannot be empty"
-
-        if not ClappiaInputValidator.validate_email(email):
-            return "Error: email must be a valid email address"
-
-        if not isinstance(data, dict):
-            return "Error: data must be a dictionary"
-
-        if not data:
-            return "Error: data cannot be empty - at least one field is required"
-
-        payload = {
-            "workplaceId": self.api_utils.workplace_id,
-            "appId": app_id.strip(),
-            "requestingUserEmailAddress": email.strip(),
-            "data": data,
-        }
-
-        logger.info(
-            f"Creating submission for app_id: {app_id} with data: {data} and email: {email}"
-        )
-
-        success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="submissions/create", data=payload
-        )
-
-        if not success:
-            return f"Error: {error_message}"
-
-        submission_id = response_data.get("submissionId") if response_data else None
-
-        submission_info = {
-            "submissionId": submission_id,
-            "status": "created",
-            "appId": app_id,
-            "owner": email,
-            "fieldsSubmitted": len(data),
-        }
-
-        return f"Successfully created submission:\n\nSUMMARY:\n{json.dumps(submission_info, indent=2)}\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
-
-    def edit_submission(
-        self, app_id: str, submission_id: str, data: Dict[str, Any], email: str
-    ) -> str:
-        """
-        Edit an existing submission in Clappia app
-
+    def edit_submission(self, app_id: str, submission_id: str, data: Dict[str, Any], email: str) -> str:
+        """Edits an existing Clappia submission.
+        
+        This is a convenience method that delegates to self.submissions.edit_submission().
+        
         Args:
-            app_id: Application ID
-            submission_id: Submission ID to edit
-            data: Updated data
-            email: User email
-
+            app_id: Application ID in uppercase letters and numbers format.
+            submission_id: Unique identifier of the submission to update.
+            data: Dictionary of field data to update.
+            email: Email address of the user requesting the edit.
+            
         Returns:
-            Formatted result string
+            str: Formatted response with edit details and status.
         """
-        is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)
-        if not is_valid:
-            return f"Error: Invalid app_id - {error_msg}"
-
-        is_valid, error_msg = ClappiaInputValidator.validate_submission_id(
-            submission_id
-        )
-        if not is_valid:
-            return f"Error: Invalid submission_id - {error_msg}"
-
-        if not email or not email.strip():
-            return "Error: email is required and cannot be empty"
-
-        if not ClappiaInputValidator.validate_email(email):
-            return "Error: email must be a valid email address"
-
-        if not isinstance(data, dict):
-            return "Error: data must be a dictionary"
-
-        if not data:
-            return "Error: data cannot be empty - at least one field is required"
-
-        payload = {
-            "workplaceId": self.api_utils.workplace_id,
-            "appId": app_id.strip(),
-            "submissionId": submission_id.strip(),
-            "requestingUserEmailAddress": email.strip(),
-            "data": data,
-        }
-
-        logger.info(
-            f"Editing submission {submission_id} for app_id: {app_id} with data: {data} and email: {email}"
-        )
-
-        success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="submissions/edit", data=payload
-        )
-
-        if not success:
-            return f"Error: {error_message}"
-
-        edit_info = {
-            "submissionId": submission_id,
-            "appId": app_id,
-            "requestingUser": email,
-            "fieldsUpdated": len(data),
-            "updatedFields": list(data.keys()),
-            "status": "updated",
-        }
-
-        return f"Successfully edited submission:\n\nSUMMARY:\n{json.dumps(edit_info, indent=2)}\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
-
-    def get_app_definition(
-        self,
-        app_id: str,
-        language: str = "en",
-        strip_html: bool = True,
-        include_tags: bool = True,
-    ) -> str:
-        """
-        Get application definition from Clappia
-
+        return self.submissions.edit_submission(app_id, submission_id, data, email)
+    
+    def update_submission_owners(self, app_id: str, submission_id: str, 
+                               requesting_user_email_address: str, email_ids: List[str]) -> str:
+        """Updates the ownership of a Clappia submission.
+        
+        This is a convenience method that delegates to self.submissions.update_owners().
+        
         Args:
-            app_id: Application ID
-            language: Language code
-            strip_html: Whether to strip HTML
-            include_tags: Whether to include tags
-
+            app_id: Application ID in uppercase letters and numbers format.
+            submission_id: Unique identifier of the submission to update.
+            requesting_user_email_address: Email address of the user making the change.
+            email_ids: List of email addresses to add as new owners.
+            
         Returns:
-            Formatted result string
+            str: Formatted response with update details and status.
         """
-        is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)
-        if not is_valid:
-            return f"Error: Invalid app_id - {error_msg}"
+        return self.submissions.update_owners(app_id, submission_id, requesting_user_email_address, email_ids)
 
-        params = {
-            "appId": app_id.strip(),
-            "workplaceId": self.api_utils.workplace_id,
-            "language": language,
-            "stripHtml": str(strip_html).lower(),
-            "includeTags": str(include_tags).lower(),
-        }
+    def update_submission_status(self, app_id: str, submission_id: str, 
+                               requesting_user_email_address: str, status_name: str, comments: str) -> str:
+        """Updates the status of a Clappia submission.
+        
+        This is a convenience method that delegates to self.submissions.update_status().
+        
+        Args:
+            app_id: Application ID in uppercase letters and numbers format.
+            submission_id: Unique identifier of the submission to update.
+            requesting_user_email_address: Email address of the user making the change.
+            status_name: Name of the new status to apply.
+            comments: Optional comments to include with the status change.
+            
+        Returns:
+            str: Formatted response with update details and status.
+        """
+        return self.submissions.update_status(app_id, submission_id, requesting_user_email_address, status_name, comments)
 
-        logger.info(
-            f"Getting app definition for app_id: {app_id} with params: {params}"
+    # =============================================================================
+    # APP DEFINITION METHODS - Direct access for backward compatibility
+    # =============================================================================
+
+    def get_app_definition(self, app_id: str, language: str = "en", 
+                          strip_html: bool = True, include_tags: bool = True) -> str:
+        """Fetches complete definition of a Clappia application.
+        
+        This is a convenience method that delegates to self.app_definition.get_definition().
+        
+        Args:
+            app_id: Unique application identifier in uppercase format.
+            language: Language code for field labels and translations.
+            strip_html: Whether to remove HTML formatting from text fields.
+            include_tags: Whether to include metadata tags in response.
+            
+        Returns:
+            str: Formatted response with app definition details and structure.
+        """
+        return self.app_definition.get_definition(app_id, language, strip_html, include_tags)
+
+    # =============================================================================
+    # APP MANAGEMENT METHODS - Direct access for backward compatibility
+    # =============================================================================
+
+    def create_app(self, app_name: str, requesting_user_email_address: str, 
+                   sections: List[Dict[str, Any]]) -> str:
+        """Creates a new Clappia application with specified sections and fields.
+        
+        This is a convenience method that delegates to self.app_management.create_app().
+        
+        Args:
+            app_name: Name of the new application.
+            requesting_user_email_address: Email address of the user creating the app.
+            sections: List of Section objects defining the app structure.
+            
+        Returns:
+            str: Success message with app ID and URL, or error message.
+        """
+        return self.app_management.create_app(app_name, requesting_user_email_address, sections)
+
+    def add_field_to_app(self, app_id: str, requesting_user_email_address: str,
+                        section_index: int, field_index: int, field_type: str, 
+                        label: str, required: bool, **kwargs) -> str:
+        """Adds a new field to an existing Clappia application.
+        
+        This is a convenience method that delegates to self.app_management.add_field().
+        
+        Args:
+            app_id: Application ID.
+            requesting_user_email_address: Email address of the user adding the field.
+            section_index: Index of the section to add the field to.
+            field_index: Position within the section for the new field.
+            field_type: Type of field to add.
+            label: Display label for the field.
+            required: Whether the field is required.
+            **kwargs: Additional optional parameters for field configuration.
+            
+        Returns:
+            str: Success message with generated field name or error message.
+        """
+        return self.app_management.add_field(
+            app_id, requesting_user_email_address, section_index, field_index, 
+            field_type, label, required, **kwargs
         )
 
-        success, error_message, response_data = self.api_utils.make_request(
-            method="GET",
-            endpoint="appdefinition-external/getAppDefinition",
-            params=params,
-        )
+    # =============================================================================
+    # UTILITY METHODS
+    # =============================================================================
 
-        if not success:
-            return f"Error: {error_message}"
-
-        app_info = {
-            "appId": response_data.get("appId") if response_data else None,
-            "version": response_data.get("version") if response_data else None,
-            "state": response_data.get("state") if response_data else None,
-            "pageCount": len(response_data.get("pageIds", [])) if response_data else 0,
-            "sectionCount": (
-                len(response_data.get("sectionIds", [])) if response_data else 0
-            ),
-            "fieldCount": (
-                len(response_data.get("fieldDefinitions", {})) if response_data else 0
-            ),
-            "appName": (
-                response_data.get("metadata", {}).get("sectionName", "Unknown")
-                if response_data
-                else "Unknown"
-            ),
-            "description": (
-                response_data.get("metadata", {}).get("description", "")
-                if response_data
-                else ""
-            ),
-        }
-
-        return f"Successfully retrieved app definition:\n\nSUMMARY:\n{json.dumps(app_info, indent=2)}\n\nFULL DEFINITION:\n{json.dumps(response_data, indent=2)}"
-
-    def update_submission_owners(
-        self,
-        app_id: str,
-        submission_id: str,
-        requesting_user_email_address: str,
-        email_ids: list[str],
-    ) -> str:
-        is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)
-        if not is_valid:
-            return f"Error: Invalid app_id - {error_msg}"
-
-        is_valid, error_msg = ClappiaInputValidator.validate_submission_id(
-            submission_id
-        )
-        if not is_valid:
-            return f"Error: Invalid submission_id - {error_msg}"
-
-        if (
-            not requesting_user_email_address
-            or not requesting_user_email_address.strip()
-        ):
-            return (
-                "Error: requesting_user_email_address is required and cannot be empty"
-            )
-
-        if not ClappiaInputValidator.validate_email(requesting_user_email_address):
-            return "Error: requesting_user_email_address must be a valid email address"
-
-        is_valid, validation_msg, valid_emails = (
-            ClappiaInputValidator.validate_email_list(email_ids)
-        )
-        if not is_valid:
-            return f"Error: {validation_msg}"
-
-        env_valid, env_error = self.api_utils.validate_environment()
-        if not env_valid:
-            return f"Error: {env_error}"
-
-        payload = {
-            "workplaceId": self.api_utils.workplace_id,
-            "appId": app_id.strip(),
-            "submissionId": submission_id.strip(),
-            "requestingUserEmailAddress": requesting_user_email_address.strip(),
-            "emailIds": valid_emails,
-        }
-
-        logger.info(
-            f"Updating submission owners for app_id: {app_id} with payload: {payload}"
-        )
-
-        success, error_message, response_data = self.api_utils.make_request(
-            method="POST",
-            endpoint="submissions/updateSubmissionOwners",
-            data=payload,
-        )
-
-        if not success:
-            return f"Error: {error_message}"
-
-        owners_info = {
-            "submissionId": submission_id,
-            "appId": app_id,
-            "requestingUser": requesting_user_email_address,
-            "newOwnersCount": len(valid_emails),
-            "newOwners": valid_emails,
-            "status": "updated",
-        }
-
-        result = f"Successfully updated submission owners:\n\nSUMMARY:\n{json.dumps(owners_info, indent=2)}"
-        if validation_msg:
-            result += f"\n\nWARNING: {validation_msg}"
-        result += f"\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
-        return result
-
-    def update_submission_status(
-        self,
-        app_id: str,
-        submission_id: str,
-        requesting_user_email_address: str,
-        status_name: str,
-        comments: str,
-    ) -> str:
-        is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)
-        if not is_valid:
-            return f"Error: Invalid app_id - {error_msg}"
-
-        is_valid, error_msg = ClappiaInputValidator.validate_submission_id(submission_id)
-        if not is_valid:
-            return f"Error: Invalid submission_id - {error_msg}"
-
-        if not requesting_user_email_address or not requesting_user_email_address.strip():
-            return "Error: requesting_user_email_address is required and cannot be empty"
-
-        if not ClappiaInputValidator.validate_email(requesting_user_email_address):
-            return "Error: requesting_user_email_address must be a valid email address"
-
-        env_valid, env_error = self.api_utils.validate_environment()
-        if not env_valid:
-            return f"Error: {env_error}"
-
-        payload = {
-            "workplaceId": self.api_utils.workplace_id,
-            "appId": app_id.strip(),
-            "submissionId": submission_id.strip(),
-            "requestingUserEmailAddress": requesting_user_email_address.strip(),
-            "status": {
-                "name": status_name,
-                "comments": comments,
+    def get_client_info(self) -> Dict[str, Any]:
+        """Returns information about the client and its configuration.
+        
+        Returns:
+            dict: Dictionary containing client configuration information.
+        """
+        return {
+            "client_type": "ClappiaClient",
+            "version": "1.0.0",
+            "specialized_clients": {
+                "submissions": "SubmissionClient",
+                "app_definition": "AppDefinitionClient", 
+                "app_management": "AppManagementClient"
             },
+            "api_config": {
+                "base_url": self.submissions.api_utils.base_url,
+                "workplace_id": self.submissions.api_utils.workplace_id,
+                "timeout": self.submissions.api_utils.timeout
+            }
         }
 
-        logger.info(f"Updating submission status for app_id: {app_id} with payload: {payload}")
+    def __repr__(self) -> str:
+        """String representation of the ClappiaClient."""
+        return f"ClappiaClient(workplace_id={self.submissions.api_utils.workplace_id})"
 
-        success, error_message, response_data = self.api_utils.make_request(
-            method="POST",
-            endpoint="submissions/updateStatus",
-            data=payload,
-        )
-
-        if not success:
-            return f"Error: {error_message}"
-
-        status_info = {
-            "submissionId": submission_id,
-            "appId": app_id,
-            "requestingUser": requesting_user_email_address,
-            "newStatus": status_name,
-            "comments": comments,
-            "updateStatus": "completed",
-        }
-
-        result = f"Successfully updated submission status:\n\nSUMMARY:\n{json.dumps(status_info, indent=2)}"
-        result += f"\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
-        return result
+    def __str__(self) -> str:
+        """Human-readable string representation of the ClappiaClient."""
+        return f"Clappia API Client for workspace: {self.submissions.api_utils.workplace_id}"
