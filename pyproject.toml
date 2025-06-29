@@ -8,11 +8,17 @@ version = "0.1.0"
 description = "Python client for Clappia API integration"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
-authors = [
-    {name = "Rishabh Verma", email = "rishabh.v@clappia.com"}
+license = { text = "MIT" }
+authors = [{ name = "Rishabh Verma", email = "rishabh.v@clappia.com" }]
+keywords = [
+    "clappia",
+    "client",
+    "mcp",
+    "rest-apis",
+    "tools",
+    "workchat",
+    "agents",
 ]
-keywords = ["clappia", "api", "client", "forms", "automation"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -24,7 +30,6 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 
-# Minimal dependencies - removed LangChain since we're not exposing tools
 dependencies = [
     "requests>=2.31.0",
     "python-dotenv>=1.0.0",
@@ -40,21 +45,8 @@ dev = [
     "mypy>=1.0.0",
     "pre-commit>=3.0.0",
 ]
-test = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "pytest-mock>=3.10.0",
-]
-docs = [
-    "mkdocs>=1.4.0",
-    "mkdocs-material>=9.0.0",
-]
-# Optional LangChain integration
-langchain = [
-    "langchain>=0.1.0",
-    "langchain-openai>=0.1.0",
-    "langchain-anthropic>=0.1.0",
-]
+test = ["pytest>=7.0.0", "pytest-cov>=4.0.0", "pytest-mock>=3.10.0"]
+docs = ["mkdocs>=1.4.0", "mkdocs-material>=9.0.0"]
 
 [project.urls]
 Homepage = "https://github.com/clappia-dev/clappia-tools"
@@ -101,15 +93,13 @@ warn_unreachable = true
 strict_equality = true
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["clappia_tools/tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = [
-    "--strict-markers",
-    "--strict-config",
-    "--verbose",
-]
+addopts = ["--strict-markers", "--strict-config", "--verbose"]
 markers = [
     "unit: Unit tests",
     "integration: Integration tests",
