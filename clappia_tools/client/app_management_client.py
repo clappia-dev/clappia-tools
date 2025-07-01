@@ -87,7 +87,9 @@ class AppManagementClient(BaseClappiaClient):
         )
 
         if not success:
+            logger.error(f"Error: {error_message}")
             return f"Error: {error_message}"
+        
 
         app_id = response_data.get("appId") if response_data else None
         app_url = response_data.get("appUrl") if response_data else None
@@ -259,7 +261,9 @@ class AppManagementClient(BaseClappiaClient):
         )
         
         if not success:
+            logger.error(f"Error: {error_message}")
             return f"Error: {error_message}"
+        
         
         field_name = response_data.get("fieldName") if response_data else None
         result = f"Successfully added field.\nField Name: {field_name}\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
@@ -445,6 +449,7 @@ class AppManagementClient(BaseClappiaClient):
         )
 
         if not success:
+            logger.error(f"Error: {error_message}")
             return f"Error: {error_message}"
         
         updated_properties = []

@@ -14,7 +14,7 @@ class SubmissionClient(BaseClappiaClient):
     editing, retrieving, and managing submission ownership and status.
     """
 
-    def create_submission(self, app_id: str, data: Dict[str, Any], email: str) -> str:
+    def create_submission(self, app_id: str, data: Dict[str, Any], requesting_user_email_address: str) -> str:
         """Creates a new submission in a Clappia application with specified field data.
 
         Submits form data to create a new record in the specified Clappia app.
@@ -23,7 +23,7 @@ class SubmissionClient(BaseClappiaClient):
         Args:
             app_id: Application ID in uppercase letters and numbers format (e.g., MFX093412). Use this to specify which Clappia app to create the submission in.
             data: Dictionary of field data to submit. Keys should match field names from the app definition, values should match expected field types. Example: {"employee_name": "John Doe", "department": "Engineering", "salary": 75000, "start_date": "20-02-2025"}.
-            email: Email address of the user creating the submission. This user becomes the submission owner and must have access to the specified app. Must be a valid email format.
+            requesting_user_email_address: Email address of the user creating the submission. This user becomes the submission owner and must have access to the specified app. Must be a valid email format.
 
         Returns:
             str: Formatted response with submission details and status
@@ -32,11 +32,11 @@ class SubmissionClient(BaseClappiaClient):
         if not is_valid:
             return f"Error: Invalid app_id - {error_msg}"
 
-        if not email or not email.strip():
-            return "Error: email is required and cannot be empty"
+        if not requesting_user_email_address or not requesting_user_email_address.strip():
+            return "Error: requesting_user_email_address is required and cannot be empty"
 
-        if not ClappiaInputValidator.validate_email(email):
-            return "Error: email must be a valid email address"
+        if not ClappiaInputValidator.validate_email(requesting_user_email_address):
+            return "Error: requesting_user_email_address must be a valid email address"
 
         if not isinstance(data, dict):
             return "Error: data must be a dictionary"
@@ -51,12 +51,12 @@ class SubmissionClient(BaseClappiaClient):
         payload = {
             "workplaceId": self.api_utils.workplace_id,
             "appId": app_id.strip(),
-            "requestingUserEmailAddress": email.strip(),
+            "requestingUserEmailAddress": requesting_user_email_address.strip(),
             "data": data,
         }
 
         logger.info(
-            f"Creating submission for app_id: {app_id} with data: {data} and email: {email}"
+            f"Creating submission for app_id: {app_id} with data: {data} and requesting_user_email_address: {requesting_user_email_address}"
         )
 
         success, error_message, response_data = self.api_utils.make_request(
@@ -64,6 +64,7 @@ class SubmissionClient(BaseClappiaClient):
         )
 
         if not success:
+            logger.error(f"Error: {error_message}")
             return f"Error: {error_message}"
 
         submission_id = response_data.get("submissionId") if response_data else None
@@ -72,13 +73,13 @@ class SubmissionClient(BaseClappiaClient):
             "submissionId": submission_id,
             "status": "created",
             "appId": app_id,
-            "owner": email,
+            "owner": requesting_user_email_address,
             "fieldsSubmitted": len(data),
         }
 
         return f"Successfully created submission:\n\nSUMMARY:\n{json.dumps(submission_info, indent=2)}\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
 
-    def edit_submission(self, app_id: str, submission_id: str, data: Dict[str, Any], email: str) -> str:
+    def edit_submission(self, app_id: str, submission_id: str, data: Dict[str, Any], requesting_user_email_address: str) -> str:
         """Edits an existing Clappia submission by updating specified field values.
 
         Modifies field data in an existing submission record while preserving other field values.
@@ -88,7 +89,7 @@ class SubmissionClient(BaseClappiaClient):
             app_id: Application ID in uppercase letters and numbers format (e.g., MFX093412). Use this to specify which Clappia app contains the submission.
             submission_id: Unique identifier of the submission to update (e.g., HGO51464561). This identifies the specific submission record to modify.
             data: Dictionary of field data to update. Keys should match field names from the app definition, values should match expected field types. Only specified fields will be updated. Example: {"employee_name": "Jane Doe", "department": "Marketing", "salary": 80000, "start_date": "20-02-2025"}.
-            email: Email address of the user requesting the edit. This user must have permission to modify the submission. Must be a valid email format.
+            requesting_user_email_address: Email address of the user requesting the edit. This user must have permission to modify the submission. Must be a valid email format.
 
         Returns:
             str: Formatted response with edit details and status
@@ -101,11 +102,11 @@ class SubmissionClient(BaseClappiaClient):
         if not is_valid:
             return f"Error: Invalid submission_id - {error_msg}"
 
-        if not email or not email.strip():
-            return "Error: email is required and cannot be empty"
+        if not requesting_user_email_address or not requesting_user_email_address.strip():
+            return "Error: requesting_user_email_address is required and cannot be empty"
 
-        if not ClappiaInputValidator.validate_email(email):
-            return "Error: email must be a valid email address"
+        if not ClappiaInputValidator.validate_email(requesting_user_email_address):
+            return "Error: requesting_user_email_address must be a valid email address"
 
         if not isinstance(data, dict):
             return "Error: data must be a dictionary"
@@ -121,12 +122,12 @@ class SubmissionClient(BaseClappiaClient):
             "workplaceId": self.api_utils.workplace_id,
             "appId": app_id.strip(),
             "submissionId": submission_id.strip(),
-            "requestingUserEmailAddress": email.strip(),
+            "requestingUserEmailAddress": requesting_user_email_address.strip(),
             "data": data,
         }
 
         logger.info(
-            f"Editing submission {submission_id} for app_id: {app_id} with data: {data} and email: {email}"
+            f"Editing submission {submission_id} for app_id: {app_id} with data: {data} and requesting_user_email_address: {requesting_user_email_address}"
         )
 
         success, error_message, response_data = self.api_utils.make_request(
@@ -134,12 +135,13 @@ class SubmissionClient(BaseClappiaClient):
         )
 
         if not success:
+            logger.error(f"Error: {error_message}")
             return f"Error: {error_message}"
 
         edit_info = {
             "submissionId": submission_id,
             "appId": app_id,
-            "requestingUser": email,
+            "requestingUser": requesting_user_email_address,
             "fieldsUpdated": len(data),
             "updatedFields": list(data.keys()),
             "status": "updated",
@@ -204,6 +206,7 @@ class SubmissionClient(BaseClappiaClient):
         )
 
         if not success:
+            logger.error(f"Error: {error_message}")
             return f"Error: {error_message}"
 
         owners_info = {
@@ -281,6 +284,7 @@ class SubmissionClient(BaseClappiaClient):
         )
 
         if not success:
+            logger.error(f"Error: {error_message}")
             return f"Error: {error_message}"
 
         status_info = {
