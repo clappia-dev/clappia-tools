@@ -47,12 +47,14 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="GET",
-            endpoint="appdefinition-external/getAppDefinition",
+            endpoint="appdefinitionv2/getAppDefinition",
             params=params,
         )
 
         if not success:
+            logger.error(f"Error: {error_message}")
             return f"Error: {error_message}"
+
 
         app_info = {
             "appId": response_data.get("appId") if response_data else None,
