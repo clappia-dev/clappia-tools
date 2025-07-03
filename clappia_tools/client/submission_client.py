@@ -22,8 +22,8 @@ class SubmissionClient(BaseClappiaClient):
 
         Args:
             app_id: Application ID in uppercase letters and numbers format (e.g., MFX093412). Use this to specify which Clappia app to create the submission in.
-            data: Dictionary of field data to submit. Keys should match field names from the app definition, values should match expected field types. Example: {"employee_name": "John Doe", "department": "Engineering", "salary": 75000, "start_date": "20-02-2025"}.
-            requesting_user_email_address: Email address of the user creating the submission. This user becomes the submission owner and must have access to the specified app. Must be a valid email format.
+            data: Dictionary of field data to submit. Keys should match field names from the app definition, values should match expected field types. Example: {"employee_name": "John Doe", "department": "Engineering", "salary": 75000, "start_date": "2024-01-15"}. For file fields, use format: {"image_field_name": [{"s3Path": {"bucket": "my-files-bucket", "key": "images/photo.jpg", "makePublic": false}}]}.
+            requesting_user_email_address (or email): Email address of the user creating the submission. This user becomes the submission owner and must have access to the specified app. Must be a valid email format.
 
         Returns:
             str: Formatted response with submission details and status
