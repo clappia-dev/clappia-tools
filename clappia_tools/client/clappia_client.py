@@ -1,13 +1,12 @@
 from typing import Optional, Dict, Any, List
 from .submission_client import SubmissionClient
 from .app_definition_client import AppDefinitionClient
-from .app_management_client import AppManagementClient
 
 class ClappiaClient:
     """Main Clappia client that provides unified access to all Clappia functionality.
     
     This client acts as a facade that combines all specialized clients (SubmissionClient,
-    AppDefinitionClient, AppManagementClient) into a single, easy-to-use interface.
+    AppDefinitionClient) into a single, easy-to-use interface.
     
     Users can access functionality in two ways:
     1. Through specialized client properties (client.submissions.create_submission())
@@ -16,7 +15,6 @@ class ClappiaClient:
     Attributes:
         submissions: SubmissionClient for managing submissions
         app_definition: AppDefinitionClient for retrieving app definitions  
-        app_management: AppManagementClient for creating and modifying apps
     """
 
     def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None, 
@@ -32,7 +30,6 @@ class ClappiaClient:
         # Initialize all specialized clients
         self.submissions = SubmissionClient(api_key, base_url, workplace_id, timeout)
         self.app_definition = AppDefinitionClient(api_key, base_url, workplace_id, timeout)
-        self.app_management = AppManagementClient(api_key, base_url, workplace_id, timeout)
 
     # =============================================================================
     # SUBMISSION METHODS - Direct access for backward compatibility
@@ -125,15 +122,11 @@ class ClappiaClient:
         """
         return self.app_definition.get_definition(app_id, language, strip_html, include_tags)
 
-    # =============================================================================
-    # APP MANAGEMENT METHODS - Direct access for backward compatibility
-    # =============================================================================
-
     def create_app(self, app_name: str, requesting_user_email_address: str, 
                    sections: List[Dict[str, Any]]) -> str:
         """Creates a new Clappia application with specified sections and fields.
         
-        This is a convenience method that delegates to self.app_management.create_app().
+        This is a convenience method that delegates to self.app_definition.create_app().
         
         Args:
             app_name: Name of the new application.
@@ -143,14 +136,14 @@ class ClappiaClient:
         Returns:
             str: Success message with app ID and URL, or error message.
         """
-        return self.app_management.create_app(app_name, requesting_user_email_address, sections)
+        return self.app_definition.create_app(app_name, requesting_user_email_address, sections)
 
     def add_field_to_app(self, app_id: str, requesting_user_email_address: str,
                         section_index: int, field_index: int, field_type: str, 
                         label: str, required: bool, **kwargs) -> str:
         """Adds a new field to an existing Clappia application.
         
-        This is a convenience method that delegates to self.app_management.add_field().
+        This is a convenience method that delegates to self.app_definition.add_field().
         
         Args:
             app_id: Application ID.
@@ -165,7 +158,7 @@ class ClappiaClient:
         Returns:
             str: Success message with generated field name or error message.
         """
-        return self.app_management.add_field(
+        return self.app_definition.add_field(
             app_id, requesting_user_email_address, section_index, field_index, 
             field_type, label, required, **kwargs
         )
@@ -185,8 +178,7 @@ class ClappiaClient:
             "version": "1.0.0",
             "specialized_clients": {
                 "submissions": "SubmissionClient",
-                "app_definition": "AppDefinitionClient", 
-                "app_management": "AppManagementClient"
+                "app_definition": "AppDefinitionClient"
             },
             "api_config": {
                 "base_url": self.submissions.api_utils.base_url,
