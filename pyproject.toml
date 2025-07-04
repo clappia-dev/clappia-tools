@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "clappia-tools"
-version = "0.1.6"
+name = "clappia-agent-tools"
+version = "0.1.0"
 description = "Python client for Clappia API integration"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -49,10 +49,10 @@ test = ["pytest>=7.0.0", "pytest-cov>=4.0.0", "pytest-mock>=3.10.0"]
 docs = ["mkdocs>=1.4.0", "mkdocs-material>=9.0.0"]
 
 [project.urls]
-Homepage = "https://github.com/clappia-dev/clappia-tools"
-Documentation = "https://github.com/clappia-dev/clappia-tools#readme"
-Repository = "https://github.com/clappia-dev/clappia-tools.git"
-"Bug Tracker" = "https://github.com/clappia-dev/clappia-tools/issues"
+Homepage = "https://github.com/clappia-dev/clappia-agent-tools"
+Documentation = "https://github.com/clappia-dev/clappia-agent-tools#readme"
+Repository = "https://github.com/clappia-dev/clappia-agent-tools.git"
+"Bug Tracker" = "https://github.com/clappia-dev/clappia-agent-tools/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]

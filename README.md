@@ -2,7 +2,7 @@
 
 **LangChain integration for Clappia API**
 
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/clappia-tools)](https://pypi.org/project/clappia-tools/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/clappia-agent-tools)](https://pypi.org/project/clappia-agent-tools/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
@@ -27,14 +27,14 @@ Clappia Tools is a Python package that provides a unified client and a set of to
 ## Installation
 
 ```bash
-pip install clappia-tools
+pip install clappia-agent-tools
 ```
 
 Or, for development:
 
 ```bash
-git clone https://github.com/clappia-dev/clappia-tools.git
-cd clappia-tools
+git clone https://github.com/clappia-dev/clappia-agent-tools.git
+cd clappia-agent-tools
 pip install -e .[dev]
 ```
 
@@ -59,6 +59,7 @@ client = ClappiaClient(
     workplace_id="your-workplace-id"
 )
 ```
+
 ---
 
 ## Usage
