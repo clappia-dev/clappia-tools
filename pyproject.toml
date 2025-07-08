@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "clappia-tools"
-version = "0.1.5"
+name = "clappia-api-tools"
+version = "0.1.6"
 description = "Python client for Clappia API integration"
 readme = "README.md"
 requires-python = ">=3.10"
