@@ -2,7 +2,7 @@ import os
 import json
 import requests
 from typing import Optional, Dict, Any, Tuple
-from clappia_tools._utils.logging_utils import get_logger
+from clappia_api_tools._utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
 

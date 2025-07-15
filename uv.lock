@@ -148,8 +148,8 @@ wheels = [
 ]
 
 [[package]]
-name = "clappia-tools"
-version = "0.1.4"
+name = "clappia-api-tools"
+version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "pydantic" },

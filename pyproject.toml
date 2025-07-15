@@ -56,7 +56,7 @@ Repository = "https://github.com/clappia-dev/clappia-tools.git"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["clappia_tools*"]
+include = ["clappia_api_tools*"]
 
 [tool.black]
 line-length = 88
@@ -93,9 +93,7 @@ warn_unreachable = true
 strict_equality = true
 
 [tool.pytest.ini_options]
-testpaths = ["clappia_tools/tests"]
-asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "function"
+testpaths = ["clappia_api_tools/tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]

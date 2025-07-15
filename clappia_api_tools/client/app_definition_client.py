@@ -1,7 +1,7 @@
 import json
 from .base_client import BaseClappiaClient
-from clappia_tools._utils.validators import ClappiaInputValidator
-from clappia_tools._utils.logging_utils import get_logger
+from clappia_api_tools._utils.validators import ClappiaInputValidator
+from clappia_api_tools._utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
 

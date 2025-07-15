@@ -1,10 +1,10 @@
 import json
 from typing import List, Dict, Any, Optional
 from .base_client import BaseClappiaClient
-from clappia_tools._utils.validators import ClappiaInputValidator
-from clappia_tools._utils.logging_utils import get_logger
-from clappia_tools._models.model import Section
-from clappia_tools._models.model import Field
+from clappia_api_tools._utils.validators import ClappiaInputValidator
+from clappia_api_tools._utils.logging_utils import get_logger
+from clappia_api_tools._models.model import Section
+from clappia_api_tools._models.model import Field
 
 logger = get_logger(__name__)
 
