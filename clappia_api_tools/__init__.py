@@ -8,7 +8,7 @@ from .client.clappia_client import ClappiaClient
 from .client.app_definition_client import AppDefinitionClient
 from .client.submission_client import SubmissionClient
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __all__ = ["ClappiaClient", "AppDefinitionClient", "SubmissionClient"]
 
 
