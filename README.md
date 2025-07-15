@@ -2,7 +2,7 @@
 
 **Clappia APIs SDK**
 
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/clappia-tools)](https://pypi.org/project/clappia-tools/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/clappia-api-tools)](https://pypi.org/project/clappia-api-tools/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
@@ -17,8 +17,7 @@ Clappia API Tools is a Python package that provides a set of clients for seamles
 
 -  **Multiple API Clients**: Dedicated clients for each Clappia API operation.
 -  **Submission Management**: Create, edit, update owners, and change status of submissions.
--  **App Definition Retrieval**: Fetch complete app structure and metadata.
--  **App Management**: Manage the app structure via fields and sections updates.
+-  **App Definition Retrieval**: Fetch complete app structure and metadata and  manage the app structure via fields and sections updates.
 -  **Input Validation**: Built-in validation for IDs, emails, and status objects.
 -  **Comprehensive Testing**: Includes unit and integration tests.
 
@@ -27,8 +26,7 @@ Clappia API Tools is a Python package that provides a set of clients for seamles
 ## Available Clients
 
 -  `SubmissionClient`: Manage submissions (create, edit, update owners, change status)
--  `AppDefinitionClient`: Retrieve app definitions and metadata
--  `AppManagementClient`: Manage app structure (fields, sections, creation)
+-  `AppDefinitionClient`: Retrieve app definitions and metadata and  Manage app structure (fields, sections, creation)
 
 ---
 
@@ -36,9 +34,6 @@ Clappia API Tools is a Python package that provides a set of clients for seamles
 
 -  [Submission Client Reference](docs/submission_client.md)
 -  [App Definition Client Reference](docs/app_definition_client.md)
--  [App Management Client Reference](docs/app_management_client.md)
--  [Tool Functions Reference](docs/tools.md)
--  [Advanced Usage](docs/advanced_usage.md)
 
 ---
 
@@ -53,7 +48,7 @@ Or, for development:
 ```bash
 git clone https://github.com/clappia-dev/clappia-api-tools.git
 cd clappia-api-tools
-pip install -e .[dev]
+pip install -e ."[dev]"
 ```
 
 ---
@@ -120,22 +115,6 @@ client = AppDefinitionClient(
 # Get app definition
 result = client.get_definition(app_id="MFX093412")
 print(result)
-```
-
-### AppManagementClient Example
-
-```python
-from clappia_api_tools.client.app_management_client import AppManagementClient
-
-client = AppManagementClient(
-    api_key="your-api-key",
-    base_url="https://api.clappia.com",
-    workplace_id="your-workplace-id"
-)
-
-# Example: create a new app
-# result = client.create_app(app_name="My New App", requesting_user_email_address="user@example.com", sections=[...])
-# print(result)
 ```
 
 ---

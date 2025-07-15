@@ -2,7 +2,6 @@ from unittest.mock import patch, Mock
 from clappia_api_tools.client.base_client import BaseClappiaClient
 from clappia_api_tools.client.submission_client import SubmissionClient
 from clappia_api_tools.client.app_definition_client import AppDefinitionClient
-from clappia_api_tools.client.app_management_client import AppManagementClient
 from clappia_api_tools.client.clappia_client import ClappiaClient
 
 
@@ -141,25 +140,21 @@ class TestAppDefinitionClient:
         assert "MFX093412" in result
         mock_request.assert_called_once()
 
-
-class TestAppManagementClient:
-    """Test cases for AppManagementClient"""
-
     def test_create_app_invalid_name(self):
         """Test create_app with invalid app name"""
-        client = AppManagementClient()
+        client = AppDefinitionClient()
         result = client.create_app("", "test@example.com", [])
         assert "Error: Invalid app_name" in result
 
     def test_create_app_invalid_email(self):
         """Test create_app with invalid email"""
-        client = AppManagementClient()
+        client = AppDefinitionClient()
         result = client.create_app("Valid App Name", "invalid-email", [])
         assert "Error: requesting_user_email_address must be a valid email address" in result
 
     def test_add_field_invalid_app_id(self):
         """Test add_field with invalid app_id"""
-        client = AppManagementClient()
+        client = AppDefinitionClient()
         result = client.add_field(
             "invalid-id", "test@example.com", 0, 0, "singleLineText", "Test Field", True
         )
@@ -167,7 +162,7 @@ class TestAppManagementClient:
 
     def test_add_field_unknown_field_type(self):
         """Test add_field with unknown field type"""
-        client = AppManagementClient(
+        client = AppDefinitionClient(
             api_key="test_key",
             base_url="https://test.com",
             workplace_id="TEST123",
@@ -178,14 +173,12 @@ class TestAppManagementClient:
         )
         assert "Error: field_type 'unknownFieldType'" in result
 
-
 class TestMainClappiaClient:
     """Test cases for main ClappiaClient"""
 
     @patch('clappia_api_tools.client.submission_client.SubmissionClient')
     @patch('clappia_api_tools.client.app_definition_client.AppDefinitionClient')
-    @patch('clappia_api_tools.client.app_management_client.AppManagementClient')
-    def test_init_creates_all_clients(self, mock_app_mgmt, mock_app_def, mock_submission):
+    def test_init_creates_all_clients(self, mock_app_def, mock_submission):
         """Test that ClappiaClient initializes all specialized clients"""
         client = ClappiaClient(
             api_key="test_key",
@@ -197,7 +190,6 @@ class TestMainClappiaClient:
         # Verify all specialized clients are created with correct parameters
         mock_submission.assert_called_once_with("test_key", "https://test.com", "TEST123", 60)
         mock_app_def.assert_called_once_with("test_key", "https://test.com", "TEST123", 60)
-        mock_app_mgmt.assert_called_once_with("test_key", "https://test.com", "TEST123", 60)
 
     def test_create_submission_delegates_to_submissions_client(self):
         """Test that create_submission delegates to submissions client"""
@@ -227,7 +219,6 @@ class TestMainClappiaClient:
             assert info["version"] == "1.0.0"
             assert "submissions" in info["specialized_clients"]
             assert "app_definition" in info["specialized_clients"]
-            assert "app_management" in info["specialized_clients"]
 
     def test_str_representation(self):
         """Test string representation of ClappiaClient"""
