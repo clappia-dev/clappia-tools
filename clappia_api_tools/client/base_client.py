@@ -1,5 +1,5 @@
 from typing import Optional
-from clappia_tools._utils.api_utils import ClappiaAPIUtils
+from clappia_api_tools._utils.api_utils import ClappiaAPIUtils
 
 
 class BaseClappiaClient:

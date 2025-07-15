@@ -1,6 +1,6 @@
 import re
 from typing import Tuple, List
-from clappia_tools._models.model import Section
+from clappia_api_tools._models.model import Section
 
 class ClappiaInputValidator:
     """Validates user inputs like app IDs, emails, etc."""

@@ -1,5 +1,5 @@
-from clappia_tools._utils.validators import ClappiaInputValidator
-from clappia_tools._models.model import Section, Field
+from clappia_api_tools._utils.validators import ClappiaInputValidator
+from clappia_api_tools._models.model import Section, Field
 
 
 class TestClappiaInputValidator:
