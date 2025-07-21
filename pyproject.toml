@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "clappia-api-tools"
-version = "1.0.0"
+version = "1.0.1"
 description = "Python client for Clappia API integration"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -49,14 +49,14 @@ test = ["pytest>=7.0.0", "pytest-cov>=4.0.0", "pytest-mock>=3.10.0"]
 docs = ["mkdocs>=1.4.0", "mkdocs-material>=9.0.0"]
 
 [project.urls]
-Homepage = "https://github.com/clappia-dev/clappia-tools"
-Documentation = "https://github.com/clappia-dev/clappia-tools#readme"
-Repository = "https://github.com/clappia-dev/clappia-tools.git"
-"Bug Tracker" = "https://github.com/clappia-dev/clappia-tools/issues"
+Homepage = "https://github.com/clappia-dev/clappia-api-tools"
+Documentation = "https://github.com/clappia-dev/clappia-api-tools#readme"
+Repository = "https://github.com/clappia-dev/clappia-api-tools.git"
+"Bug Tracker" = "https://github.com/clappia-dev/clappia-api-tools/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["clappia_tools*"]
+include = ["clappia_api_tools*"]
 
 [tool.black]
 line-length = 88
@@ -93,9 +93,7 @@ warn_unreachable = true
 strict_equality = true
 
 [tool.pytest.ini_options]
-testpaths = ["clappia_tools/tests"]
-asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "function"
+testpaths = ["clappia_api_tools/tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]

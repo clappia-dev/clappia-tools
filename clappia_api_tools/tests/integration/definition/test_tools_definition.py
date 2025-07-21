@@ -1,9 +1,7 @@
 from unittest.mock import patch, Mock
-from clappia_tools.client.app_definition_client import AppDefinitionClient
-from clappia_tools.client.app_management_client import AppManagementClient
-from clappia_tools.client.submission_client import SubmissionClient
-from clappia_tools._models.model import Field, Section
-
+from clappia_api_tools.client.app_definition_client import AppDefinitionClient
+from clappia_api_tools.client.submission_client import SubmissionClient
+from clappia_api_tools._models.model import Field, Section
 
 def dummy_app_definition_client():
     """Helper function to create a dummy app definition client for testing"""
@@ -13,17 +11,6 @@ def dummy_app_definition_client():
         workplace_id="dummy_workplace_id",
         timeout=30
     )
-
-
-def dummy_app_management_client():
-    """Helper function to create a dummy app management client for testing"""
-    return AppManagementClient(
-        api_key="dummy_api_key",
-        base_url="https://api.clappia.com",
-        workplace_id="dummy_workplace_id",
-        timeout=30
-    )
-
 
 def dummy_submission_client():
     """Helper function to create a dummy submission client for testing"""
@@ -38,7 +25,7 @@ def dummy_submission_client():
 class TestDefinitionToolsIntegration:
     """Test cases for App Definition and Management tools"""
 
-    @patch("clappia_tools.client.app_definition_client.AppDefinitionClient")
+    @patch("clappia_api_tools.client.app_definition_client.AppDefinitionClient")
     def test_get_definition_tool_basic(self, mock_client_class):
         """Test get_definition with basic parameters"""
         # Setup mock
@@ -56,7 +43,7 @@ class TestDefinitionToolsIntegration:
             "MFX093412", "en", True, True
         )
 
-    @patch("clappia_tools.client.app_definition_client.AppDefinitionClient")
+    @patch("clappia_api_tools.client.app_definition_client.AppDefinitionClient")
     def test_get_definition_tool_with_language(self, mock_client_class):
         """Test get_definition with different language"""
         # Setup mock
@@ -74,7 +61,7 @@ class TestDefinitionToolsIntegration:
             "MFX093412", "es", True, True
         )
 
-    @patch("clappia_tools.client.app_definition_client.AppDefinitionClient")
+    @patch("clappia_api_tools.client.app_definition_client.AppDefinitionClient")
     def test_get_definition_tool_custom_options(self, mock_client_class):
         """Test get_definition with custom strip_html and include_tags options"""
         # Setup mock
@@ -97,7 +84,7 @@ class TestDefinitionToolsIntegration:
             "MFX093412", "fr", False, False
         )
 
-    @patch("clappia_tools.client.app_definition_client.AppDefinitionClient")
+    @patch("clappia_api_tools.client.app_definition_client.AppDefinitionClient")
     def test_get_definition_tool_error_handling(self, mock_client_class):
         """Test get_definition error handling"""
         # Setup mock to return error
@@ -112,7 +99,7 @@ class TestDefinitionToolsIntegration:
         # Verify error is handled
         assert "Error: Invalid app_id" in result
 
-    @patch("clappia_tools.client.app_management_client.AppManagementClient")
+    @patch("clappia_api_tools.client.app_definition_client.AppDefinitionClient")
     def test_add_field_tool_basic(self, mock_client_class):
         """Test add_field with basic parameters"""
         # Setup mock
@@ -121,7 +108,7 @@ class TestDefinitionToolsIntegration:
         mock_client_class.return_value = mock_client
 
         # Call tool
-        client = dummy_app_management_client()
+        client = dummy_app_definition_client()
         result = client.add_field(
             app_id="MFX093412",
             requesting_user_email_address="admin@example.com",
@@ -163,7 +150,7 @@ class TestDefinitionToolsIntegration:
             hidden=None,
         )
 
-    @patch("clappia_tools.client.app_management_client.AppManagementClient")
+    @patch("clappia_api_tools.client.app_definition_client.AppDefinitionClient")
     def test_add_field_tool_with_options(self, mock_client_class):
         """Test add_field with optional parameters"""
         # Setup mock
@@ -172,7 +159,7 @@ class TestDefinitionToolsIntegration:
         mock_client_class.return_value = mock_client
 
         # Call tool with options
-        client = dummy_app_management_client()
+        client = dummy_app_definition_client()
         result = client.add_field(
             app_id="MFX093412",
             requesting_user_email_address="admin@example.com",
@@ -189,7 +176,7 @@ class TestDefinitionToolsIntegration:
         # Verify
         assert "Success: Added dropdown field DROPDOWN_FIELD" in result
 
-    @patch("clappia_tools.client.app_management_client.AppManagementClient")
+    @patch("clappia_api_tools.client.app_definition_client.AppDefinitionClient")
     def test_add_field_tool_selector_field(self, mock_client_class):
         """Test add_field with selector field types"""
         # Setup mock
@@ -198,7 +185,7 @@ class TestDefinitionToolsIntegration:
         mock_client_class.return_value = mock_client
 
         # Call tool with radio button field
-        client = dummy_app_management_client()
+        client = dummy_app_definition_client()
         result = client.add_field(
             app_id="MFX093412",
             requesting_user_email_address="admin@example.com",
@@ -215,7 +202,7 @@ class TestDefinitionToolsIntegration:
         # Verify
         assert "Success: Added radio button field RADIO_FIELD" in result
 
-    @patch("clappia_tools.client.app_management_client.AppManagementClient")
+    @patch("clappia_api_tools.client.app_definition_client.AppDefinitionClient")
     def test_add_field_tool_file_field(self, mock_client_class):
         """Test add_field with file upload field"""
         # Setup mock
@@ -224,7 +211,7 @@ class TestDefinitionToolsIntegration:
         mock_client_class.return_value = mock_client
 
         # Call tool with file field
-        client = dummy_app_management_client()
+        client = dummy_app_definition_client()
         result = client.add_field(
             app_id="MFX093412",
             requesting_user_email_address="admin@example.com",
@@ -241,7 +228,7 @@ class TestDefinitionToolsIntegration:
         # Verify
         assert "Success: Added file upload field FILE_FIELD" in result
 
-    @patch("clappia_tools.client.app_management_client.AppManagementClient")
+    @patch("clappia_api_tools.client.app_definition_client.AppDefinitionClient")
     def test_add_field_tool_validation_error(self, mock_client_class):
         """Test add_field with validation error"""
         # Setup mock to return validation error
@@ -250,7 +237,7 @@ class TestDefinitionToolsIntegration:
         mock_client_class.return_value = mock_client
 
         # Call tool with invalid field type
-        client = dummy_app_management_client()
+        client = dummy_app_definition_client()
         result = client.add_field(
             app_id="MFX093412",
             requesting_user_email_address="admin@example.com",
@@ -264,7 +251,7 @@ class TestDefinitionToolsIntegration:
         # Verify error is handled
         assert "Error: field_type 'invalidFieldType'" in result
 
-    @patch("clappia_tools.client.app_management_client.AppManagementClient")
+    @patch("clappia_api_tools.client.app_definition_client.AppDefinitionClient")
     def test_create_app_tool_basic(self, mock_client_class):
         """Test create_app with basic configuration"""
         # Setup mock
@@ -282,7 +269,7 @@ class TestDefinitionToolsIntegration:
             }
         ]
 
-        client = dummy_app_management_client()
+        client = dummy_app_definition_client()
         result = client.create_app(
             app_name="Employee Registration",
             requesting_user_email_address="admin@example.com",
@@ -294,7 +281,7 @@ class TestDefinitionToolsIntegration:
             "Employee Registration", "admin@example.com", sections
         )
 
-    @patch("clappia_tools.client.app_management_client.AppManagementClient")
+    @patch("clappia_api_tools.client.app_definition_client.AppDefinitionClient")
     def test_create_app_tool_multiple_sections(self, mock_client_class):
         """Test create_app with multiple sections and field types"""
         # Setup mock
@@ -325,7 +312,7 @@ class TestDefinitionToolsIntegration:
             }
         ]
 
-        client = dummy_app_management_client()
+        client = dummy_app_definition_client()
         result = client.create_app(
             app_name="Comprehensive Employee Survey",
             requesting_user_email_address="hr@example.com",
@@ -334,7 +321,7 @@ class TestDefinitionToolsIntegration:
         
         assert "Complex app created successfully" in result
 
-    @patch("clappia_tools.client.app_management_client.AppManagementClient")
+    @patch("clappia_api_tools.client.app_definition_client.AppDefinitionClient")
     def test_create_app_tool_validation_error(self, mock_client_class):
         """Test create_app with validation error"""
         # Setup mock to return validation error
@@ -344,7 +331,7 @@ class TestDefinitionToolsIntegration:
 
         sections = [{"sectionName": "Test", "fields": [{"fieldType": "singleLineText", "label": "Test Field"}]}]
 
-        client = dummy_app_management_client()
+        client = dummy_app_definition_client()
         result = client.create_app(
             app_name="AB",  # Too short
             requesting_user_email_address="admin@example.com",
@@ -353,7 +340,7 @@ class TestDefinitionToolsIntegration:
         
         assert "Error: Invalid app_name" in result
 
-    @patch("clappia_tools.client.app_management_client.AppManagementClient")
+    @patch("clappia_api_tools.client.app_definition_client.AppDefinitionClient")
     def test_create_app_tool_email_validation_error(self, mock_client_class):
         """Test create_app with invalid email"""
         # Setup mock to return email validation error
@@ -363,7 +350,7 @@ class TestDefinitionToolsIntegration:
 
         sections = [{"sectionName": "Test Section", "fields": [{"fieldType": "singleLineText", "label": "Test Field"}]}]
 
-        client = dummy_app_management_client()
+        client = dummy_app_definition_client()
         result = client.create_app(
             app_name="Valid App Name",
             requesting_user_email_address="invalid-email",
@@ -372,7 +359,7 @@ class TestDefinitionToolsIntegration:
         
         assert "Error: requesting_user_email_address must be a valid email address" in result
 
-    @patch("clappia_tools.client.app_management_client.AppManagementClient")
+    @patch("clappia_api_tools.client.app_definition_client.AppDefinitionClient")
     def test_add_field_tool_formula_field(self, mock_client_class):
         """Test add_field with formula/calculation field"""
         # Setup mock
@@ -381,7 +368,7 @@ class TestDefinitionToolsIntegration:
         mock_client_class.return_value = mock_client
 
         # Call tool with calculation field
-        client = dummy_app_management_client()
+        client = dummy_app_definition_client()
         result = client.add_field(
             app_id="MFX093412",
             requesting_user_email_address="admin@example.com",
@@ -397,7 +384,7 @@ class TestDefinitionToolsIntegration:
         # Verify
         assert "Success: Added calculation field CALC_FIELD" in result
 
-    @patch("clappia_tools.client.app_management_client.AppManagementClient")
+    @patch("clappia_api_tools.client.app_definition_client.AppDefinitionClient")
     def test_add_field_tool_conditional_field(self, mock_client_class):
         """Test add_field with conditional display and editability"""
         # Setup mock
@@ -406,7 +393,7 @@ class TestDefinitionToolsIntegration:
         mock_client_class.return_value = mock_client
 
         # Call tool with conditional field
-        client = dummy_app_management_client()
+        client = dummy_app_definition_client()
         result = client.add_field(
             app_id="MFX093412",
             requesting_user_email_address="admin@example.com",
