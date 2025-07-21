@@ -217,8 +217,12 @@ class AppDefinitionClient(BaseClappiaClient):
             image_quality: Image quality for file fields.
             image_text: Text overlay for image fields.
             file_name_prefix: Prefix for uploaded file names.
-            formula: Formula for calculation fields.
+            formula: Formula for calculation fields. Formula is a string that contains the formula for the field in format {profit} = {sales} - {costs}, where {profit}, {sales}, and {costs} are the field names in the app.
             hidden: Whether the field is hidden.
+
+        IMPORTANT:
+        - Try fetching the app definition and see the fields in the app, then use the field names in the formula.
+        - The formula must be a string that contains the formula for the field in format {profit} = {sales} - {costs}, where {profit}, {sales}, and {costs} are the field names in the app.
 
         Returns:
             str: Success message with generated field name or error message if the request fails.
@@ -337,174 +341,6 @@ class AppDefinitionClient(BaseClappiaClient):
         result = f"Successfully added field.\nField Name: {field_name}\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
         return result
  
-    def add_field(self, app_id: str, requesting_user_email_address: str,
-                  section_index: int, field_index: int, field_type: str, 
-                  label: Optional[str] = None, required: Optional[bool] = None,  description: Optional[str] = None,
-                  block_width_percentage_desktop: Optional[int] = None,
-                  block_width_percentage_mobile: Optional[int] = None,
-                  display_condition: Optional[str] = None,
-                  retain_values: Optional[bool] = None,
-                  is_editable: Optional[bool] = None,
-                  editability_condition: Optional[str] = None,
-                  validation: Optional[str] = None,
-                  default_value: Optional[str] = None,
-                  options: Optional[List[str]] = None,
-                  style: Optional[str] = None,
-                  number_of_cols: Optional[int] = None,
-                  allowed_file_types: Optional[List[str]] = None,
-                  max_file_allowed: Optional[int] = None,
-                  image_quality: Optional[str] = None,
-                  image_text: Optional[str] = None,
-                  file_name_prefix: Optional[str] = None,
-                  formula: Optional[str] = None,
-                  hidden: Optional[bool] = None) -> str:
-        """Add a new field to an existing Clappia application at a specific position.
-
-        Args:
-            app_id: Application ID (e.g., "MFX093412").
-            requesting_user_email_address: Email address of the user adding the field.
-            section_index: Index of the section to add the field to (starts from 0).
-            field_index: Position within the section for the new field (starts from 0).
-            field_type: Type of field (e.g., "singleLineText", "singleSelector").
-            label: Display label for the field.
-            required: Whether the field is required.
-            description: Field description or help text.
-            block_width_percentage_desktop: Width percentage on desktop.
-            block_width_percentage_mobile: Width percentage on mobile.
-            display_condition: Condition for when to show the field.
-            retain_values: Whether to retain values when field is hidden.
-            is_editable: Whether the field can be edited.
-            editability_condition: Condition for when field is editable.
-            validation: Validation type.
-            default_value: Default value for the field.
-            options: List of options for selector fields.
-            style: Style for selector fields.
-            number_of_cols: Number of columns for selector fields.
-            allowed_file_types: List of allowed file types for file fields.
-            max_file_allowed: Maximum files allowed.
-            image_quality: Image quality for file fields.
-            image_text: Text overlay for image fields.
-            file_name_prefix: Prefix for uploaded file names.
-            formula: Formula for calculation fields.
-            hidden: Whether the field is hidden.
-
-        Returns:
-            str: Success message with generated field name or error message if the request fails.
-        """
-        add_field_to_app_field_types = [
-            "singleLineText",
-            "multiLineText",
-            "singleSelector",
-            "multiSelector",
-            "dropDown",
-            "dateSelector",
-            "timeSelector",
-            "phoneNumber",
-            "uniqueNumbering",
-            "file",
-            "gpsLocation",
-            "html",
-            "calculationsAndLogic",
-            "codeScanner",
-            "counter",
-            "slider",
-            "signature",
-            "validation",
-            "liveTracking",
-            "nfcReader",
-            "address"          
-        ]
-            
-        is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)
-        if not is_valid:
-            return f"Error: Invalid app_id - {error_msg}"
-        
-        if not requesting_user_email_address or not requesting_user_email_address.strip():
-            return "Error: requesting_user_email_address is required and cannot be empty"
-        
-        if not ClappiaInputValidator.validate_email(requesting_user_email_address):
-            return "Error: requesting_user_email_address must be a valid email address"
-        
-        env_valid, env_error = self.api_utils.validate_environment()
-        if not env_valid:
-            return f"Error: {env_error}"
-        
-        if field_type not in add_field_to_app_field_types:
-            return f"Error: field_type '{field_type}' is not allowed to be added to app, allowed field types are {add_field_to_app_field_types}"
-
-        payload = {
-            "workplaceId": self.api_utils.workplace_id,
-            "appId": app_id.strip(),
-            "requestingUserEmailAddress": requesting_user_email_address.strip(),
-            "sectionIndex": section_index,
-            "fieldIndex": field_index,
-            "fieldType": field_type,
-        }
-        
-        # Add optional parameters if provided
-        if description is not None:
-            payload["description"] = description.strip()
-
-        if required is not None:
-            payload["required"] = required
-
-        if label is not None:
-            payload["label"] = label.strip()
-
-        if block_width_percentage_desktop is not None:
-            payload["blockWidthPercentageDesktop"] = block_width_percentage_desktop
-        if block_width_percentage_mobile is not None:
-            payload["blockWidthPercentageMobile"] = block_width_percentage_mobile
-        if display_condition is not None:
-            payload["displayCondition"] = display_condition.strip()
-        if retain_values is not None:
-            payload["retainValues"] = retain_values
-        if is_editable is not None:
-            payload["isEditable"] = is_editable
-        if editability_condition is not None:
-            payload["editabilityCondition"] = editability_condition.strip()
-        if validation is not None:
-            payload["validation"] = validation
-        if default_value is not None and field_type == "singleLineText":
-            payload["defaultValue"] = default_value.strip()
-        if options is not None and field_type in ["singleSelector", "multiSelector", "dropDown"]:
-            payload["options"] = options
-        if style is not None and field_type in ["singleSelector", "multiSelector"]:
-            payload["style"] = style
-        if number_of_cols is not None and field_type in ["singleSelector", "multiSelector"]:
-            payload["numberOfCols"] = number_of_cols
-        if allowed_file_types is not None and field_type == "file":
-            payload["allowedFileTypes"] = allowed_file_types
-        if max_file_allowed is not None and field_type == "file":
-            payload["maxFileAllowed"] = max_file_allowed
-        if image_quality is not None and field_type == "file":
-            payload["imageQuality"] = image_quality
-        if image_text is not None and field_type == "file":
-            payload["imageText"] = image_text.strip()
-        if file_name_prefix is not None and field_type == "file":
-            payload["fileNamePrefix"] = file_name_prefix.strip()
-        if formula is not None and field_type == "calculationsAndLogic":
-            payload["formula"] = formula.strip()
-        if hidden is not None and field_type == "formula":
-            payload["hidden"] = hidden
-        
-        logger.info(f"Adding field to app_id: {app_id} with payload: {payload}")
-        
-        success, error_message, response_data = self.api_utils.make_request(
-            method="POST",
-            endpoint="appdefinitionv2/addField",
-            data=payload,
-        )
-        
-        if not success:
-            logger.error(f"Error: {error_message}")
-            return f"Error: {error_message}"
-        
-        
-        field_name = response_data.get("fieldName") if response_data else None
-        result = f"Successfully added field.\nField Name: {field_name}\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
-        return result
-    
     def update_field(self, app_id: str, requesting_user_email_address: str, field_name: str,
                     label: Optional[str] = None, description: Optional[str] = None,
                     required: Optional[bool] = None, block_width_percentage_desktop: Optional[int] = None,
@@ -547,25 +383,15 @@ class AppDefinitionClient(BaseClappiaClient):
             image_quality: Image quality - "low", "medium", "high" (applicable for file fields).
             image_text: Text overlay for image fields (applicable for file fields).
             file_name_prefix: Prefix for uploaded file names (applicable for file fields).
-            formula: Formula for calculation fields (applicable for calculationsAndLogic fields).
+            formula: Formula for calculation fields (applicable for calculationsAndLogic fields). Formula is a string that contains the formula for the field in format {profit} = {sales} - {costs}, where {profit}, {sales}, and {costs} are the field names in the app.
             hidden: Whether the field is hidden (applicable for formula fields).
+
+        IMPORTANT:
+        - Try fetching the app definition and see the fields in the app, then use the field names in the formula.
+        - The formula must be a string that contains the formula for the field in format {profit} = {sales} - {costs}, where {profit}, {sales}, and {costs} are the field names in the app.
 
         Returns:
             str: Formatted response with field update details and status.
-
-        Examples:
-            Update field label and make required:
-                >>> client.update_field("APP123", "user@company.com", "employeeName", 
-                ...                    label="Full Employee Name", required=True)
-
-            Update dropdown options:
-                >>> client.update_field("APP123", "user@company.com", "department",
-                ...                    options=["HR", "IT", "Finance", "Marketing"])
-
-            Change validation and add description:
-                >>> client.update_field("APP123", "user@company.com", "emailField",
-                ...                    validation="email", 
-                ...                    description="Enter your corporate email")
         """
         # Validation
         is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)

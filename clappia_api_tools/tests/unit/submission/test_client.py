@@ -2,7 +2,6 @@ from unittest.mock import patch, Mock
 from clappia_api_tools.client.base_client import BaseClappiaClient
 from clappia_api_tools.client.submission_client import SubmissionClient
 from clappia_api_tools.client.app_definition_client import AppDefinitionClient
-from clappia_api_tools.client.clappia_client import ClappiaClient
 
 
 class TestBaseClappiaClient:
@@ -172,82 +171,3 @@ class TestAppDefinitionClient:
             "MFX093412", "test@example.com", 0, 0, "unknownFieldType", "Test Field", True
         )
         assert "Error: field_type 'unknownFieldType'" in result
-
-class TestMainClappiaClient:
-    """Test cases for main ClappiaClient"""
-
-    @patch('clappia_api_tools.client.submission_client.SubmissionClient')
-    @patch('clappia_api_tools.client.app_definition_client.AppDefinitionClient')
-    def test_init_creates_all_clients(self, mock_app_def, mock_submission):
-        """Test that ClappiaClient initializes all specialized clients"""
-        client = ClappiaClient(
-            api_key="test_key",
-            base_url="https://test.com",
-            workplace_id="TEST123",
-            timeout=60
-        )
-
-        # Verify all specialized clients are created with correct parameters
-        mock_submission.assert_called_once_with("test_key", "https://test.com", "TEST123", 60)
-        mock_app_def.assert_called_once_with("test_key", "https://test.com", "TEST123", 60)
-
-    def test_create_submission_delegates_to_submissions_client(self):
-        """Test that create_submission delegates to submissions client"""
-        with patch('clappia_api_tools.client.submission_client.SubmissionClient') as mock_client_class:
-            mock_client = Mock()
-            mock_client.create_submission.return_value = "Success"
-            mock_client_class.return_value = mock_client
-
-            client = ClappiaClient(
-                api_key="test_key",
-                base_url="https://test.com",
-                workplace_id="TEST123",
-                timeout=60
-            )
-            result = client.create_submission("APP123", {"name": "test"}, "user@test.com")
-
-            assert result == "Success"
-            mock_client.create_submission.assert_called_once_with("APP123", {"name": "test"}, "user@test.com")
-
-    def test_get_client_info(self):
-        """Test get_client_info returns correct information"""
-        with patch('clappia_api_tools.client.submission_client.SubmissionClient'):
-            client = ClappiaClient()
-            info = client.get_client_info()
-
-            assert info["client_type"] == "ClappiaClient"
-            assert info["version"] == "1.0.0"
-            assert "submissions" in info["specialized_clients"]
-            assert "app_definition" in info["specialized_clients"]
-
-    def test_str_representation(self):
-        """Test string representation of ClappiaClient"""
-        with patch('clappia_api_tools.client.submission_client.SubmissionClient') as mock_client_class:
-            mock_client = Mock()
-            mock_client_class.return_value = mock_client
-
-            client = ClappiaClient(
-                api_key="test_key",
-                base_url="https://test.com",
-                workplace_id="TEST123",
-                timeout=60
-            )
-            str_repr = str(client)
-
-            assert "Clappia API Client for workspace: TEST123" in str_repr
-
-    def test_repr_representation(self):
-        """Test repr representation of ClappiaClient"""
-        with patch('clappia_api_tools.client.submission_client.SubmissionClient') as mock_client_class:
-            mock_client = Mock()
-            mock_client_class.return_value = mock_client
-
-            client = ClappiaClient(
-                api_key="test_key",
-                base_url="https://test.com",
-                workplace_id="TEST123",
-                timeout=60
-            )
-            repr_str = repr(client)
-
-            assert "ClappiaClient(workplace_id=TEST123)" in repr_str

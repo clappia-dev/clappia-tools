@@ -127,7 +127,7 @@ class SubmissionClient(BaseClappiaClient):
         }
 
         logger.info(
-            f"Editing submission {submission_id} for app_id: {app_id} with data: {data} and requesting_user_email_address: {requesting_user_email_address}"
+            f"Editing submission for app_id: {app_id}, submission_id: {submission_id} with data: {data} and requesting_user_email_address: {requesting_user_email_address}"
         )
 
         success, error_message, response_data = self.api_utils.make_request(
@@ -140,27 +140,26 @@ class SubmissionClient(BaseClappiaClient):
 
         edit_info = {
             "submissionId": submission_id,
+            "status": "updated",
             "appId": app_id,
             "requestingUser": requesting_user_email_address,
             "fieldsUpdated": len(data),
-            "updatedFields": list(data.keys()),
-            "status": "updated",
         }
 
         return f"Successfully edited submission:\n\nSUMMARY:\n{json.dumps(edit_info, indent=2)}\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
-    
+
     def update_owners(self, app_id: str, submission_id: str, requesting_user_email_address: str, 
                      email_ids: List[str]) -> str:
-        """Updates the ownership of a Clappia submission by adding new owners to share access.
+        """Updates the owners of a Clappia submission to manage access and permissions.
 
-        Modifies submission ownership to include additional users who can view and edit the submission.
-        Use this to collaborate on submissions, delegate work, or transfer ownership.
+        Changes the list of users who have ownership rights to the submission.
+        Use this to transfer ownership, add co-owners, or manage submission access control.
 
         Args:
             app_id: Application ID in uppercase letters and numbers format (e.g., MFX093412). Use this to specify which Clappia app contains the submission.
             submission_id: Unique identifier of the submission to update (e.g., HGO51464561). This identifies the specific submission record to modify.
             requesting_user_email_address: Email address of the user making the ownership change. This user must have permission to modify the submission. Must be a valid email format.
-            email_ids: List of email addresses to add as new owners. Each email must be valid and the users should have access to the app. Example: ["user1@company.com", "user2@company.com"]. Invalid emails will be skipped with a warning.
+            email_ids: List of email addresses to set as new owners. Each email must be a valid email format. Example: ["user1@example.com", "user2@example.com"].
 
         Returns:
             str: Formatted response with update details and status
@@ -196,7 +195,7 @@ class SubmissionClient(BaseClappiaClient):
         }
 
         logger.info(
-            f"Updating submission owners for app_id: {app_id} with payload: {payload}"
+            f"Updating submission owners for app_id: {app_id}, submission_id: {submission_id} with email_ids: {valid_emails} and requesting_user_email_address: {requesting_user_email_address}"
         )
 
         success, error_message, response_data = self.api_utils.make_request(
