@@ -1,6 +1,7 @@
 import re
 from typing import Tuple, List
 from clappia_api_tools._models.model import Section
+from clappia_api_tools._enums.enums import FilterOperator, FilterKeyType, LogicalOperator, AggregationType, DimensionType
 
 class ClappiaInputValidator:
     """Validates user inputs like app IDs, emails, etc."""
@@ -8,6 +9,17 @@ class ClappiaInputValidator:
     EMAIL_PATTERN = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     APP_ID_PATTERN = r"^[A-Z0-9]+$"
     SUBMISSION_ID_PATTERN = r"^[A-Z0-9]+$"
+    
+    STANDARD_FIELDS = {
+        "$submissionId",
+        "$owner",
+        "$status",
+        "$lastUpdatedAt",
+        "$lastModifiedAt",
+        "$createdAt",
+        "$updatedAt",
+        "$state",
+    }
 
     @staticmethod
     def validate_app_name(app_name: str) -> Tuple[bool, str]:
@@ -127,3 +139,88 @@ class ClappiaInputValidator:
             )
 
         return True, ""
+
+    @staticmethod
+    def validate_condition(condition: dict) -> Tuple[bool, str]:
+        """Validate a filter condition"""
+        required_fields = ["operator", "filterKeyType", "key", "value"]
+        for field in required_fields:
+            if field not in condition:
+                return False, f"Condition missing required field: {field}"
+
+        operator = condition["operator"]
+        if operator not in [op.value for op in FilterOperator]:
+            return False, f"Invalid operator: {operator}"
+
+        if condition["filterKeyType"] not in [fkt.value for fkt in FilterKeyType]:
+            return False, f"Invalid filterKeyType: {condition['filterKeyType']}"
+
+        key = condition["key"]
+        if len(key.strip()) == 0:
+            return False, "Key must be a non-empty string"
+
+        if (
+            condition["filterKeyType"] == FilterKeyType.STANDARD.value
+            and key not in ClappiaInputValidator.STANDARD_FIELDS
+        ):
+            return (
+                False,
+                f"Standard filterKeyType used but key '{key}' is not a standard field",
+            )
+
+        operator = condition["operator"]
+        value = condition["value"]
+
+        if operator in [FilterOperator.EMPTY.value, FilterOperator.NON_EMPTY.value]:
+            if value and value.strip():
+                return False, f"Operator {operator} should have empty value"
+        else:
+            if len(value.strip()) == 0:
+                return False, f"Operator {operator} requires a non-empty value"
+
+        return True, ""
+
+    @staticmethod
+    def validate_filters(filters: dict) -> Tuple[bool, str]:
+        """Validate filter structure"""
+        if "queries" not in filters:
+            return False, "Filters must contain 'queries' key"
+
+        queries = filters["queries"]
+        if len(queries) == 0:
+            return False, "Queries must be a non-empty list"
+
+        for query_group in queries:
+            if "queries" not in query_group:
+                return False, "Each query group must contain 'queries' key"
+
+            inner_queries = query_group["queries"]
+            for inner_query in inner_queries:
+                if "conditions" not in inner_query:
+                    return False, "Each query must contain 'conditions'"
+
+                conditions = inner_query["conditions"]
+                if len(conditions) == 0:
+                    return False, "Conditions must be a non-empty list"
+
+                for condition in conditions:
+                    is_valid, error_msg = ClappiaInputValidator.validate_condition(condition)
+                    if not is_valid:
+                        return False, error_msg
+
+                if "operator" in inner_query:
+                    logical_op = inner_query["operator"]
+                    if logical_op not in [op.value for op in LogicalOperator]:
+                        return False, f"Invalid logical operator: {logical_op}"
+
+        return True, ""
+
+    @staticmethod
+    def validate_aggregation_type(agg_type: str) -> bool:
+        """Validate aggregation type"""
+        return agg_type in [at.value for at in AggregationType]
+
+    @staticmethod
+    def validate_dimension_type(dim_type: str) -> bool:
+        """Validate dimension type"""
+        return dim_type in [dt.value for dt in DimensionType]

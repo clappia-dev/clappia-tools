@@ -1,300 +1,504 @@
-import json
 from typing import Dict, Any, List, Optional
 from .base_client import BaseClappiaClient          
-from clappia_api_tools._utils.validators import ClappiaInputValidator
 from clappia_api_tools._utils.logging_utils import get_logger
+from clappia_api_tools._models.request import GetSubmissionsRequest, GetSubmissionsAggregationRequest, CreateSubmissionRequest, EditSubmissionRequest, UpdateSubmissionStatusRequest, UpdateSubmissionOwnersRequest, GetSubmissionsInExcelRequest
+from clappia_api_tools._models.submission import SubmissionFilters, AggregationDimension, AggregationMetric
+from clappia_api_tools._models.response import SubmissionsAggregationResponse, SubmissionsResponse, SubmissionResponse, SubmissionsExcelResponse
 
 logger = get_logger(__name__)
-
 
 class SubmissionClient(BaseClappiaClient):
     """Client for managing Clappia submissions.
     
-    This client handles all submission-related operations including creating,
-    editing, retrieving, and managing submission ownership and status.
+    This client handles retrieving and managing submissions, including
+    getting submissions, getting submissions aggregation, creating submissions,
+    editing submissions, updating submission status, updating submission owners.
     """
-
-    def create_submission(self, app_id: str, data: Dict[str, Any], requesting_user_email_address: str) -> str:
-        """Creates a new submission in a Clappia application with specified field data.
-
-        Submits form data to create a new record in the specified Clappia app.
-        Use this to programmatically add entries, automate data collection, or integrate external systems.
-
-        Args:
-            app_id: Application ID in uppercase letters and numbers format (e.g., MFX093412). Use this to specify which Clappia app to create the submission in.
-            data: Dictionary of field data to submit. Keys should match field names from the app definition, values should match expected field types. Example: {"employee_name": "John Doe", "department": "Engineering", "salary": 75000, "start_date": "2024-01-15"}. For file fields, use format: {"image_field_name": [{"s3Path": {"bucket": "my-files-bucket", "key": "images/photo.jpg", "makePublic": false}}]}.
-            requesting_user_email_address (or email): Email address of the user creating the submission. This user becomes the submission owner and must have access to the specified app. Must be a valid email format.
-
-        Returns:
-            str: Formatted response with submission details and status
-        """
-        is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)
-        if not is_valid:
-            return f"Error: Invalid app_id - {error_msg}"
-
-        if not requesting_user_email_address or not requesting_user_email_address.strip():
-            return "Error: requesting_user_email_address is required and cannot be empty"
-
-        if not ClappiaInputValidator.validate_email(requesting_user_email_address):
-            return "Error: requesting_user_email_address must be a valid email address"
-
-        if not isinstance(data, dict):
-            return "Error: data must be a dictionary"
-
-        if not data:
-            return "Error: data cannot be empty - at least one field is required"
-        
-        env_valid, env_error = self.api_utils.validate_environment()
-        if not env_valid:
-            return f"Error: {env_error}"
-
-        payload = {
-            "workplaceId": self.api_utils.workplace_id,
-            "appId": app_id.strip(),
-            "requestingUserEmailAddress": requesting_user_email_address.strip(),
-            "data": data,
-        }
-
-        logger.info(
-            f"Creating submission for app_id: {app_id} with data: {data} and requesting_user_email_address: {requesting_user_email_address}"
-        )
-
-        success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="submissions/create", data=payload
-        )
-
-        if not success:
-            logger.error(f"Error: {error_message}")
-            return f"Error: {error_message}"
-
-        submission_id = response_data.get("submissionId") if response_data else None
-
-        submission_info = {
-            "submissionId": submission_id,
-            "status": "created",
-            "appId": app_id,
-            "owner": requesting_user_email_address,
-            "fieldsSubmitted": len(data),
-        }
-
-        return f"Successfully created submission:\n\nSUMMARY:\n{json.dumps(submission_info, indent=2)}\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
-
-    def edit_submission(self, app_id: str, submission_id: str, data: Dict[str, Any], requesting_user_email_address: str) -> str:
-        """Edits an existing Clappia submission by updating specified field values.
-
-        Modifies field data in an existing submission record while preserving other field values.
-        Use this to update form data, correct information, or add missing details to submissions.
-
-        Args:
-            app_id: Application ID in uppercase letters and numbers format (e.g., MFX093412). Use this to specify which Clappia app contains the submission.
-            submission_id: Unique identifier of the submission to update (e.g., HGO51464561). This identifies the specific submission record to modify.
-            data: Dictionary of field data to update. Keys should match field names from the app definition, values should match expected field types. Only specified fields will be updated. Example: {"employee_name": "Jane Doe", "department": "Marketing", "salary": 80000, "start_date": "20-02-2025"}.
-            requesting_user_email_address: Email address of the user requesting the edit. This user must have permission to modify the submission. Must be a valid email format.
-
-        Returns:
-            str: Formatted response with edit details and status
-        """
-        is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)
-        if not is_valid:
-            return f"Error: Invalid app_id - {error_msg}"
-
-        is_valid, error_msg = ClappiaInputValidator.validate_submission_id(submission_id)
-        if not is_valid:
-            return f"Error: Invalid submission_id - {error_msg}"
-
-        if not requesting_user_email_address or not requesting_user_email_address.strip():
-            return "Error: requesting_user_email_address is required and cannot be empty"
-
-        if not ClappiaInputValidator.validate_email(requesting_user_email_address):
-            return "Error: requesting_user_email_address must be a valid email address"
-
-        if not isinstance(data, dict):
-            return "Error: data must be a dictionary"
-
-        if not data:
-            return "Error: data cannot be empty - at least one field is required"
+    
+    def get_submissions(self, app_id: str, requesting_user_email_address: str,
+                       page_size: int = 10, forward: bool = True,
+                       filters: Optional[SubmissionFilters] = None) -> SubmissionsResponse:
+        try:
+            request = GetSubmissionsRequest(
+                app_id=app_id,
+                requesting_user_email_address=requesting_user_email_address,
+                page_size=page_size,
+                forward=forward,
+                filters=filters
+            )
+        except Exception as e:
+            return SubmissionsResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id
+            )
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return f"Error: {env_error}"
+            return SubmissionsResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id
+            )
 
         payload = {
             "workplaceId": self.api_utils.workplace_id,
-            "appId": app_id.strip(),
-            "submissionId": submission_id.strip(),
-            "requestingUserEmailAddress": requesting_user_email_address.strip(),
-            "data": data,
+            "appId": request.app_id,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
+            "pageSize": request.page_size,
+            "forward": request.forward,
         }
 
-        logger.info(
-            f"Editing submission for app_id: {app_id}, submission_id: {submission_id} with data: {data} and requesting_user_email_address: {requesting_user_email_address}"
-        )
+        if request.filters:
+            payload["filters"] = request.filters.to_dict()
 
-        success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="submissions/edit", data=payload
-        )
-
-        if not success:
-            logger.error(f"Error: {error_message}")
-            return f"Error: {error_message}"
-
-        edit_info = {
-            "submissionId": submission_id,
-            "status": "updated",
-            "appId": app_id,
-            "requestingUser": requesting_user_email_address,
-            "fieldsUpdated": len(data),
-        }
-
-        return f"Successfully edited submission:\n\nSUMMARY:\n{json.dumps(edit_info, indent=2)}\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
-
-    def update_owners(self, app_id: str, submission_id: str, requesting_user_email_address: str, 
-                     email_ids: List[str]) -> str:
-        """Updates the owners of a Clappia submission to manage access and permissions.
-
-        Changes the list of users who have ownership rights to the submission.
-        Use this to transfer ownership, add co-owners, or manage submission access control.
-
-        Args:
-            app_id: Application ID in uppercase letters and numbers format (e.g., MFX093412). Use this to specify which Clappia app contains the submission.
-            submission_id: Unique identifier of the submission to update (e.g., HGO51464561). This identifies the specific submission record to modify.
-            requesting_user_email_address: Email address of the user making the ownership change. This user must have permission to modify the submission. Must be a valid email format.
-            email_ids: List of email addresses to set as new owners. Each email must be a valid email format. Example: ["user1@example.com", "user2@example.com"].
-
-        Returns:
-            str: Formatted response with update details and status
-        """
-        is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)
-        if not is_valid:
-            return f"Error: Invalid app_id - {error_msg}"
-
-        is_valid, error_msg = ClappiaInputValidator.validate_submission_id(submission_id)
-        if not is_valid:
-            return f"Error: Invalid submission_id - {error_msg}"
-
-        if not requesting_user_email_address or not requesting_user_email_address.strip():
-            return "Error: requesting_user_email_address is required and cannot be empty"
-
-        if not ClappiaInputValidator.validate_email(requesting_user_email_address):
-            return "Error: requesting_user_email_address must be a valid email address"
-
-        is_valid, validation_msg, valid_emails = ClappiaInputValidator.validate_email_list(email_ids)
-        if not is_valid:
-            return f"Error: {validation_msg}"
-
-        env_valid, env_error = self.api_utils.validate_environment()
-        if not env_valid:
-            return f"Error: {env_error}"
-
-        payload = {
-            "workplaceId": self.api_utils.workplace_id,
-            "appId": app_id.strip(),
-            "submissionId": submission_id.strip(),
-            "requestingUserEmailAddress": requesting_user_email_address.strip(),
-            "emailIds": valid_emails,
-        }
-
-        logger.info(
-            f"Updating submission owners for app_id: {app_id}, submission_id: {submission_id} with email_ids: {valid_emails} and requesting_user_email_address: {requesting_user_email_address}"
-        )
+        logger.info(f"Getting submissions for app_id: {app_id} with page_size: {page_size}")
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="submissions/updateSubmissionOwners",
-            data=payload,
+            endpoint="submissions/getSubmissions",
+            data=payload
         )
 
         if not success:
             logger.error(f"Error: {error_message}")
-            return f"Error: {error_message}"
+            return SubmissionsResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id
+            )
 
-        owners_info = {
-            "submissionId": submission_id,
-            "appId": app_id,
-            "requestingUser": requesting_user_email_address,
-            "newOwnersCount": len(valid_emails),
-            "newOwners": valid_emails,
-            "status": "updated",
-        }
+        submissions_count = len(response_data.get("submissions", [])) if response_data else 0
 
-        result = f"Successfully updated submission owners:\n\nSUMMARY:\n{json.dumps(owners_info, indent=2)}"
-        if validation_msg:
-            result += f"\n\nWARNING: {validation_msg}"
-        result += f"\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
-        return result
+        return SubmissionsResponse(
+            success=True,
+            message=f"Successfully retrieved {submissions_count} submissions",
+            app_id=app_id,
+            metadata=response_data.get("metadata", {}),
+            data=response_data.get("submissions", [])
+        )
 
-    def update_status(self, app_id: str, submission_id: str, requesting_user_email_address: str, 
-                     status_name: str, comments: str) -> str:
-        """Updates the status of a Clappia submission to track workflow progress and approvals.
-
-        Changes the submission status to indicate current stage in workflow (e.g., pending, approved, rejected).
-        Use this to manage approval workflows, track processing stages, or update submission lifecycle.
-
-        Args:
-            app_id: Application ID in uppercase letters and numbers format (e.g., MFX093412). Use this to specify which Clappia app contains the submission.
-            submission_id: Unique identifier of the submission to update (e.g., HGO51464561). This identifies the specific submission record to modify.
-            requesting_user_email_address: Email address of the user making the status change. This user must have permission to modify the submission. Must be a valid email format.
-            status_name: Name of the new status to apply to the submission.
-            comments: Optional comments to include with the status change.
-
-        Returns:
-            str: Formatted response with update details and status
-        """
-        is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)
-        if not is_valid:
-            return f"Error: Invalid app_id - {error_msg}"
-
-        is_valid, error_msg = ClappiaInputValidator.validate_submission_id(submission_id)
-        if not is_valid:
-            return f"Error: Invalid submission_id - {error_msg}"
-
-        if not requesting_user_email_address or not requesting_user_email_address.strip():
-            return "Error: requesting_user_email_address is required and cannot be empty"
-
-        if not ClappiaInputValidator.validate_email(requesting_user_email_address):
-            return "Error: requesting_user_email_address must be a valid email address"
+    def get_submissions_aggregation(self, app_id: str, requesting_user_email_address: str,
+                               dimensions: Optional[List[AggregationDimension]] = None,
+                               aggregation_dimensions: Optional[List[AggregationMetric]] = None,
+                               x_axis_labels: Optional[List[str]] = None,
+                               forward: bool = True, page_size: int = 1000,
+                               filters: Optional[SubmissionFilters] = None) -> SubmissionsAggregationResponse:
+        try:
+            request = GetSubmissionsAggregationRequest(
+                app_id=app_id,
+                requesting_user_email_address=requesting_user_email_address,
+                dimensions=dimensions,
+                aggregation_dimensions=aggregation_dimensions,
+                x_axis_labels=x_axis_labels,
+                forward=forward,
+                page_size=page_size,
+                filters=filters
+            )
+        except Exception as e:
+            return SubmissionsAggregationResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id
+            )
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return f"Error: {env_error}"
+            return SubmissionsAggregationResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id
+            )
 
-        if not status_name or not status_name.strip():
-            return "Error: status_name is required and cannot be empty"
-        
+        if not request.dimensions and not request.aggregation_dimensions:
+            return SubmissionsAggregationResponse(
+                success=False,
+                message="At least one dimension or aggregation dimension must be provided",
+                app_id=app_id
+            )
+
+        payload = {
+            "workplaceId": self.api_utils.workplace_id,
+            "appId": request.app_id,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
+            "forward": request.forward,
+            "pageSize": request.page_size,
+            "xAxisLabels": request.x_axis_labels or []
+        }
+
+        if request.dimensions:
+            payload["dimensions"] = [dim.to_dict() for dim in request.dimensions]
+        if request.aggregation_dimensions:
+            payload["aggregationDimensions"] = [agg.to_dict() for agg in request.aggregation_dimensions]
+        if request.filters:
+            payload["filters"] = request.filters.to_dict()
+
+        logger.info(f"Getting submissions aggregation for app_id: {app_id} with {len(request.dimensions or [])} dimensions and {len(request.aggregation_dimensions or [])} aggregation dimensions")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="submissions/getSubmissionsAggregation",
+            data=payload
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return SubmissionsAggregationResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id
+            )
+
+        return SubmissionsAggregationResponse(
+            success=True,
+            message="Successfully retrieved aggregated data",
+            app_id=app_id,
+            data=response_data
+        )
+
+    def create_submission(self, app_id: str, data: Dict[str, Any], 
+                         requesting_user_email_address: str) -> SubmissionResponse:
+        try:
+            request = CreateSubmissionRequest(
+                app_id=app_id,
+                requesting_user_email_address=requesting_user_email_address,
+                data=data
+            )
+        except Exception as e:
+            return SubmissionResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id,
+                operation="create_submission"
+            )
+
+        if not data:
+            return SubmissionResponse(
+                success=False,
+                message="data cannot be empty - at least one field is required",
+                app_id=app_id,
+                operation="create_submission"
+            )
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return SubmissionResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                operation="create_submission"
+            )
+
+        payload = {
+            "workplaceId": self.api_utils.workplace_id,
+            "appId": request.app_id,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
+            "data": request.data
+        }
+
+        logger.info(f"Creating submission for app_id: {app_id} with data: {data}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="submissions/create",
+            data=payload
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return SubmissionResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                operation="create_submission"
+            )
+
+        submission_id = response_data.get("submissionId") if response_data else None
+
+        return SubmissionResponse(
+            success=True,
+            message="Successfully created submission",
+            app_id=app_id,
+            submission_id=submission_id,
+            data=response_data,
+            operation="create_submission"
+        )
+
+    def edit_submission(self, app_id: str, submission_id: str, data: Dict[str, Any],
+                       requesting_user_email_address: str) -> SubmissionResponse:
+        try:
+            request = EditSubmissionRequest(
+                app_id=app_id,
+                submission_id=submission_id,
+                requesting_user_email_address=requesting_user_email_address,
+                data=data
+            )
+        except Exception as e:
+            return SubmissionResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id,
+                submission_id=submission_id,
+                operation="edit_submission"
+            )
+
+        if not data:
+            return SubmissionResponse(
+                success=False,
+                message="data cannot be empty - at least one field is required",
+                app_id=app_id,
+                submission_id=submission_id,
+                operation="edit_submission"
+            )
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return SubmissionResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                submission_id=submission_id,
+                operation="edit_submission"
+            )
+
+        payload = {
+            "workplaceId": self.api_utils.workplace_id,
+            "appId": request.app_id,
+            "submissionId": request.submission_id,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
+            "data": request.data
+        }
+
+        logger.info(f"Editing submission {submission_id} for app_id: {app_id} with data: {data}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="submissions/edit",
+            data=payload
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return SubmissionResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                submission_id=submission_id,
+                operation="edit_submission"
+            )
+
+        return SubmissionResponse(
+            success=True,
+            message=f"Successfully edited submission",
+            app_id=app_id,
+            submission_id=submission_id,
+            data=response_data,
+            operation="edit_submission"
+        )
+
+    def update_status(self, app_id: str, submission_id: str, 
+                     requesting_user_email_address: str, status_name: str,
+                     comments: Optional[str] = None) -> SubmissionResponse:
+        try:
+            request = UpdateSubmissionStatusRequest(
+                app_id=app_id,
+                submission_id=submission_id,
+                requesting_user_email_address=requesting_user_email_address,
+                status_name=status_name,
+                comments=comments
+            )
+        except Exception as e:
+            return SubmissionResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id,
+                submission_id=submission_id,
+                operation="update_status"
+            )
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return SubmissionResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                submission_id=submission_id,
+                operation="update_status"
+            )
+
         status = {
-            "name": status_name.strip(),
-            "comments": comments.strip() if comments else None,
+            "name": request.status_name.strip(),
+            "comments": request.comments.strip() if request.comments else None,
         }
 
         payload = {
             "workplaceId": self.api_utils.workplace_id,
-            "appId": app_id.strip(),
-            "submissionId": submission_id.strip(),
-            "requestingUserEmailAddress": requesting_user_email_address.strip(),
+            "appId": request.app_id,
+            "submissionId": request.submission_id,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "status": status,
         }
 
-        logger.info(f"Updating submission status for app_id: {app_id} with payload: {payload}")
+        logger.info(f"Updating status for submission {submission_id} to {status_name}")
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="submissions/updateStatus",
-            data=payload,
+            data=payload
         )
 
         if not success:
             logger.error(f"Error: {error_message}")
-            return f"Error: {error_message}"
+            return SubmissionResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                submission_id=submission_id,
+                operation="update_status"
+            )
 
-        status_info = {
-            "submissionId": submission_id,
-            "appId": app_id,
-            "requestingUser": requesting_user_email_address,
-            "newStatus": status_name,
-            "comments": comments,
-            "updateStatus": "completed",
+        return SubmissionResponse(
+            success=True,
+            message=f"Successfully updated status to '{status_name} and added comments '{comments}'",
+            app_id=app_id,
+            submission_id=submission_id,
+            data=response_data,
+            operation="update_status"
+        )
+
+    def update_owners(self, app_id: str, submission_id: str,
+                     requesting_user_email_address: str, 
+                     email_ids: List[str]) -> SubmissionResponse:
+        try:
+            request = UpdateSubmissionOwnersRequest(
+                app_id=app_id,
+                submission_id=submission_id,
+                requesting_user_email_address=requesting_user_email_address,
+                email_ids=email_ids
+            )
+        except Exception as e:
+            return SubmissionResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id,
+                submission_id=submission_id,
+                operation="update_owners"
+            )
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return SubmissionResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                submission_id=submission_id,
+                operation="update_owners"
+            )
+
+        payload = {
+            "workplaceId": self.api_utils.workplace_id,
+            "appId": request.app_id,
+            "submissionId": request.submission_id,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
+            "emailIds": [str(email) for email in request.email_ids]
         }
 
-        result = f"Successfully updated submission status:\n\nSUMMARY:\n{json.dumps(status_info, indent=2)}"
-        result += f"\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
-        return result
+        logger.info(f"Updating owners for submission {submission_id}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="submissions/updateSubmissionOwners",
+            data=payload
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return SubmissionResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                submission_id=submission_id,
+                operation="update_owners"
+            )
+
+        return SubmissionResponse(
+            success=True,
+            message=f"Successfully updated owners for owners {', '.join(request.email_ids)}",
+            app_id=app_id,
+            submission_id=submission_id,
+            data=response_data,
+            operation="update_owners"
+        )
+
+    def get_submissions_in_excel(self, app_id: str, requesting_user_email_address: str,
+                                filters: Optional[SubmissionFilters] = None,
+                                field_names: Optional[List[str]] = None,
+                                format: str = "Excel") -> SubmissionsExcelResponse:
+        try:
+            request = GetSubmissionsInExcelRequest(
+                app_id=app_id,
+                requesting_user_email_address=requesting_user_email_address,
+                filters=filters,
+                field_names=field_names,
+                format=format
+            )
+        except Exception as e:
+            return SubmissionsExcelResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id
+            )
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return SubmissionsExcelResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id
+            )
+
+        payload = {
+            "workplaceId": self.api_utils.workplace_id,
+            "appId": request.app_id,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
+            "format": request.format
+        }
+
+        if request.filters:
+            payload["filters"] = request.filters.to_dict()
+        if request.field_names:
+            payload["fieldNames"] = request.field_names
+
+        logger.info(f"Getting submissions in Excel for app_id: {app_id} with format: {format}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="submissions/getSubmissionsExcel",
+            data=payload
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return SubmissionsExcelResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id
+            )
+
+        if response_data.get("statusCode") == 202:
+            return SubmissionsExcelResponse(
+                success=True,
+                message=f"The {format} file has been sent to {requesting_user_email_address}",
+                app_id=app_id,
+                format=format,
+                requesting_user_email_address=requesting_user_email_address
+            )
+        else:
+            return SubmissionsExcelResponse(
+                success=True,
+                message="Excel file generated successfully and will be sent to the requesting user email address since the submissions are large in number",
+                app_id=app_id,
+                url=response_data.get("url"),
+                format=format,
+                requesting_user_email_address=requesting_user_email_address
+            )

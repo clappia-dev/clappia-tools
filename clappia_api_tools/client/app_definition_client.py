@@ -1,52 +1,47 @@
 import json
 from .base_client import BaseClappiaClient
-from clappia_api_tools._utils.validators import ClappiaInputValidator
 from clappia_api_tools._utils.logging_utils import get_logger
-from clappia_api_tools._models.model import Section
-from clappia_api_tools._models.model import Field
 from typing import List, Dict, Any, Optional
+from clappia_api_tools._models.request import GetAppDefinitionRequest, CreateAppRequest, AddFieldRequest, UpdateFieldRequest
+from clappia_api_tools._models.definition import AppField, AppSection
+from clappia_api_tools._models.response import AppDefinitionResponse, AppCreationResponse, FieldOperationResponse
 
 logger = get_logger(__name__)
-
 
 class AppDefinitionClient(BaseClappiaClient):
     """Client for managing Clappia app definitions.
     
-    This client handles retrieving and managing application definitions,
-    including forms, fields, sections, and metadata.
+    This client handles retrieving and managing app definitions, including
+    getting app definitions, creating apps, adding fields, and updating fields.
     """
-
+    
     def get_definition(self, app_id: str, language: str = "en", 
-                      strip_html: bool = True, include_tags: bool = True) -> str:
-        """Fetches complete definition of a Clappia application including forms, fields, sections, and metadata.
-
-        Retrieves structure and configuration of a Clappia app to understand available fields,
-        validation rules, and workflow logic before creating charts, filtering submissions, or planning integrations.
-
-        Args:
-            app_id: Unique application identifier in uppercase letters and numbers format (e.g., QGU236634). Use this to specify which Clappia app definition to retrieve.
-            language: Language code for field labels and translations. Available options: "en" (English, default), "es" (Spanish), "fr" (French), "de" (German). Use "es" for Spanish reports or "fr" for French localization.
-            strip_html: Whether to remove HTML formatting from text fields. True (default) removes HTML tags for clean text, False preserves HTML formatting for display purposes.
-            include_tags: Whether to include metadata tags in response. True (default) includes full metadata tags, False returns basic structure only for lightweight responses.
-
-        Returns:
-            str: Formatted response with app definition details and complete structure
-        """
-        is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)
-        if not is_valid:
-            return f"Error: Invalid app_id - {error_msg}"
+                      strip_html: bool = True, include_tags: bool = True) -> AppDefinitionResponse:
+        try:
+            supporting_user_email_address = "support@clappia.com"
+            request = GetAppDefinitionRequest(
+                app_id=app_id,
+                requesting_user_email_address=supporting_user_email_address,
+                language=language,
+                strip_html=strip_html,
+                include_tags=include_tags
+            )
+        except Exception as e:
+            return AppDefinitionResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id,
+            )
 
         params = {
-            "appId": app_id.strip(),
+            "appId": request.app_id,
             "workplaceId": self.api_utils.workplace_id,
-            "language": language,
-            "stripHtml": str(strip_html).lower(),
-            "includeTags": str(include_tags).lower(),
+            "language": request.language,
+            "stripHtml": str(request.strip_html).lower(),
+            "includeTags": str(request.include_tags).lower(),
         }
 
-        logger.info(
-            f"Getting app definition for app_id: {app_id} with params: {params}"
-        )
+        logger.info(f"Getting app definition for app_id: {app_id} with params: {params}")
 
         success, error_message, response_data = self.api_utils.make_request(
             method="GET",
@@ -56,94 +51,76 @@ class AppDefinitionClient(BaseClappiaClient):
 
         if not success:
             logger.error(f"Error: {error_message}")
-            return f"Error: {error_message}"
-
-
+            return AppDefinitionResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id
+            )
+        
         app_info = {
-            "appId": response_data.get("appId") if response_data else None,
+            "app_id": response_data.get("appId") if response_data else None,
             "version": response_data.get("version") if response_data else None,
             "state": response_data.get("state") if response_data else None,
-            "pageCount": len(response_data.get("pageIds", [])) if response_data else 0,
-            "sectionCount": (
-                len(response_data.get("sectionIds", [])) if response_data else 0
-            ),
-            "fieldCount": (
-                len(response_data.get("fieldDefinitions", {})) if response_data else 0
-            ),
-            "appName": (
-                response_data.get("metadata", {}).get("sectionName", "Unknown")
-                if response_data
-                else "Unknown"
-            ),
-            "description": (
-                response_data.get("metadata", {}).get("description", "")
-                if response_data
-                else ""
-            ),
+            "page_count": len(response_data.get("pageIds", [])) if response_data else 0,
+            "section_count": len(response_data.get("sectionIds", [])) if response_data else 0,
+            "field_count": len(response_data.get("fieldDefinitions", {})) if response_data else 0,
+            "app_name": response_data.get("metadata", {}).get("sectionName", "Unknown") if response_data else "Unknown",
+            "description": response_data.get("metadata", {}).get("description", "") if response_data else "",
+            "field_definitions": response_data.get("fieldDefinitions", {}) if response_data else {}
         }
-
-        return f"Successfully retrieved app definition:\n\nSUMMARY:\n{json.dumps(app_info, indent=2)}\n\nFULL DEFINITION:\n{json.dumps(response_data, indent=2)}"
+        
+        return AppDefinitionResponse(
+            success=True,
+            message="Successfully retrieved app definition",
+            app_id=app_id,
+            data=app_info
+        )
 
     def create_app(self, app_name: str, requesting_user_email_address: str, 
-                   sections: List[Dict[str, Any]]) -> str:
-        """Create a new Clappia application with specified sections and fields.
-
-        Args:
-            app_name: Name of the new application (e.g., "Employee Survey", "Inventory Management"). Minimum 10 characters.
-            requesting_user_email_address: Email address of the user creating the app (becomes the app owner).
-            sections: List of Section objects defining the app structure. Each section contains fields with specific types and properties.
-
-            Example:
-            {
-                "sections": [
-                    {
-                        "sectionName": "Section 1",
-                        "fields": [{"fieldType": "singleLineText", "label": "Field 1", "options": ["Option 1", "Option 2"]}, {"fieldType": "multiLineText", "label": "Field 2", "options": ["Option 3", "Option 4"]}]
-                    }
-                ]
-            }
-
-        Returns:
-            str: Success message with app ID and URL, or error message if the request fails.
-        """
-        is_valid, error_msg = ClappiaInputValidator.validate_app_name(app_name)
-        if not is_valid:
-            return f"Error: Invalid app_name - {error_msg}"
-
-        if not ClappiaInputValidator.validate_email(requesting_user_email_address):
-            return "Error: requesting_user_email_address must be a valid email address"
-
-        # Convert sections dict to Section objects
-        section_objects: List[Section] = []
-        for section_dict in sections:
-            fields = []
-            for field_dict in section_dict.get("fields", []):
-                field = Field(
-                    fieldType=field_dict["fieldType"],
-                    label=field_dict["label"],
-                    options=field_dict.get("options")
+                   sections: List[Dict[str, Any]]) -> AppCreationResponse:
+        try:
+            section_models = []
+            for section_dict in sections:
+                field_models = []
+                for field_dict in section_dict.get("fields", []):
+                    field_model = AppField(**field_dict)
+                    field_models.append(field_model)
+                
+                section_model = AppSection(
+                    section_name=section_dict["section_name"],
+                    fields=field_models
                 )
-                fields.append(field)
-            
-            section = Section(
-                sectionName=section_dict["sectionName"],
-                fields=fields
-            )
-            section_objects.append(section)
+                section_models.append(section_model)
 
-        is_valid, error_msg = ClappiaInputValidator.validate_app_structure(section_objects)
-        if not is_valid:
-            return f"Error: Invalid sections - {error_msg}"
+            request = CreateAppRequest(
+                app_name=app_name,
+                requesting_user_email_address=requesting_user_email_address,
+                sections=section_models
+            )
+        except Exception as e:
+            return AppCreationResponse(
+                success=False,
+                message=str(e),
+                app_name=app_name,
+                sections_created=len(sections)
+            )
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return f"Error: {env_error}"
+            return AppCreationResponse(
+                success=False,
+                message=env_error,
+                app_name=app_name,
+                sections_created=len(sections)
+            )
+
+        sections_for_api = [section.to_dict() for section in request.sections]
 
         payload = {
             "workplaceId": self.api_utils.workplace_id,
-            "appName": app_name.strip(),
-            "requestingUserEmailAddress": requesting_user_email_address.strip(),
-            "sections": [section.to_dict() for section in section_objects],
+            "appName": request.app_name.strip(),
+            "requestingUserEmailAddress": str(request.requesting_user_email_address).strip(),
+            "sections": sections_for_api
         }
 
         logger.info(f"Creating app with payload: {json.dumps(payload, indent=2)}")
@@ -156,22 +133,32 @@ class AppDefinitionClient(BaseClappiaClient):
 
         if not success:
             logger.error(f"Error: {error_message}")
-            return f"Error: {error_message}"
-        
+            return AppCreationResponse(
+                success=False,
+                message=error_message,
+                app_name=app_name,
+                sections_created=len(sections)
+            )
 
         app_id = response_data.get("appId") if response_data else None
         app_url = response_data.get("appUrl") if response_data else None
-        result = {
-            "appId": app_id,
-            "appName": app_name,
-            "appUrl": app_url,
-            "status": "created"
-        }
-        return f"App created successfully:\nSUMMARY:\n{json.dumps(result, indent=2)}\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
+        
+        return AppCreationResponse(
+            success=True,
+            message="App created successfully",
+            app_id=app_id,
+            app_name=app_name,
+            sections_created=len(sections),
+            data={
+                "app_id": app_id,
+                "app_url": app_url
+            }
+        )
 
     def add_field(self, app_id: str, requesting_user_email_address: str,
                   section_index: int, field_index: int, field_type: str, 
-                  label: Optional[str] = None, required: Optional[bool] = None,  description: Optional[str] = None,
+                  label: Optional[str] = None, required: Optional[bool] = None, 
+                  description: Optional[str] = None,
                   block_width_percentage_desktop: Optional[int] = None,
                   block_width_percentage_mobile: Optional[int] = None,
                   display_condition: Optional[str] = None,
@@ -189,140 +176,106 @@ class AppDefinitionClient(BaseClappiaClient):
                   image_text: Optional[str] = None,
                   file_name_prefix: Optional[str] = None,
                   formula: Optional[str] = None,
-                  hidden: Optional[bool] = None) -> str:
-        """Add a new field to an existing Clappia application at a specific position.
+                  hidden: Optional[bool] = None) -> FieldOperationResponse:
+        try:
+            request = AddFieldRequest(
+                app_id=app_id,
+                requesting_user_email_address=requesting_user_email_address,
+                section_index=section_index,
+                field_index=field_index,
+                field_type=field_type,
+                label=label,
+                description=description,
+                required=required,
+                block_width_percentage_desktop=block_width_percentage_desktop,
+                block_width_percentage_mobile=block_width_percentage_mobile,
+                display_condition=display_condition,
+                retain_values=retain_values,
+                is_editable=is_editable,
+                editability_condition=editability_condition,
+                validation=validation,
+                default_value=default_value,
+                options=options,
+                style=style,
+                number_of_cols=number_of_cols,
+                allowed_file_types=allowed_file_types,
+                max_file_allowed=max_file_allowed,
+                image_quality=image_quality,
+                image_text=image_text,
+                file_name_prefix=file_name_prefix,
+                formula=formula,
+                hidden=hidden
+            )
+        except Exception as e:
+            return FieldOperationResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id,
+                field_name=field_type,
+                operation="add_field"
+            )
 
-        Args:
-            app_id: Application ID (e.g., "MFX093412").
-            requesting_user_email_address: Email address of the user adding the field.
-            section_index: Index of the section to add the field to (starts from 0).
-            field_index: Position within the section for the new field (starts from 0).
-            field_type: Type of field (e.g., "singleLineText", "singleSelector").
-            label: Display label for the field.
-            required: Whether the field is required.
-            description: Field description or help text.
-            block_width_percentage_desktop: Width percentage on desktop.
-            block_width_percentage_mobile: Width percentage on mobile.
-            display_condition: Condition for when to show the field.
-            retain_values: Whether to retain values when field is hidden.
-            is_editable: Whether the field can be edited.
-            editability_condition: Condition for when field is editable.
-            validation: Validation type.
-            default_value: Default value for the field.
-            options: List of options for selector fields.
-            style: Style for selector fields.
-            number_of_cols: Number of columns for selector fields.
-            allowed_file_types: List of allowed file types for file fields.
-            max_file_allowed: Maximum files allowed.
-            image_quality: Image quality for file fields.
-            image_text: Text overlay for image fields.
-            file_name_prefix: Prefix for uploaded file names.
-            formula: Formula for calculation fields. Formula is a string that contains the formula for the field in format {profit} = {sales} - {costs}, where {profit}, {sales}, and {costs} are the field names in the app.
-            hidden: Whether the field is hidden.
-
-        IMPORTANT:
-        - Try fetching the app definition and see the fields in the app, then use the field names in the formula.
-        - The formula must be a string that contains the formula for the field in format {profit} = {sales} - {costs}, where {profit}, {sales}, and {costs} are the field names in the app.
-
-        Returns:
-            str: Success message with generated field name or error message if the request fails.
-        """
-        add_field_to_app_field_types = [
-            "singleLineText",
-            "multiLineText",
-            "singleSelector",
-            "multiSelector",
-            "dropDown",
-            "dateSelector",
-            "timeSelector",
-            "phoneNumber",
-            "uniqueNumbering",
-            "file",
-            "gpsLocation",
-            "html",
-            "calculationsAndLogic",
-            "codeScanner",
-            "counter",
-            "slider",
-            "signature",
-            "validation",
-            "liveTracking",
-            "nfcReader",
-            "address"          
-        ]
-            
-        is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)
-        if not is_valid:
-            return f"Error: Invalid app_id - {error_msg}"
-        
-        if not requesting_user_email_address or not requesting_user_email_address.strip():
-            return "Error: requesting_user_email_address is required and cannot be empty"
-        
-        if not ClappiaInputValidator.validate_email(requesting_user_email_address):
-            return "Error: requesting_user_email_address must be a valid email address"
-        
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return f"Error: {env_error}"
-        
-        if field_type not in add_field_to_app_field_types:
-            return f"Error: field_type '{field_type}' is not allowed to be added to app, allowed field types are {add_field_to_app_field_types}"
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                field_name=field_type,
+                operation="add_field"
+            )
 
         payload = {
             "workplaceId": self.api_utils.workplace_id,
-            "appId": app_id.strip(),
-            "requestingUserEmailAddress": requesting_user_email_address.strip(),
-            "sectionIndex": section_index,
-            "fieldIndex": field_index,
-            "fieldType": field_type,
+            "appId": request.app_id,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
+            "sectionIndex": request.section_index,
+            "fieldIndex": request.field_index,
+            "fieldType": request.field_type,
         }
         
-        # Add optional parameters if provided
-        if description is not None:
-            payload["description"] = description.strip()
-
-        if required is not None:
-            payload["required"] = required
-
-        if label is not None:
-            payload["label"] = label.strip()
-
-        if block_width_percentage_desktop is not None:
-            payload["blockWidthPercentageDesktop"] = block_width_percentage_desktop
-        if block_width_percentage_mobile is not None:
-            payload["blockWidthPercentageMobile"] = block_width_percentage_mobile
-        if display_condition is not None:
-            payload["displayCondition"] = display_condition.strip()
-        if retain_values is not None:
-            payload["retainValues"] = retain_values
-        if is_editable is not None:
-            payload["isEditable"] = is_editable
-        if editability_condition is not None:
-            payload["editabilityCondition"] = editability_condition.strip()
-        if validation is not None:
-            payload["validation"] = validation
-        if default_value is not None and field_type == "singleLineText":
-            payload["defaultValue"] = default_value.strip()
-        if options is not None and field_type in ["singleSelector", "multiSelector", "dropDown"]:
-            payload["options"] = options
-        if style is not None and field_type in ["singleSelector", "multiSelector"]:
-            payload["style"] = style
-        if number_of_cols is not None and field_type in ["singleSelector", "multiSelector"]:
-            payload["numberOfCols"] = number_of_cols
-        if allowed_file_types is not None and field_type == "file":
-            payload["allowedFileTypes"] = allowed_file_types
-        if max_file_allowed is not None and field_type == "file":
-            payload["maxFileAllowed"] = max_file_allowed
-        if image_quality is not None and field_type == "file":
-            payload["imageQuality"] = image_quality
-        if image_text is not None and field_type == "file":
-            payload["imageText"] = image_text.strip()
-        if file_name_prefix is not None and field_type == "file":
-            payload["fileNamePrefix"] = file_name_prefix.strip()
-        if formula is not None and field_type == "calculationsAndLogic":
-            payload["formula"] = formula.strip()
-        if hidden is not None and field_type == "formula":
-            payload["hidden"] = hidden
+        if request.description is not None:
+            payload["description"] = request.description.strip()
+        if request.required is not None:
+            payload["required"] = request.required
+        if request.label is not None:
+            payload["label"] = request.label.strip()
+        if request.block_width_percentage_desktop is not None:
+            payload["blockWidthPercentageDesktop"] = request.block_width_percentage_desktop
+        if request.block_width_percentage_mobile is not None:
+            payload["blockWidthPercentageMobile"] = request.block_width_percentage_mobile
+        if request.display_condition is not None:
+            payload["displayCondition"] = request.display_condition.strip()
+        if request.retain_values is not None:
+            payload["retainValues"] = request.retain_values
+        if request.is_editable is not None:
+            payload["isEditable"] = request.is_editable
+        if request.editability_condition is not None:
+            payload["editabilityCondition"] = request.editability_condition.strip()
+        if request.validation is not None:
+            payload["validation"] = request.validation
+        if request.default_value is not None and request.field_type == "singleLineText":
+            payload["defaultValue"] = request.default_value.strip()
+        if request.options is not None and request.field_type in ["singleSelector", "multiSelector", "dropDown"]:
+            payload["options"] = request.options
+        if request.style is not None and request.field_type in ["singleSelector", "multiSelector"]:
+            payload["style"] = request.style
+        if request.number_of_cols is not None and request.field_type in ["singleSelector", "multiSelector"]:
+            payload["numberOfCols"] = request.number_of_cols
+        if request.allowed_file_types is not None and request.field_type == "file":
+            payload["allowedFileTypes"] = request.allowed_file_types
+        if request.max_file_allowed is not None and request.field_type == "file":
+            payload["maxFileAllowed"] = request.max_file_allowed
+        if request.image_quality is not None and request.field_type == "file":
+            payload["imageQuality"] = request.image_quality
+        if request.image_text is not None and request.field_type == "file":
+            payload["imageText"] = request.image_text.strip()
+        if request.file_name_prefix is not None and request.field_type == "file":
+            payload["fileNamePrefix"] = request.file_name_prefix.strip()
+        if request.formula is not None and request.field_type == "calculationsAndLogic":
+            payload["formula"] = request.formula.strip()
+        if request.hidden is not None and request.field_type == "formula":
+            payload["hidden"] = request.hidden
         
         logger.info(f"Adding field to app_id: {app_id} with payload: {payload}")
         
@@ -334,13 +287,29 @@ class AppDefinitionClient(BaseClappiaClient):
         
         if not success:
             logger.error(f"Error: {error_message}")
-            return f"Error: {error_message}"
-        
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                field_name=field_type,
+                operation="add_field",
+                data=response_data
+            )
         
         field_name = response_data.get("fieldName") if response_data else None
-        result = f"Successfully added field.\nField Name: {field_name}\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
-        return result
- 
+        
+        return {
+            "success": True,
+            "app_id": app_id,
+            "field_name": field_name,
+            "field_type": field_type,
+            "section_index": section_index,
+            "field_index": field_index,
+            "operation": "add_field",
+            "full_response": response_data,
+            "message": f"Successfully added {field_type} field to app {app_id}"
+        }
+
     def update_field(self, app_id: str, requesting_user_email_address: str, field_name: str,
                     label: Optional[str] = None, description: Optional[str] = None,
                     required: Optional[bool] = None, block_width_percentage_desktop: Optional[int] = None,
@@ -352,155 +321,126 @@ class AppDefinitionClient(BaseClappiaClient):
                     allowed_file_types: Optional[List[str]] = None, max_file_allowed: Optional[int] = None,
                     image_quality: Optional[str] = None, image_text: Optional[str] = None,
                     file_name_prefix: Optional[str] = None, formula: Optional[str] = None,
-                    hidden: Optional[bool] = None) -> str:
-        """Updates an existing field in a Clappia application with new configuration.
-
-        Modifies the properties of an existing field in a Clappia app, enabling dynamic form updates,
-        A/B testing, and iterative improvements without recreating the entire app.
-
-        Args:
-            app_id: Application ID in uppercase letters and numbers format (e.g., "MFX093412").
-            requesting_user_email_address: Email address of the user updating the field.
-                This user must have permission to modify the app. Must be a valid email format.
-            field_name: Variable name of the existing field to update (e.g., "employeeName", "department").
-            label: New display label for the field.
-            description: New field description/help text.
-            required: Whether the field is mandatory.
-            block_width_percentage_desktop: Width percentage on desktop (1-100).
-            block_width_percentage_mobile: Width percentage on mobile (1-100).
-            display_condition: Condition for when to show the field.
-            retain_values: Whether to retain values when field is hidden.
-            is_editable: Whether the field can be edited.
-            editability_condition: Condition for when field is editable.
-            validation: Validation type - "none", "number", "email", "url", "custom".
-            default_value: Default value for the field (applicable only for singleLineText).
-            options: List of options for selector fields (applicable for singleSelector/multiSelector/dropDown).
-            style: Style for selector fields - "Standard" or "Chips" (applicable for singleSelector/multiSelector).
-            number_of_cols: Number of columns for selector fields (applicable for singleSelector/multiSelector).
-            allowed_file_types: List of allowed file types (applicable for file fields).
-                Valid values: "images_camera_upload", "images_gallery_upload", "videos", "documents".
-            max_file_allowed: Maximum files allowed, between 1-10 (applicable for file fields).
-            image_quality: Image quality - "low", "medium", "high" (applicable for file fields).
-            image_text: Text overlay for image fields (applicable for file fields).
-            file_name_prefix: Prefix for uploaded file names (applicable for file fields).
-            formula: Formula for calculation fields (applicable for calculationsAndLogic fields). Formula is a string that contains the formula for the field in format {profit} = {sales} - {costs}, where {profit}, {sales}, and {costs} are the field names in the app.
-            hidden: Whether the field is hidden (applicable for formula fields).
-
-        IMPORTANT:
-        - Try fetching the app definition and see the fields in the app, then use the field names in the formula.
-        - The formula must be a string that contains the formula for the field in format {profit} = {sales} - {costs}, where {profit}, {sales}, and {costs} are the field names in the app.
-
-        Returns:
-            str: Formatted response with field update details and status.
-        """
-        # Validation
-        is_valid, error_msg = ClappiaInputValidator.validate_app_id(app_id)
-        if not is_valid:
-            return f"Error: Invalid app_id - {error_msg}"
-
-        if not requesting_user_email_address or not requesting_user_email_address.strip():
-            return "Error: requesting_user_email_address is required and cannot be empty"
-
-        if not ClappiaInputValidator.validate_email(requesting_user_email_address):
-            return "Error: requesting_user_email_address must be a valid email address"
-
-        if not field_name or not field_name.strip():
-            return "Error: field_name is required and cannot be empty"
+                    hidden: Optional[bool] = None) -> FieldOperationResponse:
+        
+        try:
+            request = UpdateFieldRequest(
+                app_id=app_id,
+                requesting_user_email_address=requesting_user_email_address,
+                field_name=field_name,
+                label=label,
+                description=description,
+                required=required,
+                block_width_percentage_desktop=block_width_percentage_desktop,
+                block_width_percentage_mobile=block_width_percentage_mobile,
+                display_condition=display_condition,
+                retain_values=retain_values,
+                is_editable=is_editable,
+                editability_condition=editability_condition,
+                validation=validation,
+                default_value=default_value,
+                options=options,
+                style=style,
+                number_of_cols=number_of_cols,
+                allowed_file_types=allowed_file_types,
+                max_file_allowed=max_file_allowed,
+                image_quality=image_quality,
+                image_text=image_text,
+                file_name_prefix=file_name_prefix,
+                formula=formula,
+                hidden=hidden
+            )
+        except Exception as e:
+            return FieldOperationResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id,
+                field_name=field_name,
+                operation="update_field"
+            )
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return f"Error: {env_error}"
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                field_name=field_name,
+                operation="update_field"
+            )
 
-        # Validate optional parameters
-        if validation and validation not in ["none", "number", "email", "url", "custom"]:
-            return f"Error: Invalid validation type '{validation}'. Valid types: none, number, email, url, custom"
-
-        if style and style not in ["Standard", "Chips"]:
-            return f"Error: Invalid style '{style}'. Valid styles: Standard, Chips"
-
-        if image_quality and image_quality not in ["low", "medium", "high"]:
-            return f"Error: Invalid image quality '{image_quality}'. Valid qualities: low, medium, high"
-
-        if allowed_file_types:
-            valid_file_types = {"images_camera_upload", "images_gallery_upload", "videos", "documents"}
-            for file_type in allowed_file_types:
-                if file_type not in valid_file_types:
-                    return f"Error: Invalid file type '{file_type}'. Valid types: {', '.join(valid_file_types)}"
-
-        if max_file_allowed is not None and (max_file_allowed < 1 or max_file_allowed > 10):
-            return "Error: max_file_allowed must be between 1 and 10"
-
-        # Build payload with only non-None values
         payload = {
             "workplaceId": self.api_utils.workplace_id,
-            "appId": app_id.strip(),
-            "requestingUserEmailAddress": requesting_user_email_address.strip(),
-            "fieldName": field_name.strip()
+            "appId": request.app_id,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
+            "fieldName": request.field_name
         }
 
-        # Add optional fields only if they have values (not None)
-        if label is not None:
-            payload["label"] = label.strip()
-
-        if required is not None:
-            payload["required"] = required
-
-        if description is not None:
-            payload["description"] = description.strip()
-
-        if block_width_percentage_desktop is not None:
-            payload["blockWidthPercentageDesktop"] = block_width_percentage_desktop
-
-        if block_width_percentage_mobile is not None:
-            payload["blockWidthPercentageMobile"] = block_width_percentage_mobile
-
-        if display_condition is not None:
-            payload["displayCondition"] = display_condition.strip()
-
-        if retain_values is not None:
-            payload["retainValues"] = retain_values
-
-        if is_editable is not None:
-            payload["isEditable"] = is_editable
-
-        if editability_condition is not None:
-            payload["editabilityCondition"] = editability_condition.strip()
-
-        if validation is not None:
-            payload["validation"] = validation
-
-        if default_value is not None:
-            payload["defaultValue"] = default_value.strip()
-
-        if options is not None:
-            payload["options"] = options
-
-        if style is not None:
-            payload["style"] = style
-
-        if number_of_cols is not None:
-            payload["numberOfCols"] = number_of_cols
-
-        if allowed_file_types is not None:
-            payload["allowedFileTypes"] = allowed_file_types
-
-        if max_file_allowed is not None:
-            payload["maxFileAllowed"] = max_file_allowed
-
-        if image_quality is not None:
-            payload["imageQuality"] = image_quality
-
-        if image_text is not None:
-            payload["imageText"] = image_text.strip()
-
-        if file_name_prefix is not None:
-            payload["fileNamePrefix"] = file_name_prefix.strip()
-
-        if formula is not None:
-            payload["formula"] = formula.strip()
-
-        if hidden is not None:
-            payload["hidden"] = hidden
+        updated_properties = []
+        
+        if request.label is not None:
+            payload["label"] = request.label.strip()
+            updated_properties.append("label")
+        if request.required is not None:
+            payload["required"] = request.required
+            updated_properties.append("required")
+        if request.description is not None:
+            payload["description"] = request.description.strip()
+            updated_properties.append("description")
+        if request.block_width_percentage_desktop is not None:
+            payload["blockWidthPercentageDesktop"] = request.block_width_percentage_desktop
+            updated_properties.append("block_width_percentage_desktop")
+        if request.block_width_percentage_mobile is not None:
+            payload["blockWidthPercentageMobile"] = request.block_width_percentage_mobile
+            updated_properties.append("block_width_percentage_mobile")
+        if request.display_condition is not None:
+            payload["displayCondition"] = request.display_condition.strip()
+            updated_properties.append("display_condition")
+        if request.retain_values is not None:
+            payload["retainValues"] = request.retain_values
+            updated_properties.append("retain_values")
+        if request.is_editable is not None:
+            payload["isEditable"] = request.is_editable
+            updated_properties.append("is_editable")
+        if request.editability_condition is not None:
+            payload["editabilityCondition"] = request.editability_condition.strip()
+            updated_properties.append("editability_condition")
+        if request.validation is not None:
+            payload["validation"] = request.validation
+            updated_properties.append("validation")
+        if request.default_value is not None:
+            payload["defaultValue"] = request.default_value.strip()
+            updated_properties.append("default_value")
+        if request.options is not None:
+            payload["options"] = request.options
+            updated_properties.append("options")
+        if request.style is not None:
+            payload["style"] = request.style
+            updated_properties.append("style")
+        if request.number_of_cols is not None:
+            payload["numberOfCols"] = request.number_of_cols
+            updated_properties.append("number_of_cols")
+        if request.allowed_file_types is not None:
+            payload["allowedFileTypes"] = request.allowed_file_types
+            updated_properties.append("allowed_file_types")
+        if request.max_file_allowed is not None:
+            payload["maxFileAllowed"] = request.max_file_allowed
+            updated_properties.append("max_file_allowed")
+        if request.image_quality is not None:
+            payload["imageQuality"] = request.image_quality
+            updated_properties.append("image_quality")
+        if request.image_text is not None:
+            payload["imageText"] = request.image_text.strip()
+            updated_properties.append("image_text")
+        if request.file_name_prefix is not None:
+            payload["fileNamePrefix"] = request.file_name_prefix.strip()
+            updated_properties.append("file_name_prefix")
+        if request.formula is not None:
+            payload["formula"] = request.formula.strip()
+            updated_properties.append("formula")
+        if request.hidden is not None:
+            payload["hidden"] = request.hidden
+            updated_properties.append("hidden")
 
         logger.info(f"Updating field '{field_name}' in app_id: {app_id} with payload: {payload}")
 
@@ -512,59 +452,20 @@ class AppDefinitionClient(BaseClappiaClient):
 
         if not success:
             logger.error(f"Error: {error_message}")
-            return f"Error: {error_message}"
-        
-        updated_properties = []
-        if label is not None:
-            updated_properties.append("label")
-        if description is not None:
-            updated_properties.append("description")
-        if required is not None:
-            updated_properties.append("required")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                field_name=field_name,
+                operation="update_field",
+                data=response_data
+            )
 
-        if block_width_percentage_desktop is not None:
-            updated_properties.append("block_width_percentage_desktop")
-        if block_width_percentage_mobile is not None:
-            updated_properties.append("block_width_percentage_mobile")
-        if display_condition is not None:
-            updated_properties.append("display_condition")
-        if retain_values is not None:
-            updated_properties.append("retain_values")
-        if is_editable is not None:
-            updated_properties.append("is_editable")
-        if editability_condition is not None:
-            updated_properties.append("editability_condition")
-        if validation is not None:
-            updated_properties.append("validation")
-        if default_value is not None:
-            updated_properties.append("default_value")
-        if options is not None:
-            updated_properties.append("options")
-        if style is not None:
-            updated_properties.append("style")
-        if number_of_cols is not None:
-            updated_properties.append("number_of_cols")
-        if allowed_file_types is not None:
-            updated_properties.append("allowed_file_types")
-        if max_file_allowed is not None:
-            updated_properties.append("max_file_allowed")
-        if image_quality is not None:
-            updated_properties.append("image_quality")
-        if image_text is not None:
-            updated_properties.append("image_text")
-        if file_name_prefix is not None:
-            updated_properties.append("file_name_prefix")
-        if formula is not None:
-            updated_properties.append("formula")
-        if hidden is not None:
-            updated_properties.append("hidden")
-
-        update_info = {
-            "fieldName": field_name,
-            "appId": app_id,
-            "requestingUser": requesting_user_email_address,
-            "updatedProperties": updated_properties,
-            "status": "updated",
-        }
-
-        return f"Successfully updated field:\n\nSUMMARY:\n{json.dumps(update_info, indent=2)}\n\nFULL RESPONSE:\n{json.dumps(response_data, indent=2)}"
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully updated field '{field_name}' in app {app_id}",
+            app_id=app_id,
+            field_name=field_name,
+            operation="update_field",
+            data=response_data
+        )
