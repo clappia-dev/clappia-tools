@@ -16,7 +16,7 @@ class FilterCondition(BaseModel):
         description="Type of field being filtered, possible values are STANDARD, CUSTOM",
     )
     key: str = Field(min_length=1, description="Field key to filter on, use $submissionId, $owner, $status, $lastUpdatedAt, $lastModifiedAt, $createdAt, $updatedAt, $state for standard fields or the field name for custom fields")
-    value: str = Field(description="Value to filter by")
+    value: Any = Field(description="Value to filter by")
     
     @field_validator('key')
     def validate_key(cls, v: str, values: ValidationInfo) -> str:
@@ -28,17 +28,6 @@ class FilterCondition(BaseModel):
             }
             if v not in standard_fields:
                 raise ValueError(f"Standard filterKeyType used but key '{v}' is not a standard field")
-        return v
-    
-    @field_validator('value')
-    def validate_value(cls, v: str, values: ValidationInfo) -> str:
-        operator = values.data.get('operator')
-        if operator in ["EMPTY", "NON_EMPTY"]:
-            if v and v.strip():
-                raise ValueError(f"Operator {operator} should have empty value")
-        else:
-            if not v or not v.strip():
-                raise ValueError(f"Operator {operator} requires a non-empty value")
         return v
     
     def to_dict(self) -> Dict[str, Any]:

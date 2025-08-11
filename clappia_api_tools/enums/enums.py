@@ -90,7 +90,7 @@ class ValidationType(Enum):
 
 class ExcelFormat(Enum):
     EXCEL = "excel"
-    CSV = "Csv"
+    CSV = "csv"
 
 class TriggerType(Enum):
     SUBMISSION_CREATED = "newSubmission"
