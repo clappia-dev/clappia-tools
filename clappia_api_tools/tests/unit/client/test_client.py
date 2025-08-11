@@ -7,14 +7,14 @@ from clappia_api_tools.client.app_definition_client import AppDefinitionClient
 class TestBaseClappiaClient:
     """Test cases for BaseClappiaClient"""
 
-    @patch('clappia_api_tools.utils.api_utils.ClappiaAPIUtils')
+    @patch('clappia_api_tools.client.base_client.ClappiaAPIUtils')
     def test_init_with_defaults(self, mock_api_utils):
         """Test BaseClappiaClient initialization with default parameters"""
         client = BaseClappiaClient()
         assert client.api_utils is not None
         mock_api_utils.assert_called_once_with(None, None, None, 30)
 
-    @patch('clappia_api_tools.utils.api_utils.ClappiaAPIUtils')
+    @patch('clappia_api_tools.client.base_client.ClappiaAPIUtils')
     def test_init_with_custom_params(self, mock_api_utils):
         """Test BaseClappiaClient initialization with custom parameters"""
         client = BaseClappiaClient(
@@ -34,13 +34,15 @@ class TestSubmissionClient:
         """Test create_submission with invalid app_id"""
         client = SubmissionClient()
         result = client.create_submission("invalid-id", {}, "test@example.com")
-        assert "Error: Invalid app_id" in result
+        assert result.success is False
+        assert "App ID must contain only uppercase letters and numbers" in result.message
 
     def test_create_submission_empty_email(self):
         """Test create_submission with empty email"""
         client = SubmissionClient()
         result = client.create_submission("MFX093412", {"test": "data"}, "")
-        assert "Error: requesting_user_email_address is required" in result
+        assert result.success is False
+        assert "requesting_user_email_address" in result.message
 
     def test_create_submission_invalid_email(self):
         """Test create_submission with invalid email format"""
@@ -48,19 +50,22 @@ class TestSubmissionClient:
         result = client.create_submission(
             "MFX093412", {"test": "data"}, "invalid-email"
         )
-        assert "Error: requesting_user_email_address must be a valid email address" in result
+        assert result.success is False
+        assert "requesting_user_email_address" in result.message
 
     def test_create_submission_empty_data(self):
         """Test create_submission with empty data"""
         client = SubmissionClient()
         result = client.create_submission("MFX093412", {}, "test@example.com")
-        assert "Error: data cannot be empty" in result
+        assert result.success is False
+        assert "data cannot be empty" in result.message
 
     def test_create_submission_invalid_data_type(self):
         """Test create_submission with non-dictionary data"""
         client = SubmissionClient()
         result = client.create_submission("MFX093412", "invalid", "test@example.com")
-        assert "Error: data must be a dictionary" in result
+        assert result.success is False
+        assert "data" in result.message
 
     @patch("clappia_api_tools.utils.api_utils.ClappiaAPIUtils.make_request")
     def test_create_submission_success(self, mock_request):
@@ -78,8 +83,9 @@ class TestSubmissionClient:
             "MFX093412", {"name": "Test User"}, "test@example.com"
         )
 
-        assert "Successfully created submission" in result
-        assert "TEST123" in result
+        assert result.success is True
+        assert "Successfully created submission" in result.message
+        assert result.submission_id == "TEST123"
         mock_request.assert_called_once()
 
     @patch("clappia_api_tools.utils.api_utils.ClappiaAPIUtils.make_request")
@@ -98,7 +104,8 @@ class TestSubmissionClient:
             "MFX093412", {"name": "Test User"}, "test@example.com"
         )
 
-        assert "Error: API Error: Invalid request" in result
+        assert result.success is False
+        assert "API Error: Invalid request" in result.message
 
     def test_edit_submission_invalid_submission_id(self):
         """Test edit_submission with invalid submission ID"""
@@ -106,7 +113,8 @@ class TestSubmissionClient:
         result = client.edit_submission(
             "MFX093412", "invalid-id", {"name": "Updated"}, "test@example.com"
         )
-        assert "Error: Invalid submission_id" in result
+        assert result.success is False
+        assert "Submission ID must contain only uppercase letters and numbers" in result.message
 
 
 class TestAppDefinitionClient:
@@ -116,7 +124,8 @@ class TestAppDefinitionClient:
         """Test get_definition with invalid app_id"""
         client = AppDefinitionClient()
         result = client.get_definition("invalid-app-id")
-        assert "Error: Invalid app_id" in result
+        assert result.success is False
+        assert "App ID must contain only uppercase letters and numbers" in result.message
 
     @patch("clappia_api_tools.utils.api_utils.ClappiaAPIUtils.make_request")
     def test_get_definition_success(self, mock_request):
@@ -135,21 +144,24 @@ class TestAppDefinitionClient:
         client = AppDefinitionClient()
         result = client.get_definition("MFX093412")
 
-        assert "Successfully retrieved app definition" in result
-        assert "MFX093412" in result
+        assert result.success is True
+        assert "Successfully retrieved app definition" in result.message
+        assert result.app_id == "MFX093412"
         mock_request.assert_called_once()
 
     def test_create_app_invalid_name(self):
         """Test create_app with invalid app name"""
         client = AppDefinitionClient()
         result = client.create_app("", "test@example.com", [])
-        assert "Error: Invalid app_name" in result
+        assert result.success is False
+        assert "app_name" in result.message
 
     def test_create_app_invalid_email(self):
         """Test create_app with invalid email"""
         client = AppDefinitionClient()
         result = client.create_app("Valid App Name", "invalid-email", [])
-        assert "Error: requesting_user_email_address must be a valid email address" in result
+        assert result.success is False
+        assert "requesting_user_email_address" in result.message
 
     def test_add_field_invalid_app_id(self):
         """Test add_field with invalid app_id"""
@@ -157,7 +169,8 @@ class TestAppDefinitionClient:
         result = client.add_field(
             "invalid-id", "test@example.com", 0, 0, "singleLineText", "Test Field", True
         )
-        assert "Error: Invalid app_id" in result
+        assert result.success is False
+        assert "App ID must contain only uppercase letters and numbers" in result.message
 
     def test_add_field_unknown_field_type(self):
         """Test add_field with unknown field type"""
@@ -170,5 +183,5 @@ class TestAppDefinitionClient:
         result = client.add_field(
             "MFX093412", "test@example.com", 0, 0, "unknownFieldType", "Test Field", True
         )
-        print(result)
-        assert "Error: field_type 'unknownFieldType'" in result
+        assert result.success is False
+        assert "field_type" in result.message

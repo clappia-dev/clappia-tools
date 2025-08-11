@@ -24,4 +24,8 @@ class BaseClappiaClient:
             workplace_id: Workspace ID.
             timeout: Request timeout in seconds.
         """
+        self.api_key = api_key
+        self.base_url = base_url
+        self.workplace_id = workplace_id
+        self.timeout = timeout
         self.api_utils = ClappiaAPIUtils(api_key, base_url, workplace_id, timeout)

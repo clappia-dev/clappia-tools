@@ -20,8 +20,6 @@ Clappia API Tools is a Python package that provides a set of clients for seamles
 -  **App Definition Retrieval**: Fetch complete app structure and metadata and manage the app structure via fields and sections updates.
 -  **Workflow Management**: Retrieve, create, modify, and manage workflow definitions and steps.
 -  **Analytics Management**: Add, remove, update, and reorder charts and analytics configurations.
--  **Input Validation**: Built-in validation for IDs, emails, and status objects.
--  **Comprehensive Testing**: Includes unit and integration tests.
 
 ---
 
@@ -40,6 +38,7 @@ Clappia API Tools is a Python package that provides a set of clients for seamles
 -  [App Definition Client Reference](docs/app_definition_client.md)
 -  [Workflow Definition Client Reference](docs/workflow_definition_client.md)
 -  [Analytics Client Reference](docs/analytics_client.md)
+-  [Setup, Testing, and Publish Reference](docs/setup_testing_publishing.md)
 
 ---
 
@@ -56,22 +55,6 @@ git clone https://github.com/clappia-dev/clappia-api-tools.git
 cd clappia-api-tools
 pip install -e ."[dev]"
 ```
-
----
-
-## First-Time Setup
-
-Before using or testing Clappia API Tools, set up your environment variables. Create a `.env` file in the project root with the following content:
-
-```env
-CLAPPIA_API_KEY=your-api-key
-CLAPPIA_BASE_URL=https://api.clappia.com
-CLAPPIA_WORKPLACE_ID=your-workplace-id
-```
-
--  Replace `your-api-key` and `your-workplace-id` with your actual Clappia credentials.
--  The `.env` file is included in `.gitignore` and will not be committed.
--  The package uses [python-dotenv](https://pypi.org/project/python-dotenv/) to load these variables automatically if present.
 
 ---
 
@@ -185,29 +168,6 @@ update_result = client.update_chart(
     update_data=update_data
 )
 print(update_result)
-```
-
----
-
-## Input Validation
-
--  **App ID**: Must be uppercase letters and numbers (e.g., `MFX093412`).
--  **Submission ID**: Must be uppercase letters and numbers (e.g., `HGO51464561`).
--  **Email**: Must be a valid email address.
--  **Status**: Must be a dictionary with a non-empty `statusName` or `name` field.
-
-Invalid inputs will return descriptive error messages.
-
----
-
-## Testing
-
-Before running tests, ensure your `.env` file is present in the project root with valid credentials. The test suite will load environment variables automatically.
-
-Run all tests (unit and integration):
-
-```bash
-pytest
 ```
 
 ---

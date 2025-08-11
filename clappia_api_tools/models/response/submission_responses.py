@@ -14,10 +14,7 @@ class SubmissionsResponse(BaseResponse):
 class SubmissionsAggregationResponse(BaseResponse):
     app_id: str = Field(None, description="App ID")
 
-class FieldOperationResponse(BaseResponse):
-    app_id: str = Field(description="App ID where field was modified")
-    field_name: Optional[str] = Field(None, description="Name of the field")
-    operation: str = Field(description="Type of operation performed")
+
 
 class SubmissionsExcelResponse(BaseResponse):
     app_id: str = Field(None, description="App ID")

@@ -22,6 +22,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         try:
             request = GetWorkflowRequest(
                 app_id=app_id,
+                workplace_id=self.workplace_id,
                 requesting_user_email_address=requesting_user_email_address,
                 trigger_type=trigger_type
             )
@@ -42,6 +43,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
 
         params = {
             "appId": request.app_id,
+            "workplaceId": request.workplace_id,
             "triggerType": request.trigger_type.value,
             "requestingUserEmailAddress": str(request.requesting_user_email_address)
         }
@@ -75,6 +77,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         try:
             request = AddWorkflowStepRequest(
                 app_id=app_id,
+                workplace_id=self.workplace_id,
                 requesting_user_email_address=requesting_user_email_address,
                 trigger_type=trigger_type,
                 node_type=node_type,
@@ -101,8 +104,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
+            "workplaceId": request.workplace_id,
             "triggerType": request.trigger_type.value,
-            "nodeType": request.node_type,
+            "nodeType": request.node_type.value,
             "parentVariableName": request.parent_variable_name,
             "requestingUserEmailAddress": str(request.requesting_user_email_address)
         }
@@ -139,9 +143,11 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         try:
             request = RemoveWorkflowStepRequest(
                 app_id=app_id,
+                workplace_id=self.workplace_id,
                 requesting_user_email_address=requesting_user_email_address,
                 trigger_type=trigger_type,
-                step_variable_name=step_variable_name
+                step_variable_name=step_variable_name,
+                delete_type="node"
             )
         except Exception as e:
             return WorkflowStepResponse(
@@ -164,8 +170,10 @@ class WorkflowDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
+            "workplaceId": request.workplace_id,
             "triggerType": request.trigger_type.value,
             "stepVariableName": request.step_variable_name,
+            "deleteType": request.delete_type,
             "requestingUserEmailAddress": str(request.requesting_user_email_address)
         }
 
@@ -203,6 +211,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         try:
             request = UpdateWorkflowStepRequest(
                 app_id=app_id,
+                workplace_id=self.workplace_id,
                 requesting_user_email_address=requesting_user_email_address,
                 trigger_type=trigger_type,
                 step_variable_name=step_variable_name,
@@ -229,6 +238,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
+            "workplaceId": request.workplace_id,
             "triggerType": request.trigger_type.value,
             "stepVariableName": request.step_variable_name,
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
@@ -268,6 +278,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         try:
             request = ReorderWorkflowStepRequest(
                 app_id=app_id,
+                workplace_id=self.workplace_id,
                 requesting_user_email_address=requesting_user_email_address,
                 trigger_type=trigger_type,
                 step_variable_name=step_variable_name,
@@ -294,6 +305,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
+            "workplaceId": request.workplace_id,
             "triggerType": request.trigger_type.value,
             "stepVariableName": request.step_variable_name,
             "parentVariableName": request.parent_variable_name,

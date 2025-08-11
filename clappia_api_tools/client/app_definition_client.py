@@ -298,17 +298,14 @@ class AppDefinitionClient(BaseClappiaClient):
         
         field_name = response_data.get("fieldName") if response_data else None
         
-        return {
-            "success": True,
-            "app_id": app_id,
-            "field_name": field_name,
-            "field_type": field_type,
-            "section_index": section_index,
-            "field_index": field_index,
-            "operation": "add_field",
-            "full_response": response_data,
-            "message": f"Successfully added {field_type} field to app {app_id}"
-        }
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added {field_type} field to app {app_id}",
+            app_id=app_id,
+            field_name=field_name,
+            operation="add_field",
+            data=response_data
+        )
 
     def update_field(self, app_id: str, requesting_user_email_address: str, field_name: str,
                     label: Optional[str] = None, description: Optional[str] = None,

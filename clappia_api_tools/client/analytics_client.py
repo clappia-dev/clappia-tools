@@ -4,7 +4,7 @@ from clappia_api_tools.utils.logging_utils import get_logger
 from clappia_api_tools.models.request import (
     AddChartRequest, RemoveChartRequest, UpdateChartRequest, ReorderChartRequest
 )
-from clappia_api_tools.models.response import ChartResponse, AnalyticsResponse
+from clappia_api_tools.models.response import ChartResponse
 
 logger = get_logger(__name__)
 
@@ -16,10 +16,11 @@ class AnalyticsClient(BaseClappiaClient):
     """
     
     def add_chart(self, app_id: str, chart_type: str, requesting_user_email_address: str,
-                  chart_index: Optional[int] = None, chart_title: Optional[str] = None) -> ChartResponse:
+                  chart_index: int = 0, chart_title: Optional[str] = None) -> ChartResponse:
         try:
             request = AddChartRequest(
                 app_id=app_id,
+                workplace_id=self.workplace_id,
                 requesting_user_email_address=requesting_user_email_address,
                 chart_type=chart_type,
                 chart_index=chart_index,
@@ -44,12 +45,12 @@ class AnalyticsClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
+            "workplaceId": request.workplace_id,
             "chartType": request.chart_type.value,
+            "chartIndex": request.chart_index,
             "requestingUserEmailAddress": str(request.requesting_user_email_address)
         }
 
-        if request.chart_index is not None:
-            payload["chartIndex"] = request.chart_index
         if request.chart_title:
             payload["chartTitle"] = request.chart_title
 
@@ -84,6 +85,7 @@ class AnalyticsClient(BaseClappiaClient):
         try:
             request = RemoveChartRequest(
                 app_id=app_id,
+                workplace_id=self.workplace_id,
                 requesting_user_email_address=requesting_user_email_address,
                 chart_index=chart_index
             )
@@ -106,6 +108,7 @@ class AnalyticsClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
+            "workplaceId": request.workplace_id,
             "chartIndex": request.chart_index,
             "requestingUserEmailAddress": str(request.requesting_user_email_address)
         }
@@ -141,6 +144,7 @@ class AnalyticsClient(BaseClappiaClient):
         try:
             request = UpdateChartRequest(
                 app_id=app_id,
+                workplace_id=self.workplace_id,
                 requesting_user_email_address=requesting_user_email_address,
                 chart_index=chart_index,
                 **update_data
@@ -164,6 +168,7 @@ class AnalyticsClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
+            "workplaceId": request.workplace_id,
             "chartIndex": request.chart_index,
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
             **update_data
@@ -200,9 +205,10 @@ class AnalyticsClient(BaseClappiaClient):
         try:
             request = ReorderChartRequest(
                 app_id=app_id,
+                workplace_id=self.workplace_id,
                 requesting_user_email_address=requesting_user_email_address,
-                source_chart_index=source_chart_index,
-                target_chart_index=target_chart_index
+                source_index=source_chart_index,
+                target_index=target_chart_index
             )
         except Exception as e:
             return ChartResponse(
@@ -223,8 +229,9 @@ class AnalyticsClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "sourceChartIndex": request.source_chart_index,
-            "targetChartIndex": request.target_chart_index,
+            "workplaceId": request.workplace_id,
+            "sourceIndex": request.source_index,
+            "targetIndex": request.target_index,
             "requestingUserEmailAddress": str(request.requesting_user_email_address)
         }
 

@@ -15,7 +15,7 @@ from .request import (
 from .response import (
     AppDefinitionResponse, AppCreationResponse, SubmissionResponse, FieldOperationResponse, 
     SubmissionsAggregationResponse, SubmissionsResponse, SubmissionsExcelResponse, 
-    WorkflowResponse, WorkflowStepResponse, ChartResponse, AnalyticsResponse
+    WorkflowResponse, WorkflowStepResponse, ChartResponse
 )
 
 __all__ = [
@@ -37,5 +37,5 @@ __all__ = [
     # Response Models
     "AppDefinitionResponse", "AppCreationResponse", "SubmissionResponse", "FieldOperationResponse", 
     "SubmissionsAggregationResponse", "SubmissionsResponse", "SubmissionsExcelResponse", 
-    "WorkflowResponse", "WorkflowStepResponse", "ChartResponse", "AnalyticsResponse"
+    "WorkflowResponse", "WorkflowStepResponse", "ChartResponse"
 ]

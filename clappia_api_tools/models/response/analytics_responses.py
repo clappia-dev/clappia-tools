@@ -14,8 +14,3 @@ class ChartDefinition(BaseModel):
     chart_type: ChartType = Field(description="Type of chart")
     chart_title: Optional[str] = Field(None, description="Title of the chart")
     configuration: Optional[Dict[str, Any]] = Field(None, description="Chart configuration")
-
-class AnalyticsResponse(BaseResponse):
-    app_id: str = Field(None, description="App ID")
-    charts: Optional[List[ChartDefinition]] = Field(None, description="List of chart definitions")
-    total_charts: Optional[int] = Field(None, description="Total number of charts") 
