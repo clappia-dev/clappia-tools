@@ -1,6 +1,7 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, EmailStr, validator
+from pydantic import BaseModel, Field, EmailStr, field_validator, ValidationInfo
 import re
+from ..enums import FilterOperator, FilterKeyType, LogicalOperator, DimensionType, SortDirection, AggregationType
 
 standard_fields = {
     "$submissionId", "$owner", "$status", "$lastUpdatedAt",
@@ -8,23 +9,18 @@ standard_fields = {
 }
 
 class FilterCondition(BaseModel):
-    operator: str = Field(
-        description="Filter operator to apply",
-        enum=[
-            "CONTAINS", "NOT_IN", "EQ", "NEQ", "EMPTY", "NON_EMPTY",
-            "STARTS_WITH", "BETWEEN", "GT", "LT", "GTE", "LTE"
-        ]
+    operator: FilterOperator = Field(
+        description="Filter operator to apply, possible values are CONTAINS, NOT_IN, EQ, NEQ, EMPTY, NON_EMPTY, STARTS_WITH, BETWEEN, GT, LT, GTE, LTE",
     )
-    filter_key_type: str = Field(
-        description="Type of field being filtered",
-        enum=["STANDARD", "CUSTOM"]
+    filter_key_type: FilterKeyType = Field(
+        description="Type of field being filtered, possible values are STANDARD, CUSTOM",
     )
     key: str = Field(min_length=1, description="Field key to filter on, use $submissionId, $owner, $status, $lastUpdatedAt, $lastModifiedAt, $createdAt, $updatedAt, $state for standard fields or the field name for custom fields")
     value: str = Field(description="Value to filter by")
     
-    @validator('key')
-    def validate_key(cls, v, values):
-        filter_key_type = values.get('filter_key_type')
+    @field_validator('key')
+    def validate_key(cls, v: str, values: ValidationInfo) -> str:
+        filter_key_type = values.data.get('filter_key_type')
         if filter_key_type == "STANDARD":
             standard_fields = {
                 "$submissionId", "$owner", "$status", "$lastUpdatedAt",
@@ -34,9 +30,9 @@ class FilterCondition(BaseModel):
                 raise ValueError(f"Standard filterKeyType used but key '{v}' is not a standard field")
         return v
     
-    @validator('value')
-    def validate_value(cls, v, values):
-        operator = values.get('operator')
+    @field_validator('value')
+    def validate_value(cls, v: str, values: ValidationInfo) -> str:
+        operator = values.data.get('operator')
         if operator in ["EMPTY", "NON_EMPTY"]:
             if v and v.strip():
                 raise ValueError(f"Operator {operator} should have empty value")
@@ -54,8 +50,8 @@ class FilterCondition(BaseModel):
         }
 
 class SubmissionQuery(BaseModel):
-    conditions: List[FilterCondition] = Field(min_items=1, description="Array of filter conditions")
-    operator: str = Field(default="AND", description="Logical operator", enum=["AND", "OR"])
+    conditions: List[FilterCondition] = Field(min_length=1, description="Array of filter conditions")
+    operator: LogicalOperator = Field(default="AND", description="Logical operator, possible values are AND, OR")
     
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -64,7 +60,7 @@ class SubmissionQuery(BaseModel):
         }
 
 class SubmissionQueryGroup(BaseModel):
-    queries: List[SubmissionQuery] = Field(min_items=1, description="Array of individual queries")
+    queries: List[SubmissionQuery] = Field(min_length=1, description="Array of individual queries")
     
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -72,7 +68,7 @@ class SubmissionQueryGroup(BaseModel):
         }
 
 class SubmissionFilters(BaseModel):
-    queries: List[SubmissionQueryGroup] = Field(min_items=1, description="Array of query groups")
+    queries: List[SubmissionQueryGroup] = Field(min_length=1, description="Array of query groups")
     
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -83,7 +79,7 @@ class AggregationOperand(BaseModel):
     field_name: str = Field(description="Name of the field to aggregate")
     label: str = Field(description="Display label for the operand")
     data_type: str = Field(description="Data type of the operand field, use text, number, date, boolean, select for standard fields or the field type for custom fields")
-    dimension_type: str = Field(default="CUSTOM", description="Type of operand field", enum=["STANDARD", "CUSTOM"])
+    dimension_type: DimensionType = Field(default="CUSTOM", description="Type of operand field, possible values are STANDARD, CUSTOM")
     
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -97,9 +93,9 @@ class AggregationDimension(BaseModel):
     field_name: str = Field(description="Name of the field to group by")
     label: str = Field(description="Display label for the dimension")
     data_type: str = Field(description="Data type of the field, use text, number, date, boolean, select for standard fields or the field type for custom fields")
-    dimension_type: str = Field(default="CUSTOM", description="Type of dimension field", enum=["STANDARD", "CUSTOM"])
-    sort_direction: Optional[str] = Field(None, description="Sort direction", enum=["asc", "desc"])
-    sort_type: Optional[str] = Field(None, description="Type of sorting", enum=["number", "string"])
+    dimension_type: DimensionType = Field(default="CUSTOM", description="Type of dimension field, possible values are STANDARD, CUSTOM")
+    sort_direction: Optional[SortDirection] = Field(None, description="Sort direction, possible values are asc, desc")
+    sort_type: Optional[str] = Field(None, description="Type of sorting, possible values are number, string")
     missing_value: Optional[str] = Field(None, description="Value when field data is missing")
     interval: Optional[str] = Field(None, description="Interval for date/time grouping, use day, week, month, year")
     
@@ -121,7 +117,7 @@ class AggregationDimension(BaseModel):
         return result
 
 class AggregationMetric(BaseModel):
-    type: str = Field(description="Type of aggregation", enum=["count", "sum", "average", "minimum", "maximum", "unique"])
+    type: AggregationType = Field(description="Type of aggregation, possible values are count, sum, average, minimum, maximum, unique")
     operand: Optional[AggregationOperand] = Field(None, description="Field to aggregate")
     
     def to_dict(self) -> Dict[str, Any]:

@@ -7,14 +7,14 @@ from clappia_api_tools.client.app_definition_client import AppDefinitionClient
 class TestBaseClappiaClient:
     """Test cases for BaseClappiaClient"""
 
-    @patch('clappia_api_tools._utils.api_utils.ClappiaAPIUtils')
+    @patch('clappia_api_tools.utils.api_utils.ClappiaAPIUtils')
     def test_init_with_defaults(self, mock_api_utils):
         """Test BaseClappiaClient initialization with default parameters"""
         client = BaseClappiaClient()
         assert client.api_utils is not None
         mock_api_utils.assert_called_once_with(None, None, None, 30)
 
-    @patch('clappia_api_tools._utils.api_utils.ClappiaAPIUtils')
+    @patch('clappia_api_tools.utils.api_utils.ClappiaAPIUtils')
     def test_init_with_custom_params(self, mock_api_utils):
         """Test BaseClappiaClient initialization with custom parameters"""
         client = BaseClappiaClient(
@@ -62,7 +62,7 @@ class TestSubmissionClient:
         result = client.create_submission("MFX093412", "invalid", "test@example.com")
         assert "Error: data must be a dictionary" in result
 
-    @patch("clappia_api_tools._utils.api_utils.ClappiaAPIUtils.make_request")
+    @patch("clappia_api_tools.utils.api_utils.ClappiaAPIUtils.make_request")
     def test_create_submission_success(self, mock_request):
         """Test successful create_submission"""
         # Mock successful API response
@@ -82,7 +82,7 @@ class TestSubmissionClient:
         assert "TEST123" in result
         mock_request.assert_called_once()
 
-    @patch("clappia_api_tools._utils.api_utils.ClappiaAPIUtils.make_request")
+    @patch("clappia_api_tools.utils.api_utils.ClappiaAPIUtils.make_request")
     def test_create_submission_api_error(self, mock_request):
         """Test create_submission with API error"""
         # Mock API error response
@@ -118,7 +118,7 @@ class TestAppDefinitionClient:
         result = client.get_definition("invalid-app-id")
         assert "Error: Invalid app_id" in result
 
-    @patch("clappia_api_tools._utils.api_utils.ClappiaAPIUtils.make_request")
+    @patch("clappia_api_tools.utils.api_utils.ClappiaAPIUtils.make_request")
     def test_get_definition_success(self, mock_request):
         """Test successful get_definition"""
         mock_response = {
@@ -170,4 +170,5 @@ class TestAppDefinitionClient:
         result = client.add_field(
             "MFX093412", "test@example.com", 0, 0, "unknownFieldType", "Test Field", True
         )
+        print(result)
         assert "Error: field_type 'unknownFieldType'" in result

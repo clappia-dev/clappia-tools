@@ -1,24 +1,18 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, EmailStr, validator
+from pydantic import BaseModel, Field, EmailStr, field_validator, ValidationInfo
 import re
+from ..enums import FieldType
 
 class AppField(BaseModel):
-    field_type: str = Field(
-        description="Type of field",
-        enum=[
-            "singleLineText", "multiLineText", "singleSelector", "multiSelector",
-            "dropDown", "dateSelector", "timeSelector", "phoneNumber", "uniqueNumbering",
-            "file", "gpsLocation", "html", "calculationsAndLogic", "codeScanner",
-            "counter", "slider", "signature", "validation", "liveTracking",
-            "nfcReader", "address"
-        ]
+    field_type: FieldType = Field(
+        description="Type of field, possible values are singleLineText, multiLineText, singleSelector, multiSelector, dropDown, dateSelector, timeSelector, phoneNumber, uniqueNumbering, file, gpsLocation, html, calculationsAndLogic, codeScanner, counter, slider, signature, validation, liveTracking, nfcReader, address",
     )
     label: str = Field(min_length=1, description="Label for the field")
     options: Optional[List[str]] = Field(None, description="Options for selector/dropdown fields")
     
-    @validator('options')
-    def validate_options(cls, v, values):
-        field_type = values.get('field_type')
+    @field_validator('options')
+    def validate_options(cls, v: List[str], values: ValidationInfo) -> List[str]:
+        field_type = values.data.get('field_type')
         if field_type in ["singleSelector", "multiSelector", "dropDown"]:
             if not v:
                 raise ValueError(f"Options are required for {field_type}")
@@ -28,7 +22,7 @@ class AppField(BaseModel):
     
     def to_dict(self) -> Dict[str, Any]:
         result = {
-            "fieldType": self.field_type,
+            "fieldType": self.field_type.value,
             "label": self.label,
         }
         if self.options is not None:
@@ -37,7 +31,7 @@ class AppField(BaseModel):
 
 class AppSection(BaseModel):
     section_name: str = Field(min_length=1, description="Name of the section")
-    fields: List[AppField] = Field(min_items=1, description="Array of fields in this section")
+    fields: List[AppField] = Field(min_length=1, description="Array of fields in this section")
     
     def to_dict(self) -> Dict[str, Any]:
         return {

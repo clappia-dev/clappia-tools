@@ -1,7 +1,6 @@
 from unittest.mock import patch, Mock
 from clappia_api_tools.client.app_definition_client import AppDefinitionClient
 from clappia_api_tools.client.submission_client import SubmissionClient
-from clappia_api_tools._models.model import Field, Section
 
 def dummy_app_definition_client():
     """Helper function to create a dummy app definition client for testing"""

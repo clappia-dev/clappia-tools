@@ -17,7 +17,9 @@ Clappia API Tools is a Python package that provides a set of clients for seamles
 
 -  **Multiple API Clients**: Dedicated clients for each Clappia API operation.
 -  **Submission Management**: Create, edit, update owners, and change status of submissions.
--  **App Definition Retrieval**: Fetch complete app structure and metadata and  manage the app structure via fields and sections updates.
+-  **App Definition Retrieval**: Fetch complete app structure and metadata and manage the app structure via fields and sections updates.
+-  **Workflow Management**: Retrieve, create, modify, and manage workflow definitions and steps.
+-  **Analytics Management**: Add, remove, update, and reorder charts and analytics configurations.
 -  **Input Validation**: Built-in validation for IDs, emails, and status objects.
 -  **Comprehensive Testing**: Includes unit and integration tests.
 
@@ -26,7 +28,9 @@ Clappia API Tools is a Python package that provides a set of clients for seamles
 ## Available Clients
 
 -  `SubmissionClient`: Manage submissions (create, edit, update owners, change status)
--  `AppDefinitionClient`: Retrieve app definitions and metadata and  Manage app structure (fields, sections, creation)
+-  `AppDefinitionClient`: Retrieve app definitions and metadata and Manage app structure (fields, sections, creation)
+-  `WorkflowDefinitionClient`: Manage workflow definitions (get, add, remove, update, reorder workflow steps)
+-  `AnalyticsClient`: Manage analytics and charts (add, remove, update, reorder charts)
 
 ---
 
@@ -34,6 +38,8 @@ Clappia API Tools is a Python package that provides a set of clients for seamles
 
 -  [Submission Client Reference](docs/submission_client.md)
 -  [App Definition Client Reference](docs/app_definition_client.md)
+-  [Workflow Definition Client Reference](docs/workflow_definition_client.md)
+-  [Analytics Client Reference](docs/analytics_client.md)
 
 ---
 
@@ -115,6 +121,70 @@ client = AppDefinitionClient(
 # Get app definition
 result = client.get_definition(app_id="MFX093412")
 print(result)
+```
+
+### WorkflowDefinitionClient Example
+
+```python
+from clappia_api_tools.client.workflow_definition_client import WorkflowDefinitionClient
+
+client = WorkflowDefinitionClient(
+    api_key="your-api-key",
+    base_url="https://api.clappia.com",
+    workplace_id="your-workplace-id"
+)
+
+# Get workflow definition
+result = client.get_workflow(
+    app_id="MFX093412",
+    trigger_type="submissionCreated",
+    requesting_user_email_address="user@example.com"
+)
+print(result)
+
+# Add a workflow step
+add_result = client.add_workflow_step(
+    app_id="MFX093412",
+    trigger_type="submissionCreated",
+    node_type="Email",
+    requesting_user_email_address="user@example.com"
+)
+print(add_result)
+```
+
+### AnalyticsClient Example
+
+```python
+from clappia_api_tools.client.analytics_client import AnalyticsClient
+
+client = AnalyticsClient(
+    api_key="your-api-key",
+    base_url="https://api.clappia.com",
+    workplace_id="your-workplace-id"
+)
+
+# Add a chart
+result = client.add_chart(
+    app_id="MFX093412",
+    chart_type="Bar",
+    requesting_user_email_address="user@example.com",
+    chart_title="Sales Overview"
+)
+print(result)
+
+# Update chart configuration
+update_data = {
+    "chart_title": "Updated Sales Overview",
+    "dimensions": ["region"],
+    "metrics": ["sales_amount"]
+}
+update_result = client.update_chart(
+    app_id="MFX093412",
+    chart_index=0,
+    requesting_user_email_address="user@example.com",
+    update_data=update_data
+)
+print(update_result)
 ```
 
 ---

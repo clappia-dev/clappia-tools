@@ -1,9 +1,9 @@
 from typing import Dict, Any, List, Optional
 from .base_client import BaseClappiaClient          
-from clappia_api_tools._utils.logging_utils import get_logger
-from clappia_api_tools._models.request import GetSubmissionsRequest, GetSubmissionsAggregationRequest, CreateSubmissionRequest, EditSubmissionRequest, UpdateSubmissionStatusRequest, UpdateSubmissionOwnersRequest, GetSubmissionsInExcelRequest
-from clappia_api_tools._models.submission import SubmissionFilters, AggregationDimension, AggregationMetric
-from clappia_api_tools._models.response import SubmissionsAggregationResponse, SubmissionsResponse, SubmissionResponse, SubmissionsExcelResponse
+from clappia_api_tools.utils.logging_utils import get_logger
+from clappia_api_tools.models.request import GetSubmissionsRequest, GetSubmissionsAggregationRequest, CreateSubmissionRequest, EditSubmissionRequest, UpdateSubmissionStatusRequest, UpdateSubmissionOwnersRequest, GetSubmissionsInExcelRequest
+from clappia_api_tools.models.submission import SubmissionFilters, AggregationDimension, AggregationMetric
+from clappia_api_tools.models.response import SubmissionsAggregationResponse, SubmissionsResponse, SubmissionResponse, SubmissionsExcelResponse
 
 logger = get_logger(__name__)
 

@@ -1,10 +1,10 @@
 import json
 from .base_client import BaseClappiaClient
-from clappia_api_tools._utils.logging_utils import get_logger
+from clappia_api_tools.utils.logging_utils import get_logger
 from typing import List, Dict, Any, Optional
-from clappia_api_tools._models.request import GetAppDefinitionRequest, CreateAppRequest, AddFieldRequest, UpdateFieldRequest
-from clappia_api_tools._models.definition import AppField, AppSection
-from clappia_api_tools._models.response import AppDefinitionResponse, AppCreationResponse, FieldOperationResponse
+from clappia_api_tools.models.request import GetAppDefinitionRequest, CreateAppRequest, AddFieldRequest, UpdateFieldRequest
+from clappia_api_tools.models.definition import AppField, AppSection
+from clappia_api_tools.models.response import AppDefinitionResponse, AppCreationResponse, FieldOperationResponse
 
 logger = get_logger(__name__)
 
@@ -64,7 +64,7 @@ class AppDefinitionClient(BaseClappiaClient):
             "page_count": len(response_data.get("pageIds", [])) if response_data else 0,
             "section_count": len(response_data.get("sectionIds", [])) if response_data else 0,
             "field_count": len(response_data.get("fieldDefinitions", {})) if response_data else 0,
-            "app_name": response_data.get("metadata", {}).get("sectionName", "Unknown") if response_data else "Unknown",
+            "app_name": response_data.get("metadata", {}).get("name", "Unknown") if response_data else "Unknown",
             "description": response_data.get("metadata", {}).get("description", "") if response_data else "",
             "field_definitions": response_data.get("fieldDefinitions", {}) if response_data else {}
         }
@@ -231,7 +231,7 @@ class AppDefinitionClient(BaseClappiaClient):
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "sectionIndex": request.section_index,
             "fieldIndex": request.field_index,
-            "fieldType": request.field_type,
+            "fieldType": request.field_type.value,
         }
         
         if request.description is not None:
