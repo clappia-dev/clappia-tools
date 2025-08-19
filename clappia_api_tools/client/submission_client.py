@@ -63,7 +63,6 @@ class SubmissionClient(BaseClappiaClient):
             return SubmissionsResponse(success=False, message=env_error, app_id=app_id)
 
         payload = {
-            "workplaceId": self.api_utils.workplace_id,
             "appId": request.app_id,
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "pageSize": request.page_size,
@@ -140,7 +139,6 @@ class SubmissionClient(BaseClappiaClient):
             )
 
         payload = {
-            "workplaceId": self.api_utils.workplace_id,
             "appId": request.app_id,
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "forward": request.forward,
@@ -215,7 +213,6 @@ class SubmissionClient(BaseClappiaClient):
             )
 
         payload = {
-            "workplaceId": self.api_utils.workplace_id,
             "appId": request.app_id,
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "data": request.data,
@@ -290,7 +287,6 @@ class SubmissionClient(BaseClappiaClient):
             )
 
         payload = {
-            "workplaceId": self.api_utils.workplace_id,
             "appId": request.app_id,
             "submissionId": request.submission_id,
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
@@ -365,7 +361,6 @@ class SubmissionClient(BaseClappiaClient):
         }
 
         payload = {
-            "workplaceId": self.api_utils.workplace_id,
             "appId": request.app_id,
             "submissionId": request.submission_id,
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
@@ -433,7 +428,6 @@ class SubmissionClient(BaseClappiaClient):
             )
 
         payload = {
-            "workplaceId": self.api_utils.workplace_id,
             "appId": request.app_id,
             "submissionId": request.submission_id,
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
@@ -493,7 +487,6 @@ class SubmissionClient(BaseClappiaClient):
             )
 
         payload = {
-            "workplaceId": self.api_utils.workplace_id,
             "appId": request.app_id,
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "format": request.format,
@@ -560,7 +553,6 @@ class SubmissionClient(BaseClappiaClient):
             )
 
         payload = {
-            "workplaceId": self.api_utils.workplace_id,
             "appId": request.app_id,
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
         }

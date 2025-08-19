@@ -20,7 +20,6 @@ Instantiate `SubmissionClient` directly with the required parameters:
 client = SubmissionClient(
     api_key="your-api-key",
     base_url="https://api.clappia.com",
-    workplace_id="your-workplace-id"
 )
 ```
 
@@ -323,7 +322,6 @@ from clappia_api_tools.enums.enums import FilterOperator, FilterKeyType, Aggrega
 client = SubmissionClient(
     api_key="your-api-key",
     base_url="https://api.clappia.com",
-    workplace_id="your-workplace-id"
 )
 
 # Create a submission

@@ -7,7 +7,6 @@ def dummy_app_definition_client():
     return AppDefinitionClient(
         api_key="dummy_api_key",
         base_url="https://api.clappia.com",
-        workplace_id="dummy_workplace_id",
         timeout=30,
     )
 
@@ -16,7 +15,6 @@ def dummy_submission_client():
     return SubmissionClient(
         api_key="dummy_api_key",
         base_url="https://api.clappia.com",
-        workplace_id="dummy_workplace_id",
         timeout=30,
     )
 
@@ -52,7 +50,6 @@ class TestDefinitionToolsIntegration:
             endpoint="appdefinitionv2/getAppDefinition",
             params={
                 "appId": "MFX093412",
-                "workplaceId": "dummy_workplace_id",
                 "language": "en",
                 "stripHtml": "true",
                 "includeTags": "true",
@@ -91,7 +88,6 @@ class TestDefinitionToolsIntegration:
             endpoint="appdefinitionv2/getAppDefinition",
             params={
                 "appId": "MFX093412",
-                "workplaceId": "dummy_workplace_id",
                 "language": "es",
                 "stripHtml": "true",
                 "includeTags": "true",
@@ -131,7 +127,6 @@ class TestDefinitionToolsIntegration:
             endpoint="appdefinitionv2/getAppDefinition",
             params={
                 "appId": "MFX093412",
-                "workplaceId": "dummy_workplace_id",
                 "language": "fr",
                 "stripHtml": "false",
                 "includeTags": "false",

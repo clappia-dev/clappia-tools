@@ -18,3 +18,7 @@ class ChartDefinition(BaseModel):
     configuration: Optional[Dict[str, Any]] = Field(
         None, description="Chart configuration"
     )
+
+class GetAppChartsResponse(BaseResponse):
+    app_id: str = Field(description="App ID")
+    operation: str = Field(default="get", description="Type of operation performed")

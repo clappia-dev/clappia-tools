@@ -2,6 +2,8 @@ from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field, EmailStr, field_validator, ValidationInfo
 import re
 from ...enums import ChartType
+
+
 class BaseAnalyticsRequest(BaseModel):
     """Base class for analytics requests with common validation"""
 
@@ -15,6 +17,7 @@ class BaseAnalyticsRequest(BaseModel):
         if not re.match(r"^[A-Z0-9]+$", v.strip()):
             raise ValueError("App ID must contain only uppercase letters and numbers")
         return v.strip()
+
 
 class AddChartRequest(BaseAnalyticsRequest):
     """Request model for adding a chart"""
@@ -102,3 +105,7 @@ class ReorderChartRequest(BaseAnalyticsRequest):
         if "source_index" in info.data and v == info.data["source_index"]:
             raise ValueError("Source and target chart indices cannot be the same")
         return v
+
+class GetAppChartsRequest(BaseAnalyticsRequest):
+    """Request model for getting charts definition"""
+    pass

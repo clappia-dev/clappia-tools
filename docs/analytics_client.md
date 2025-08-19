@@ -19,7 +19,6 @@ from clappia_api_tools.client.analytics_client import AnalyticsClient
 client = AnalyticsClient(
     api_key="your-api-key",
     base_url="https://api.clappia.com",
-    workplace_id="your-workplace-id"
 )
 ```
 
@@ -127,8 +126,8 @@ Move a chart to a different position within the app.
 ```python
 result = client.reorder_chart(
     app_id="MFX093412",
-    source_chart_index=0,
-    target_chart_index=2,
+    source_index=0,
+    target_index=2,
     requesting_user_email_address="user@example.com"
 )
 
@@ -141,8 +140,8 @@ else:
 **Parameters:**
 
 -  `app_id` (str): App Id
--  `source_chart_index` (int): Current index of the chart to move
--  `target_chart_index` (int): New index where to move the chart
+-  `source_index` (int): Current index of the chart to move
+-  `target_index` (int): New index where to move the chart
 -  `requesting_user_email_address` (str): Email of the requesting user
 
 ## Response Models
@@ -209,7 +208,6 @@ from clappia_api_tools.client.analytics_client import AnalyticsClient
 client = AnalyticsClient(
     api_key="your-api-key",
     base_url="https://api.clappia.com",
-    workplace_id="your-workplace-id"
 )
 
 # Add a bar chart
@@ -255,8 +253,8 @@ if add_result.success:
             # Reorder charts
             reorder_result = client.reorder_chart(
                 app_id="MFX093412",
-                source_chart_index=1,
-                target_chart_index=0,
+                source_index=1,
+                target_index=0,
                 requesting_user_email_address="admin@company.com"
             )
 

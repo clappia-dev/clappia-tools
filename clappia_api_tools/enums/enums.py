@@ -141,12 +141,12 @@ class ChartType(Enum):
 
 
 class WorkplaceUserRole(Enum):
-    ADMIN = 'Workplace Manager'
-    DEVELOPER = 'App Builder'
-    USER = 'User'
+    ADMIN = "Workplace Manager"
+    DEVELOPER = "App Builder"
+    USER = "User"
 
 
 class AppUserRole(Enum):
-    ADMIN = 'Admin'
-    DEVELOPER = 'Developer'
-    USER = 'User'
+    ADMIN = "Admin"
+    DEVELOPER = "Developer"
+    USER = "User"

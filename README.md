@@ -64,7 +64,6 @@ You must provide your Clappia API credentials and workspace information directly
 
 -  `api_key`: Your Clappia API key
 -  `base_url`: The base URL for the Clappia API (e.g., `https://api.clappia.com`)
--  `workplace_id`: Your Clappia workplace ID
 
 ---
 
@@ -78,7 +77,6 @@ from clappia_api_tools.client.submission_client import SubmissionClient
 client = SubmissionClient(
     api_key="your-api-key",
     base_url="https://api.clappia.com",
-    workplace_id="your-workplace-id"
 )
 
 # Create a submission
@@ -98,7 +96,6 @@ from clappia_api_tools.client.app_definition_client import AppDefinitionClient
 client = AppDefinitionClient(
     api_key="your-api-key",
     base_url="https://api.clappia.com",
-    workplace_id="your-workplace-id"
 )
 
 # Get app definition
@@ -114,7 +111,6 @@ from clappia_api_tools.client.workflow_definition_client import WorkflowDefiniti
 client = WorkflowDefinitionClient(
     api_key="your-api-key",
     base_url="https://api.clappia.com",
-    workplace_id="your-workplace-id"
 )
 
 # Get workflow definition
@@ -143,7 +139,6 @@ from clappia_api_tools.client.analytics_client import AnalyticsClient
 client = AnalyticsClient(
     api_key="your-api-key",
     base_url="https://api.clappia.com",
-    workplace_id="your-workplace-id"
 )
 
 # Add a chart

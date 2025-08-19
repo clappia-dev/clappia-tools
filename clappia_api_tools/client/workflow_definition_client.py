@@ -21,28 +21,22 @@ class WorkflowDefinitionClient(BaseClappiaClient):
     updating workflow steps, and reordering workflow steps.
     """
 
-    def get_workflow(
-        self, app_id: str, trigger_type: str, requesting_user_email_address: str
-    ) -> WorkflowResponse:
+    def get_workflow(self, app_id: str, trigger_type: str) -> WorkflowResponse:
         try:
             request = GetWorkflowRequest(
                 app_id=app_id,
-                workplace_id=self.workplace_id,
-                requesting_user_email_address=requesting_user_email_address,
                 trigger_type=trigger_type,
             )
         except Exception as e:
-            return WorkflowResponse(success=False, message=str(e), app_id=app_id)
+            return WorkflowResponse(success=False, message=str(e), app_id=app_id, operation="get_workflow")
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return WorkflowResponse(success=False, message=env_error, app_id=app_id)
+            return WorkflowResponse(success=False, message=env_error, app_id=app_id, operation="get_workflow")
 
         params = {
             "appId": request.app_id,
-            "workplaceId": request.workplace_id,
             "triggerType": request.trigger_type.value,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
         }
 
         logger.info(
@@ -55,13 +49,14 @@ class WorkflowDefinitionClient(BaseClappiaClient):
 
         if not success:
             logger.error(f"Error: {error_message}")
-            return WorkflowResponse(success=False, message=error_message, app_id=app_id)
+            return WorkflowResponse(success=False, message=error_message, app_id=app_id, operation="get_workflow")
 
         return WorkflowResponse(
             success=True,
             message="Successfully retrieved workflow definition",
             app_id=app_id,
             data=response_data,
+            operation="get_workflow",
         )
 
     def add_workflow_step(
@@ -69,14 +64,11 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         app_id: str,
         trigger_type: str,
         node_type: str,
-        requesting_user_email_address: str,
         parent_variable_name: str = "Start",
     ) -> WorkflowStepResponse:
         try:
             request = AddWorkflowStepRequest(
                 app_id=app_id,
-                workplace_id=self.workplace_id,
-                requesting_user_email_address=requesting_user_email_address,
                 trigger_type=trigger_type,
                 node_type=node_type,
                 parent_variable_name=parent_variable_name,
@@ -102,11 +94,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "workplaceId": request.workplace_id,
             "triggerType": request.trigger_type.value,
             "nodeType": request.node_type.value,
             "parentVariableName": request.parent_variable_name,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
         }
 
         logger.info(
@@ -141,13 +131,10 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         app_id: str,
         trigger_type: str,
         step_variable_name: str,
-        requesting_user_email_address: str,
     ) -> WorkflowStepResponse:
         try:
             request = RemoveWorkflowStepRequest(
                 app_id=app_id,
-                workplace_id=self.workplace_id,
-                requesting_user_email_address=requesting_user_email_address,
                 trigger_type=trigger_type,
                 step_variable_name=step_variable_name,
                 delete_type="node",
@@ -173,11 +160,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "workplaceId": request.workplace_id,
             "triggerType": request.trigger_type.value,
             "stepVariableName": request.step_variable_name,
             "deleteType": request.delete_type,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
         }
 
         logger.info(
@@ -215,14 +200,11 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         app_id: str,
         trigger_type: str,
         step_variable_name: str,
-        requesting_user_email_address: str,
         update_data: Dict[str, Any],
     ) -> WorkflowStepResponse:
         try:
             request = UpdateWorkflowStepRequest(
                 app_id=app_id,
-                workplace_id=self.workplace_id,
-                requesting_user_email_address=requesting_user_email_address,
                 trigger_type=trigger_type,
                 step_variable_name=step_variable_name,
                 **update_data,
@@ -248,10 +230,8 @@ class WorkflowDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "workplaceId": request.workplace_id,
             "triggerType": request.trigger_type.value,
             "stepVariableName": request.step_variable_name,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
             **update_data,
         }
 
@@ -291,13 +271,10 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         trigger_type: str,
         step_variable_name: str,
         parent_variable_name: str,
-        requesting_user_email_address: str,
     ) -> WorkflowStepResponse:
         try:
             request = ReorderWorkflowStepRequest(
                 app_id=app_id,
-                workplace_id=self.workplace_id,
-                requesting_user_email_address=requesting_user_email_address,
                 trigger_type=trigger_type,
                 step_variable_name=step_variable_name,
                 parent_variable_name=parent_variable_name,
@@ -323,11 +300,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "workplaceId": request.workplace_id,
             "triggerType": request.trigger_type.value,
             "stepVariableName": request.step_variable_name,
             "parentVariableName": request.parent_variable_name,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
         }
 
         logger.info(

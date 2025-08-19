@@ -20,7 +20,6 @@ from clappia_api_tools.client.workflow_definition_client import WorkflowDefiniti
 client = WorkflowDefinitionClient(
     api_key="your-api-key",
     base_url="https://api.clappia.com",
-    workplace_id="your-workplace-id"
 )
 ```
 
@@ -238,7 +237,6 @@ from clappia_api_tools.client.workflow_definition_client import WorkflowDefiniti
 client = WorkflowDefinitionClient(
     api_key="your-api-key",
     base_url="https://api.clappia.com",
-    workplace_id="your-workplace-id"
 )
 
 # Get existing workflow

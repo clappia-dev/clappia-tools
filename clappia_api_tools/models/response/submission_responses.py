@@ -25,7 +25,8 @@ class SubmissionsExcelResponse(BaseResponse):
     requesting_user_email_address: Optional[str] = Field(
         None, description="Email address where file was sent"
     )
-    
+
+
 class SubmissionsCountResponse(BaseResponse):
     app_id: str = Field(None, description="App ID")
     total_count: int = Field(None, description="Total number of submissions")

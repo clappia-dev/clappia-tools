@@ -14,7 +14,6 @@ def dummy_submission_client():
     return SubmissionClient(
         api_key="dummy_api_key",
         base_url="https://api.clappia.com",
-        workplace_id="dummy_workplace_id",
         timeout=30,
     )
 

@@ -6,8 +6,9 @@ from clappia_api_tools.models.request import (
     RemoveChartRequest,
     UpdateChartRequest,
     ReorderChartRequest,
+    GetAppChartsRequest
 )
-from clappia_api_tools.models.response import ChartResponse
+from clappia_api_tools.models.response import ChartResponse, GetAppChartsResponse, ChartDefinition
 
 logger = get_logger(__name__)
 
@@ -29,7 +30,6 @@ class AnalyticsClient(BaseClappiaClient):
         try:
             request = AddChartRequest(
                 app_id=app_id,
-                workplace_id=self.workplace_id,
                 chart_type=chart_type,
                 chart_index=chart_index,
                 chart_title=chart_title,
@@ -47,7 +47,6 @@ class AnalyticsClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "workplaceId": request.workplace_id,
             "chartType": request.chart_type.value,
             "chartIndex": request.chart_index,
         }
@@ -76,13 +75,10 @@ class AnalyticsClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def remove_chart(
-        self, app_id: str, chart_index: int
-    ) -> ChartResponse:
+    def remove_chart(self, app_id: str, chart_index: int) -> ChartResponse:
         try:
             request = RemoveChartRequest(
                 app_id=app_id,
-                workplace_id=self.workplace_id,
                 chart_index=chart_index,
             )
         except Exception as e:
@@ -98,7 +94,6 @@ class AnalyticsClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "workplaceId": request.workplace_id,
             "chartIndex": request.chart_index,
         }
 
@@ -132,7 +127,6 @@ class AnalyticsClient(BaseClappiaClient):
         try:
             request = UpdateChartRequest(
                 app_id=app_id,
-                workplace_id=self.workplace_id,
                 chart_index=chart_index,
                 **update_data,
             )
@@ -149,7 +143,6 @@ class AnalyticsClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "workplaceId": request.workplace_id,
             "chartIndex": request.chart_index,
             **update_data,
         }
@@ -178,15 +171,14 @@ class AnalyticsClient(BaseClappiaClient):
     def reorder_chart(
         self,
         app_id: str,
-        source_chart_index: int,
-        target_chart_index: int,
+        source_index: int,
+        target_index: int,
     ) -> ChartResponse:
         try:
             request = ReorderChartRequest(
                 app_id=app_id,
-                workplace_id=self.workplace_id,
-                source_index=source_chart_index,
-                target_index=target_chart_index,
+                source_index=source_index,
+                target_index=target_index,
             )
         except Exception as e:
             return ChartResponse(
@@ -201,13 +193,12 @@ class AnalyticsClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "workplaceId": request.workplace_id,
             "sourceIndex": request.source_index,
             "targetIndex": request.target_index,
         }
 
         logger.info(
-            f"Reordering chart for app_id: {app_id} from index {source_chart_index} to {target_chart_index}"
+            f"Reordering chart for app_id: {app_id} from index {source_index} to {target_index}"
         )
 
         success, error_message, response_data = self.api_utils.make_request(
@@ -224,7 +215,51 @@ class AnalyticsClient(BaseClappiaClient):
             success=True,
             message="Successfully reordered chart",
             app_id=app_id,
-            chart_index=source_chart_index,
+            chart_index=source_index,
             operation="reorder",
+            data=response_data,
+        )
+    
+    def get_charts(self, app_id: str) -> GetAppChartsResponse:
+        """Get all charts for a specific app.
+
+        Args:
+            app_id: The ID of the app to get charts for
+
+        Returns:
+            GetAppChartsResponse: Response containing the list of charts
+        """
+        try:
+            request = GetAppChartsRequest(app_id=app_id)
+        except Exception as e:
+            return GetAppChartsResponse(
+                success=False, message=str(e), app_id=app_id, operation="get"
+            )
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return GetAppChartsResponse(
+                success=False, message=env_error, app_id=app_id, operation="get"
+            )
+        params = {
+            "appId": request.app_id,
+        }
+
+        logger.info(f"Getting charts for app_id: {app_id}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="GET", endpoint="analytics/getAppCharts", params=params
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return GetAppChartsResponse(
+                success=False, message=error_message, app_id=app_id, operation="get"
+            )
+        return GetAppChartsResponse(
+            success=True,
+            message="Successfully retrieved charts",
+            app_id=app_id,
+            operation="get_charts",
             data=response_data,
         )

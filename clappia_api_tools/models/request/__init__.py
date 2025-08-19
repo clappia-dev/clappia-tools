@@ -11,6 +11,9 @@ from .workplace_requests import (
     UpdateWorkplaceUserRoleRequest,
     UpdateWorkplaceUserGroupsRequest,
     AddUserToAppRequest,
+    GetWorkplaceAppsRequest,
+    GetWorkplaceUserAppsRequest,
+    GetWorkplaceUsersRequest,
 )
 from .submission_requests import (
     GetSubmissionsRequest,
@@ -34,6 +37,7 @@ from .analytics_requests import (
     RemoveChartRequest,
     UpdateChartRequest,
     ReorderChartRequest,
+    GetAppChartsRequest
 )
 
 __all__ = [
@@ -47,6 +51,8 @@ __all__ = [
     "UpdateWorkplaceUserRoleRequest",
     "UpdateWorkplaceUserGroupsRequest",
     "AddUserToAppRequest",
+    "GetWorkplaceAppsRequest",
+    "GetWorkplaceUserAppsRequest",
     "GetSubmissionsRequest",
     "GetSubmissionsAggregationRequest",
     "CreateSubmissionRequest",
@@ -64,4 +70,5 @@ __all__ = [
     "RemoveChartRequest",
     "UpdateChartRequest",
     "ReorderChartRequest",
+    "GetAppChartsRequest"
 ]

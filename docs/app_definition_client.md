@@ -20,7 +20,6 @@ Instantiate `AppDefinitionClient` directly with the required parameters:
 client = AppDefinitionClient(
     api_key="your-api-key",
     base_url="https://api.clappia.com",
-    workplace_id="your-workplace-id"
 )
 ```
 
@@ -157,7 +156,6 @@ from clappia_api_tools.client.app_definition_client import AppDefinitionClient
 client = AppDefinitionClient(
     api_key="your-api-key",
     base_url="https://api.clappia.com",
-    workplace_id="your-workplace-id"
 )
 
 # Get app definition

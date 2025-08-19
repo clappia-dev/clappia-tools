@@ -13,7 +13,6 @@ class BaseClappiaClient:
         self,
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
-        workplace_id: Optional[str] = None,
         timeout: int = 30,
     ):
         """Initialize base Clappia client.
@@ -21,11 +20,6 @@ class BaseClappiaClient:
         Args:
             api_key: Clappia API key.
             base_url: API base URL.
-            workplace_id: Workspace ID.
             timeout: Request timeout in seconds.
         """
-        self.api_key = api_key
-        self.base_url = base_url
-        self.workplace_id = workplace_id
-        self.timeout = timeout
-        self.api_utils = ClappiaAPIUtils(api_key, base_url, workplace_id, timeout)
+        self.api_utils = ClappiaAPIUtils(api_key, base_url, timeout)

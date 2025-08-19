@@ -12,7 +12,7 @@ class TestBaseClappiaClient:
         """Test BaseClappiaClient initialization with default parameters"""
         client = BaseClappiaClient()
         assert client.api_utils is not None
-        mock_api_utils.assert_called_once_with(None, None, None, 30)
+        mock_api_utils.assert_called_once_with(None, None, 30)
 
     @patch("clappia_api_tools.client.base_client.ClappiaAPIUtils")
     def test_init_with_custom_params(self, mock_api_utils):
@@ -20,13 +20,10 @@ class TestBaseClappiaClient:
         client = BaseClappiaClient(
             api_key="test_key",
             base_url="https://test.com",
-            workplace_id="TEST123",
             timeout=60,
         )
         assert client.api_utils is not None
-        mock_api_utils.assert_called_once_with(
-            "test_key", "https://test.com", "TEST123", 60
-        )
+        mock_api_utils.assert_called_once_with("test_key", "https://test.com", 60)
 
 
 class TestSubmissionClient:
@@ -80,7 +77,6 @@ class TestSubmissionClient:
         client = SubmissionClient(
             api_key="test_key",
             base_url="https://test.com",
-            workplace_id="TEST123",
             timeout=60,
         )
         result = client.create_submission(
@@ -101,7 +97,6 @@ class TestSubmissionClient:
         client = SubmissionClient(
             api_key="test_key",
             base_url="https://test.com",
-            workplace_id="TEST123",
             timeout=60,
         )
         result = client.create_submission(
@@ -188,7 +183,6 @@ class TestAppDefinitionClient:
         client = AppDefinitionClient(
             api_key="test_key",
             base_url="https://test.com",
-            workplace_id="TEST123",
             timeout=60,
         )
         result = client.add_field(

@@ -50,7 +50,6 @@ class AppDefinitionClient(BaseClappiaClient):
 
         params = {
             "appId": request.app_id,
-            "workplaceId": self.api_utils.workplace_id,
             "language": request.language,
             "stripHtml": str(request.strip_html).lower(),
             "includeTags": str(request.include_tags).lower(),
@@ -149,7 +148,6 @@ class AppDefinitionClient(BaseClappiaClient):
         sections_for_api = [section.to_dict() for section in request.sections]
 
         payload = {
-            "workplaceId": self.api_utils.workplace_id,
             "appName": request.app_name.strip(),
             "requestingUserEmailAddress": str(
                 request.requesting_user_email_address
@@ -264,7 +262,6 @@ class AppDefinitionClient(BaseClappiaClient):
             )
 
         payload = {
-            "workplaceId": self.api_utils.workplace_id,
             "appId": request.app_id,
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "sectionIndex": request.section_index,
@@ -434,7 +431,6 @@ class AppDefinitionClient(BaseClappiaClient):
             )
 
         payload = {
-            "workplaceId": self.api_utils.workplace_id,
             "appId": request.app_id,
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "fieldName": request.field_name,

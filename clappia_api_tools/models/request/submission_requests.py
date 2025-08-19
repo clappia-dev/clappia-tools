@@ -9,12 +9,13 @@ from ..submission import (
 )
 from ...enums import ExcelFormat
 
+
 class BaseSubmissionRequest(BaseModel):
     app_id: str = Field(description="App Id")
     requesting_user_email_address: EmailStr = Field(
         description="Email of requesting user"
     )
-    
+
     @field_validator("app_id")
     def validate_app_id(cls, v: str) -> str:
         if not v or not v.strip():
@@ -60,7 +61,8 @@ class CreateSubmissionRequest(BaseSubmissionRequest):
     data: Dict[str, Any] = Field(
         description="Submission data, in the format of a dictionary. Example {'employee_name': 'Jane Doe', 'department': 'HR', 'salary': 60000, 'start_date': '10-02-2024', 'location':'23.456789, 45.678901', 'image_field_name': [{\"s3Path\": {\"bucket\": \"my-files-bucket\", \"key\": \"images/photo.jpg\", \"makePublic\": false}}]}"
     )
-        
+
+
 class EditSubmissionRequest(BaseSubmissionRequest):
     submission_id: str = Field(description="Submission Id to edit")
     data: Dict[str, Any] = Field(
@@ -124,7 +126,6 @@ class GetSubmissionsInExcelRequest(BaseSubmissionRequest):
     )
     format: ExcelFormat = Field(default=ExcelFormat.EXCEL, description="Export format")
 
+
 class GetSubmissionsCountRequest(BaseSubmissionRequest):
     filters: Optional[SubmissionQuery] = Field(None, description="Optional filters")
-
-

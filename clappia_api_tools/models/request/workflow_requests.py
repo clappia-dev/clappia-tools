@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field, EmailStr, field_validator, ValidationInfo
 import re
 from ...enums import TriggerType, NodeType
 
+
 class BaseWorkflowRequest(BaseModel):
     """Base class for workflow requests with common validation"""
 
@@ -27,6 +28,7 @@ class BaseWorkflowRequest(BaseModel):
                 f"Parameter triggerType is not valid, valid values are {allowed_values}"
             )
         return v
+
 
 class AddWorkflowStepRequest(BaseWorkflowRequest):
     """Request model for adding a workflow step"""
@@ -102,8 +104,8 @@ class ReorderWorkflowStepRequest(BaseWorkflowRequest):
     step_variable_name: str = Field(
         description="Variable name of the workflow step to move"
     )
-    parent_variable_name: str = Field(
-        description="Variable name of the new parent workflow step"
+    parent_variable_name: Optional[str] = Field(
+        None, description="Variable name of the new parent workflow step"
     )
 
     @field_validator("step_variable_name")
@@ -112,14 +114,6 @@ class ReorderWorkflowStepRequest(BaseWorkflowRequest):
         if not v or not v.strip():
             raise ValueError("Parameter stepVariableName is required")
         return v.strip()
-
-    @field_validator("parent_variable_name")
-    @classmethod
-    def validate_parent_variable_name(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Parameter parentVariableName is required")
-        return v.strip()
-
 
 class GetWorkflowRequest(BaseWorkflowRequest):
     """Request model for getting workflow information"""

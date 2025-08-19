@@ -14,7 +14,6 @@ class ClappiaAPIUtils:
         self,
         api_key: str,
         base_url: str,
-        workplace_id: str,
         timeout: int = 30,
     ):
         """
@@ -23,12 +22,10 @@ class ClappiaAPIUtils:
         Args:
             api_key: Clappia API key
             base_url: API base URL
-            workplace_id: Workplace ID
             timeout: Request timeout in seconds
         """
         self.api_key = api_key
         self.base_url = base_url
-        self.workplace_id = workplace_id
         self.timeout = timeout
 
     def validate_environment(self) -> Tuple[bool, str]:
@@ -43,11 +40,6 @@ class ClappiaAPIUtils:
                 False,
                 "Base URL is not configured",
             )
-        if not self.workplace_id:
-            return (
-                False,
-                "Workplace ID is not configured",
-            )
         return True, ""
 
     def get_headers(self) -> Dict[str, str]:
@@ -55,7 +47,6 @@ class ClappiaAPIUtils:
         return {
             "x-api-key": self.api_key,
             "Content-Type": "application/json",
-            "workplaceId": self.workplace_id,
         }
 
     def handle_response(
