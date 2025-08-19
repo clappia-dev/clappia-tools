@@ -7,14 +7,14 @@ from clappia_api_tools.client.app_definition_client import AppDefinitionClient
 class TestBaseClappiaClient:
     """Test cases for BaseClappiaClient"""
 
-    @patch('clappia_api_tools.client.base_client.ClappiaAPIUtils')
+    @patch("clappia_api_tools.client.base_client.ClappiaAPIUtils")
     def test_init_with_defaults(self, mock_api_utils):
         """Test BaseClappiaClient initialization with default parameters"""
         client = BaseClappiaClient()
         assert client.api_utils is not None
         mock_api_utils.assert_called_once_with(None, None, None, 30)
 
-    @patch('clappia_api_tools.client.base_client.ClappiaAPIUtils')
+    @patch("clappia_api_tools.client.base_client.ClappiaAPIUtils")
     def test_init_with_custom_params(self, mock_api_utils):
         """Test BaseClappiaClient initialization with custom parameters"""
         client = BaseClappiaClient(
@@ -24,7 +24,9 @@ class TestBaseClappiaClient:
             timeout=60,
         )
         assert client.api_utils is not None
-        mock_api_utils.assert_called_once_with("test_key", "https://test.com", "TEST123", 60)
+        mock_api_utils.assert_called_once_with(
+            "test_key", "https://test.com", "TEST123", 60
+        )
 
 
 class TestSubmissionClient:
@@ -35,7 +37,9 @@ class TestSubmissionClient:
         client = SubmissionClient()
         result = client.create_submission("invalid-id", {}, "test@example.com")
         assert result.success is False
-        assert "App ID must contain only uppercase letters and numbers" in result.message
+        assert (
+            "App ID must contain only uppercase letters and numbers" in result.message
+        )
 
     def test_create_submission_empty_email(self):
         """Test create_submission with empty email"""
@@ -77,7 +81,7 @@ class TestSubmissionClient:
             api_key="test_key",
             base_url="https://test.com",
             workplace_id="TEST123",
-            timeout=60
+            timeout=60,
         )
         result = client.create_submission(
             "MFX093412", {"name": "Test User"}, "test@example.com"
@@ -98,7 +102,7 @@ class TestSubmissionClient:
             api_key="test_key",
             base_url="https://test.com",
             workplace_id="TEST123",
-            timeout=60
+            timeout=60,
         )
         result = client.create_submission(
             "MFX093412", {"name": "Test User"}, "test@example.com"
@@ -114,7 +118,10 @@ class TestSubmissionClient:
             "MFX093412", "invalid-id", {"name": "Updated"}, "test@example.com"
         )
         assert result.success is False
-        assert "Submission ID must contain only uppercase letters and numbers" in result.message
+        assert (
+            "Submission ID must contain only uppercase letters and numbers"
+            in result.message
+        )
 
 
 class TestAppDefinitionClient:
@@ -125,7 +132,9 @@ class TestAppDefinitionClient:
         client = AppDefinitionClient()
         result = client.get_definition("invalid-app-id")
         assert result.success is False
-        assert "App ID must contain only uppercase letters and numbers" in result.message
+        assert (
+            "App ID must contain only uppercase letters and numbers" in result.message
+        )
 
     @patch("clappia_api_tools.utils.api_utils.ClappiaAPIUtils.make_request")
     def test_get_definition_success(self, mock_request):
@@ -137,7 +146,7 @@ class TestAppDefinitionClient:
             "pageIds": ["page1", "page2"],
             "sectionIds": ["section1"],
             "fieldDefinitions": {"field1": {}, "field2": {}},
-            "metadata": {"sectionName": "Test App", "description": "Test Description"}
+            "metadata": {"sectionName": "Test App", "description": "Test Description"},
         }
         mock_request.return_value = (True, None, mock_response)
 
@@ -170,7 +179,9 @@ class TestAppDefinitionClient:
             "invalid-id", "test@example.com", 0, 0, "singleLineText", "Test Field", True
         )
         assert result.success is False
-        assert "App ID must contain only uppercase letters and numbers" in result.message
+        assert (
+            "App ID must contain only uppercase letters and numbers" in result.message
+        )
 
     def test_add_field_unknown_field_type(self):
         """Test add_field with unknown field type"""
@@ -178,10 +189,16 @@ class TestAppDefinitionClient:
             api_key="test_key",
             base_url="https://test.com",
             workplace_id="TEST123",
-            timeout=60
+            timeout=60,
         )
         result = client.add_field(
-            "MFX093412", "test@example.com", 0, 0, "unknownFieldType", "Test Field", True
+            "MFX093412",
+            "test@example.com",
+            0,
+            0,
+            "unknownFieldType",
+            "Test Field",
+            True,
         )
         assert result.success is False
         assert "field_type" in result.message

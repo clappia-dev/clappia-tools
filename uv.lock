@@ -152,6 +152,7 @@ name = "clappia-api-tools"
 version = "1.0.1"
 source = { editable = "." }
 dependencies = [
+    { name = "phonenumbers" },
     { name = "pydantic", extra = ["email"] },
     { name = "python-dotenv" },
     { name = "requests" },
@@ -183,6 +184,7 @@ requires-dist = [
     { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.4.0" },
     { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.0.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0.0" },
+    { name = "phonenumbers", specifier = ">=9.0.12" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.0.0" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.0.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
@@ -638,6 +640,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ca/bc/f35b8446f4531a7cb215605d100cd88b7ac6f44ab3fc94870c120ab3adbf/pathspec-0.12.1.tar.gz", hash = "sha256:a482d51503a1ab33b1c67a6c3813a26953dbdc71c31dacaef9a838c4e29f5712", size = 51043, upload-time = "2023-12-10T22:30:45Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cc/20/ff623b09d963f88bfde16306a54e12ee5ea43e9b597108672ff3a408aad6/pathspec-0.12.1-py3-none-any.whl", hash = "sha256:a0d503e138a4c123b27490a4f7beda6a01c6f288df0e4a8b79c7eb0dc7b4cc08", size = 31191, upload-time = "2023-12-10T22:30:43.14Z" },
+]
+
+[[package]]
+name = "phonenumbers"
+version = "9.0.12"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9f/07/f76fb718ad78d0cd0926ef750b58928e5b13f0f94cc6c516d310f11228fb/phonenumbers-9.0.12.tar.gz", hash = "sha256:ccadff6b949494bd606836d8c9678bee5b55cb1cbad1e98bf7adae108e6fd0be", size = 2297813, upload-time = "2025-08-15T11:29:03.489Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7c/f1/e94b3504078d67d69d024ffb1798c31df9ddfb09ec2ec1680f3e7776414a/phonenumbers-9.0.12-py2.py3-none-any.whl", hash = "sha256:900633afc3e12191458d710262df5efc117838bd1e2e613b64fa254a86bb20a1", size = 2583620, upload-time = "2025-08-15T11:28:59.161Z" },
 ]
 
 [[package]]

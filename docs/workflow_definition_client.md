@@ -46,7 +46,7 @@ else:
 
 **Parameters:**
 
--  `app_id` (str): The Clappia app ID
+-  `app_id` (str): App Id
 -  `trigger_type` (str): The trigger type for the workflow
 -  `requesting_user_email_address` (str): Email of the requesting user
 
@@ -78,7 +78,7 @@ else:
 
 **Parameters:**
 
--  `app_id` (str): The Clappia app ID
+-  `app_id` (str): App Id
 -  `trigger_type` (str): The trigger type for the workflow
 -  `node_type` (str): Type of workflow node to add
 -  `requesting_user_email_address` (str): Email of the requesting user
@@ -118,7 +118,7 @@ else:
 
 **Parameters:**
 
--  `app_id` (str): The Clappia app ID
+-  `app_id` (str): App Id
 -  `trigger_type` (str): The trigger type for the workflow
 -  `step_variable_name` (str): Variable name of the workflow step to remove
 -  `requesting_user_email_address` (str): Email of the requesting user
@@ -150,7 +150,7 @@ else:
 
 **Parameters:**
 
--  `app_id` (str): The Clappia app ID
+-  `app_id` (str): App Id
 -  `trigger_type` (str): The trigger type for the workflow
 -  `step_variable_name` (str): Variable name of the workflow step to update
 -  `requesting_user_email_address` (str): Email of the requesting user
@@ -177,7 +177,7 @@ else:
 
 **Parameters:**
 
--  `app_id` (str): The Clappia app ID
+-  `app_id` (str): App Id
 -  `trigger_type` (str): The trigger type for the workflow
 -  `step_variable_name` (str): Variable name of the workflow step to move
 -  `parent_variable_name` (str): Variable name of the new parent workflow step

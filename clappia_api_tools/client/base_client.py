@@ -4,7 +4,7 @@ from clappia_api_tools.utils.api_utils import ClappiaAPIUtils
 
 class BaseClappiaClient:
     """Base client with shared functionality for all Clappia clients.
-    
+
     This class provides the common initialization and shared utilities
     that all specialized Clappia clients will inherit from.
     """

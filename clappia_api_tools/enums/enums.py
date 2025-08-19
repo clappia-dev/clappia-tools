@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class FilterOperator(Enum):
     CONTAINS = "CONTAINS"
     NOT_IN = "NOT_IN"
@@ -43,6 +44,7 @@ class SortDirection(Enum):
     ASC = "asc"
     DESC = "desc"
 
+
 class FieldType(Enum):
     SINGLE_LINE_TEXT = "singleLineText"
     MULTI_LINE_TEXT = "multiLineText"
@@ -66,10 +68,12 @@ class FieldType(Enum):
     NFC_READER = "nfcReader"
     ADDRESS = "address"
 
+
 class ImageQuality(Enum):
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
+
 
 class AllowedFileTypes(Enum):
     IMAGES_CAMERA_UPLOAD = "images_camera_upload"
@@ -77,9 +81,11 @@ class AllowedFileTypes(Enum):
     VIDEOS = "videos"
     DOCUMENTS = "documents"
 
+
 class ChipType(Enum):
     STANDARD = "standard"
     CHIPS = "chips"
+
 
 class ValidationType(Enum):
     NONE = "none"
@@ -88,14 +94,17 @@ class ValidationType(Enum):
     URL = "url"
     CUSTOM = "custom"
 
+
 class ExcelFormat(Enum):
     EXCEL = "excel"
     CSV = "csv"
+
 
 class TriggerType(Enum):
     SUBMISSION_CREATED = "newSubmission"
     SUBMISSION_EDITED = "editSubmission"
     SUBMISSION_STATUS_EDITED = "reviewSubmission"
+
 
 class NodeType(Enum):
     EMAIL = "email"
@@ -119,6 +128,7 @@ class NodeType(Enum):
     SYNC = "sync"
     MSTEAMS = "msteams"
 
+
 class ChartType(Enum):
     PIE_CHART = "pieChart"
     BAR_CHART = "barGraph"
@@ -128,3 +138,15 @@ class ChartType(Enum):
     SUMMARY_CARD = "summary"
     MAP_CHART = "maps"
     GANTT_CHART = "gantt"
+
+
+class WorkplaceUserRole(Enum):
+    ADMIN = 'Workplace Manager'
+    DEVELOPER = 'App Builder'
+    USER = 'User'
+
+
+class AppUserRole(Enum):
+    ADMIN = 'Admin'
+    DEVELOPER = 'Developer'
+    USER = 'User'

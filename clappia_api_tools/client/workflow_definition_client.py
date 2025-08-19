@@ -2,78 +2,76 @@ from typing import Dict, Any, Optional
 from .base_client import BaseClappiaClient
 from clappia_api_tools.utils.logging_utils import get_logger
 from clappia_api_tools.models.request import (
-    GetWorkflowRequest, AddWorkflowStepRequest, RemoveWorkflowStepRequest,
-    UpdateWorkflowStepRequest, ReorderWorkflowStepRequest
+    GetWorkflowRequest,
+    AddWorkflowStepRequest,
+    RemoveWorkflowStepRequest,
+    UpdateWorkflowStepRequest,
+    ReorderWorkflowStepRequest,
 )
 from clappia_api_tools.models.response import WorkflowResponse, WorkflowStepResponse
 
 logger = get_logger(__name__)
 
+
 class WorkflowDefinitionClient(BaseClappiaClient):
     """Client for managing Clappia workflow definitions.
-    
+
     This client handles retrieving and managing workflow definitions, including
     getting workflows, adding workflow steps, removing workflow steps,
     updating workflow steps, and reordering workflow steps.
     """
-    
-    def get_workflow(self, app_id: str, trigger_type: str, 
-                     requesting_user_email_address: str) -> WorkflowResponse:
+
+    def get_workflow(
+        self, app_id: str, trigger_type: str, requesting_user_email_address: str
+    ) -> WorkflowResponse:
         try:
             request = GetWorkflowRequest(
                 app_id=app_id,
                 workplace_id=self.workplace_id,
                 requesting_user_email_address=requesting_user_email_address,
-                trigger_type=trigger_type
+                trigger_type=trigger_type,
             )
         except Exception as e:
-            return WorkflowResponse(
-                success=False,
-                message=str(e),
-                app_id=app_id
-            )
+            return WorkflowResponse(success=False, message=str(e), app_id=app_id)
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return WorkflowResponse(
-                success=False,
-                message=env_error,
-                app_id=app_id
-            )
+            return WorkflowResponse(success=False, message=env_error, app_id=app_id)
 
         params = {
             "appId": request.app_id,
             "workplaceId": request.workplace_id,
             "triggerType": request.trigger_type.value,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address)
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
         }
 
-        logger.info(f"Getting workflow for app_id: {app_id} with trigger_type: {trigger_type}")
+        logger.info(
+            f"Getting workflow for app_id: {app_id} with trigger_type: {trigger_type}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="GET",
-            endpoint="workflowdefinitionv2/getWorkflow",
-            params=params
+            method="GET", endpoint="workflowdefinitionv2/getWorkflow", params=params
         )
 
         if not success:
             logger.error(f"Error: {error_message}")
-            return WorkflowResponse(
-                success=False,
-                message=error_message,
-                app_id=app_id
-            )
+            return WorkflowResponse(success=False, message=error_message, app_id=app_id)
 
         return WorkflowResponse(
             success=True,
             message="Successfully retrieved workflow definition",
             app_id=app_id,
-            data=response_data
+            data=response_data,
         )
 
-    def add_workflow_step(self, app_id: str, trigger_type: str, node_type: str,
-                         requesting_user_email_address: str, 
-                         parent_variable_name: str = "Start") -> WorkflowStepResponse:
+    def add_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        node_type: str,
+        requesting_user_email_address: str,
+        parent_variable_name: str = "Start",
+    ) -> WorkflowStepResponse:
         try:
             request = AddWorkflowStepRequest(
                 app_id=app_id,
@@ -81,7 +79,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 requesting_user_email_address=requesting_user_email_address,
                 trigger_type=trigger_type,
                 node_type=node_type,
-                parent_variable_name=parent_variable_name
+                parent_variable_name=parent_variable_name,
             )
         except Exception as e:
             return WorkflowStepResponse(
@@ -89,7 +87,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=str(e),
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="add"
+                operation="add",
             )
 
         env_valid, env_error = self.api_utils.validate_environment()
@@ -99,7 +97,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=env_error,
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="add"
+                operation="add",
             )
 
         payload = {
@@ -108,15 +106,15 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             "triggerType": request.trigger_type.value,
             "nodeType": request.node_type.value,
             "parentVariableName": request.parent_variable_name,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address)
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
         }
 
-        logger.info(f"Adding workflow step for app_id: {app_id} with node_type: {node_type}")
+        logger.info(
+            f"Adding workflow step for app_id: {app_id} with node_type: {node_type}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
-            data=payload
+            method="POST", endpoint="workflowdefinitionv2/addWorkflowStep", data=payload
         )
 
         if not success:
@@ -126,7 +124,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="add"
+                operation="add",
             )
 
         return WorkflowStepResponse(
@@ -135,11 +133,16 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             app_id=app_id,
             trigger_type=trigger_type,
             operation="add",
-            data=response_data
+            data=response_data,
         )
 
-    def remove_workflow_step(self, app_id: str, trigger_type: str, step_variable_name: str,
-                           requesting_user_email_address: str) -> WorkflowStepResponse:
+    def remove_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        requesting_user_email_address: str,
+    ) -> WorkflowStepResponse:
         try:
             request = RemoveWorkflowStepRequest(
                 app_id=app_id,
@@ -147,7 +150,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 requesting_user_email_address=requesting_user_email_address,
                 trigger_type=trigger_type,
                 step_variable_name=step_variable_name,
-                delete_type="node"
+                delete_type="node",
             )
         except Exception as e:
             return WorkflowStepResponse(
@@ -155,7 +158,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=str(e),
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="remove"
+                operation="remove",
             )
 
         env_valid, env_error = self.api_utils.validate_environment()
@@ -165,7 +168,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=env_error,
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="remove"
+                operation="remove",
             )
 
         payload = {
@@ -174,15 +177,17 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             "triggerType": request.trigger_type.value,
             "stepVariableName": request.step_variable_name,
             "deleteType": request.delete_type,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address)
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
         }
 
-        logger.info(f"Removing workflow step for app_id: {app_id} with step: {step_variable_name}")
+        logger.info(
+            f"Removing workflow step for app_id: {app_id} with step: {step_variable_name}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="workflowdefinitionv2/removeWorkflowStep",
-            data=payload
+            data=payload,
         )
 
         if not success:
@@ -192,7 +197,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="remove"
+                operation="remove",
             )
 
         return WorkflowStepResponse(
@@ -202,12 +207,17 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             trigger_type=trigger_type,
             operation="remove",
             step_variable_name=step_variable_name,
-            data=response_data
+            data=response_data,
         )
 
-    def update_workflow_step(self, app_id: str, trigger_type: str, step_variable_name: str,
-                           requesting_user_email_address: str, 
-                           update_data: Dict[str, Any]) -> WorkflowStepResponse:
+    def update_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        requesting_user_email_address: str,
+        update_data: Dict[str, Any],
+    ) -> WorkflowStepResponse:
         try:
             request = UpdateWorkflowStepRequest(
                 app_id=app_id,
@@ -215,7 +225,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 requesting_user_email_address=requesting_user_email_address,
                 trigger_type=trigger_type,
                 step_variable_name=step_variable_name,
-                **update_data
+                **update_data,
             )
         except Exception as e:
             return WorkflowStepResponse(
@@ -223,7 +233,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=str(e),
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="update"
+                operation="update",
             )
 
         env_valid, env_error = self.api_utils.validate_environment()
@@ -233,7 +243,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=env_error,
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="update"
+                operation="update",
             )
 
         payload = {
@@ -242,15 +252,17 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             "triggerType": request.trigger_type.value,
             "stepVariableName": request.step_variable_name,
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
-            **update_data
+            **update_data,
         }
 
-        logger.info(f"Updating workflow step for app_id: {app_id} with step: {step_variable_name}")
+        logger.info(
+            f"Updating workflow step for app_id: {app_id} with step: {step_variable_name}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="workflowdefinitionv2/updateWorkflowStep",
-            data=payload
+            data=payload,
         )
 
         if not success:
@@ -260,7 +272,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="update"
+                operation="update",
             )
 
         return WorkflowStepResponse(
@@ -270,11 +282,17 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             trigger_type=trigger_type,
             operation="update",
             step_variable_name=step_variable_name,
-            data=response_data
+            data=response_data,
         )
 
-    def reorder_workflow_step(self, app_id: str, trigger_type: str, step_variable_name: str,
-                             parent_variable_name: str, requesting_user_email_address: str) -> WorkflowStepResponse:
+    def reorder_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        parent_variable_name: str,
+        requesting_user_email_address: str,
+    ) -> WorkflowStepResponse:
         try:
             request = ReorderWorkflowStepRequest(
                 app_id=app_id,
@@ -282,7 +300,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 requesting_user_email_address=requesting_user_email_address,
                 trigger_type=trigger_type,
                 step_variable_name=step_variable_name,
-                parent_variable_name=parent_variable_name
+                parent_variable_name=parent_variable_name,
             )
         except Exception as e:
             return WorkflowStepResponse(
@@ -290,7 +308,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=str(e),
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="reorder"
+                operation="reorder",
             )
 
         env_valid, env_error = self.api_utils.validate_environment()
@@ -300,7 +318,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=env_error,
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="reorder"
+                operation="reorder",
             )
 
         payload = {
@@ -309,15 +327,17 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             "triggerType": request.trigger_type.value,
             "stepVariableName": request.step_variable_name,
             "parentVariableName": request.parent_variable_name,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address)
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
         }
 
-        logger.info(f"Reordering workflow step for app_id: {app_id} with step: {step_variable_name}")
+        logger.info(
+            f"Reordering workflow step for app_id: {app_id} with step: {step_variable_name}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="workflowdefinitionv2/reorderWorkflowStep",
-            data=payload
+            data=payload,
         )
 
         if not success:
@@ -327,7 +347,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="reorder"
+                operation="reorder",
             )
 
         return WorkflowStepResponse(
@@ -338,5 +358,5 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             operation="reorder",
             step_variable_name=step_variable_name,
             parent_variable_name=parent_variable_name,
-            data=response_data
+            data=response_data,
         )

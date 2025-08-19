@@ -46,7 +46,7 @@ else:
 
 **Parameters:**
 
--  `app_id` (str): The Clappia app ID
+-  `app_id` (str): App Id
 -  `chart_type` (str): Type of chart to add
 -  `requesting_user_email_address` (str): Email of the requesting user
 -  `chart_index` (int, optional): Index where to add the chart
@@ -82,7 +82,7 @@ else:
 
 **Parameters:**
 
--  `app_id` (str): The Clappia app ID
+-  `app_id` (str): App Id
 -  `chart_index` (int): Index of the chart to remove
 -  `requesting_user_email_address` (str): Email of the requesting user
 
@@ -115,7 +115,7 @@ else:
 
 **Parameters:**
 
--  `app_id` (str): The Clappia app ID
+-  `app_id` (str): App Id
 -  `chart_index` (int): Index of the chart to update
 -  `requesting_user_email_address` (str): Email of the requesting user
 -  `update_data` (dict): Dictionary containing the fields to update
@@ -140,7 +140,7 @@ else:
 
 **Parameters:**
 
--  `app_id` (str): The Clappia app ID
+-  `app_id` (str): App Id
 -  `source_chart_index` (int): Current index of the chart to move
 -  `target_chart_index` (int): New index where to move the chart
 -  `requesting_user_email_address` (str): Email of the requesting user

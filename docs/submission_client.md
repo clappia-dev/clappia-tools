@@ -175,7 +175,7 @@ Exports submissions to Excel or CSV format with optional filtering and field sel
 
 **Parameters:**
 
--  `app_id` (str): The Clappia app ID
+-  `app_id` (str): App Id
 -  `requesting_user_email_address` (str): Email of the requesting user
 -  `filters` (Optional[SubmissionFilters]): Optional filters to apply to the export
 -  `field_names` (Optional[List[str]]): List of field names to include in the export

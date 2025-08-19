@@ -11,7 +11,12 @@ from .client.analytics_client import AnalyticsClient
 
 
 __version__ = "1.0.2"
-__all__ = ["AppDefinitionClient", "SubmissionClient", "WorkflowDefinitionClient", "AnalyticsClient"]
+__all__ = [
+    "AppDefinitionClient",
+    "SubmissionClient",
+    "WorkflowDefinitionClient",
+    "AnalyticsClient",
+]
 
 
 def __dir__():
