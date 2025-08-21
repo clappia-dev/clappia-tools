@@ -3,6 +3,12 @@ from .app_definition_requests import (
     CreateAppRequest,
     AddFieldRequest,
     UpdateFieldRequest,
+    RemovePageBreakRequest,
+    AddPageBreakRequest,
+    UpdatePageBreakRequest,
+    ReorderSectionRequest,
+    AddSectionRequest,
+    UpdateSectionRequest,
 )
 from .workplace_requests import (
     AddUserToWorkplaceRequest,
@@ -45,6 +51,10 @@ __all__ = [
     "CreateAppRequest",
     "AddFieldRequest",
     "UpdateFieldRequest",
+    "RemovePageBreakRequest",
+    "AddPageBreakRequest",
+    "UpdatePageBreakRequest",
+    "ReorderSectionRequest",
     "AddUserToWorkplaceRequest",
     "UpdateWorkplaceUserDetailsRequest",
     "UpdateWorkplaceUserAttributesRequest",
@@ -70,5 +80,9 @@ __all__ = [
     "RemoveChartRequest",
     "UpdateChartRequest",
     "ReorderChartRequest",
-    "GetAppChartsRequest"
+    "GetAppChartsRequest",
+    "GetWorkplaceUsersRequest",
+    "GetWorkplaceUserAppsRequest",
+    "AddSectionRequest",
+    "UpdateSectionRequest",
 ]

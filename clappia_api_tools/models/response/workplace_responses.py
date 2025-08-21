@@ -49,7 +49,6 @@ class WorkplaceUserResponse(BaseResponse):
 
     email_address: Optional[str] = Field(None, description="Email address of the user")
     phone_number: Optional[str] = Field(None, description="Phone number of the user")
-    operation: Optional[str] = Field(None, description="Type of operation performed")
 
 
 class WorkplaceUserDetailsResponse(BaseResponse):
@@ -57,7 +56,6 @@ class WorkplaceUserDetailsResponse(BaseResponse):
 
     email_address: Optional[str] = Field(None, description="Email address of the user")
     phone_number: Optional[str] = Field(None, description="Phone number of the user")
-    operation: Optional[str] = Field(None, description="Type of operation performed")
     updated_details: Optional[Dict[str, Any]] = Field(
         None, description="Updated user details"
     )
@@ -68,7 +66,6 @@ class WorkplaceUserAttributesResponse(BaseResponse):
 
     email_address: Optional[str] = Field(None, description="Email address of the user")
     phone_number: Optional[str] = Field(None, description="Phone number of the user")
-    operation: Optional[str] = Field(None, description="Type of operation performed")
     attributes: Optional[Dict[str, str]] = Field(None, description="User attributes")
 
 
@@ -77,7 +74,6 @@ class WorkplaceUserRoleResponse(BaseResponse):
 
     email_address: Optional[str] = Field(None, description="Email address of the user")
     phone_number: Optional[str] = Field(None, description="Phone number of the user")
-    operation: Optional[str] = Field(None, description="Type of operation performed")
     role: Optional[str] = Field(None, description="User role")
 
 
@@ -86,7 +82,6 @@ class WorkplaceUserGroupsResponse(BaseResponse):
 
     email_address: Optional[str] = Field(None, description="Email address of the user")
     phone_number: Optional[str] = Field(None, description="Phone number of the user")
-    operation: Optional[str] = Field(None, description="Type of operation performed")
     group_names: Optional[List[str]] = Field(None, description="Group names")
 
 
@@ -96,14 +91,13 @@ class AppUserResponse(BaseResponse):
     email_address: Optional[str] = Field(None, description="Email address of the user")
     phone_number: Optional[str] = Field(None, description="Phone number of the user")
     app_id: Optional[str] = Field(None, description="App ID")
-    operation: Optional[str] = Field(None, description="Type of operation performed")
     permissions: Optional[Dict[str, bool]] = Field(None, description="User permissions")
 
 
 class WorkplaceAppResponse(BaseResponse):
     """Response model for workplace app operations"""
+    pass 
 
-    operation: Optional[str] = Field(None, description="Type of operation performed")
 
 
 class WorkplaceUserAppsResponse(BaseResponse):
@@ -111,12 +105,10 @@ class WorkplaceUserAppsResponse(BaseResponse):
 
     email_address: Optional[str] = Field(None, description="Email address of the user")
     phone_number: Optional[str] = Field(None, description="Phone number of the user")
-    operation: Optional[str] = Field(None, description="Type of operation performed")
 
 
 class WorkplaceUsersResponse(BaseResponse):
     """Response model for workplace users operations"""
 
     users: List[WorkplaceUser] = Field(description="List of users")
-    operation: Optional[str] = Field(None, description="Type of operation performed")
     token: Optional[str] = Field(None, description="Token, needed for pagination")

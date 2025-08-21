@@ -24,6 +24,28 @@ client = AnalyticsClient(
 
 ## Available Methods
 
+### Get Schema
+
+Retrieve the schema for analytics and charts. This provides information about the structure and configuration options available for charts and analytics.
+
+```python
+result = client.get_schema()
+
+if result.success:
+    print(f"Schema retrieved: {result.message}")
+    print(f"Schema data: {result.data}")
+else:
+    print(f"Error: {result.message}")
+```
+
+**Parameters:**
+
+-  None (no parameters required)
+
+**Returns:**
+
+-  `BaseResponse`: Response containing the analytics schema data
+
 ### Add Chart
 
 Add a new chart to an app with specified type and configuration.

@@ -6,7 +6,6 @@ from .base_response import BaseResponse
 class SubmissionResponse(BaseResponse):
     app_id: str = Field(None, description="App ID")
     submission_id: Optional[str] = Field(None, description="Submission ID")
-    operation: str = Field(description="Type of operation performed")
 
 
 class SubmissionsResponse(BaseResponse):

@@ -107,6 +107,7 @@ class TriggerType(Enum):
 
 
 class NodeType(Enum):
+    """Enumeration of supported workflow node types"""
     EMAIL = "email"
     WAIT = "wait"
     CONDITION = "condition"
@@ -124,9 +125,16 @@ class NodeType(Enum):
     FIND_SUBMISSION = "findSubmission"
     AI = "ai"
     CODE = "code"
-    PASS = "pass"
-    SYNC = "sync"
-    MSTEAMS = "msteams"
+
+class ChartType(Enum):
+    PIE_CHART = "pieChart"
+    BAR_CHART = "barGraph"
+    LINE_CHART = "lineChart"
+    DOUGHNUT_CHART = "doughnutChart"
+    DATA_TABLE = "dataTable"
+    SUMMARY_CARD = "summary"
+    MAP_CHART = "maps"
+    GANTT_CHART = "gantt"
 
 
 class ChartType(Enum):

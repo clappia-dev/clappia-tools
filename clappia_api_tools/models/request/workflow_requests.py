@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field, EmailStr, field_validator, ValidationInfo
+from pydantic import BaseModel, Field, field_validator, model_validator
 import re
 from ...enums import TriggerType, NodeType
 
@@ -9,6 +9,9 @@ class BaseWorkflowRequest(BaseModel):
 
     app_id: str = Field(description="App Id")
     trigger_type: TriggerType = Field(description="Trigger type for the workflow")
+
+    class Config:
+        extra = "allow"
 
     @field_validator("app_id")
     @classmethod
@@ -37,6 +40,9 @@ class AddWorkflowStepRequest(BaseWorkflowRequest):
         None, description="Parent workflow step variable name"
     )
     node_type: NodeType = Field(description="Type of workflow node to add")
+    
+    class Config:
+        extra = "allow"
 
     @field_validator("node_type")
     @classmethod
@@ -52,8 +58,26 @@ class AddWorkflowStepRequest(BaseWorkflowRequest):
     @classmethod
     def validate_parent_variable_name(cls, v: Optional[str]) -> Optional[str]:
         if v is not None:
-            return v.strip() if v.strip() else None
+            stripped = v.strip() if v else ""
+            return stripped if stripped else None
         return None
+
+    @model_validator(mode='before')
+    @classmethod
+    def validate_required_fields(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if isinstance(values, dict):
+            if 'node_type' not in values or values['node_type'] is None:
+                raise ValueError('Parameter nodeType is required')
+        return values
+
+    def get_extra_fields(self) -> Dict[str, Any]:
+        """Get all extra fields that were passed beyond the defined schema"""
+        base_fields = {
+            'app_id', 'trigger_type', 'parent_variable_name', 'node_type'
+        }
+        all_fields = set(self.model_dump().keys())
+        extra_field_names = all_fields - base_fields
+        return {field: getattr(self, field) for field in extra_field_names if hasattr(self, field)}
 
 
 class RemoveWorkflowStepRequest(BaseWorkflowRequest):
@@ -86,16 +110,34 @@ class RemoveWorkflowStepRequest(BaseWorkflowRequest):
 class UpdateWorkflowStepRequest(BaseWorkflowRequest):
     """Request model for updating a workflow step"""
 
-    step_variable_name: str = Field(
-        description="Variable name of the workflow step to update"
-    )
+    step_variable_name: str = Field(description="Step variable name to update")
+    
+    class Config:
+        extra = "allow"
 
     @field_validator("step_variable_name")
     @classmethod
     def validate_step_variable_name(cls, v: str) -> str:
         if not v or not v.strip():
-            raise ValueError("Parameter stepVariableName is required")
+            raise ValueError('Parameter stepVariableName is required')
         return v.strip()
+
+    @model_validator(mode='before')
+    @classmethod
+    def validate_required_fields(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if isinstance(values, dict):
+            if 'step_variable_name' not in values or not values['step_variable_name']:
+                raise ValueError('Parameter stepVariableName is required')
+        return values
+
+    def get_extra_fields(self) -> Dict[str, Any]:
+        """Get all extra fields that were passed beyond the defined schema"""
+        base_fields = {
+            'app_id', 'trigger_type', 'step_variable_name'
+        }
+        all_fields = set(self.model_dump().keys())
+        extra_field_names = all_fields - base_fields
+        return {field: getattr(self, field) for field in extra_field_names if hasattr(self, field)}
 
 
 class ReorderWorkflowStepRequest(BaseWorkflowRequest):

@@ -3,6 +3,10 @@ from .app_definition_responses import (
     AppDefinitionResponse,
     AppCreationResponse,
     FieldOperationResponse,
+    PageBreakOperationResponse,
+    SectionOperationResponse,
+    AddSectionResponse,
+    UpdateSectionResponse,
 )
 from .submission_responses import (
     SubmissionResponse,
@@ -34,6 +38,10 @@ __all__ = [
     # App Definition Responses
     "AppDefinitionResponse",
     "AppCreationResponse",
+    "PageBreakOperationResponse",
+    "SectionOperationResponse",
+    "AddSectionResponse",
+    "UpdateSectionResponse",
     # Submission Responses
     "SubmissionResponse",
     "SubmissionsResponse",

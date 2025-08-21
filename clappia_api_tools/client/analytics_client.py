@@ -8,7 +8,7 @@ from clappia_api_tools.models.request import (
     ReorderChartRequest,
     GetAppChartsRequest
 )
-from clappia_api_tools.models.response import ChartResponse, GetAppChartsResponse, ChartDefinition
+from clappia_api_tools.models.response import ChartResponse, GetAppChartsResponse, BaseResponse
 
 logger = get_logger(__name__)
 
@@ -26,13 +26,16 @@ class AnalyticsClient(BaseClappiaClient):
         chart_type: str,
         chart_index: int = 0,
         chart_title: Optional[str] = None,
+        **kwargs
     ) -> ChartResponse:
+        """Add a chart to a Clappia app's analytics dashboard"""
         try:
             request = AddChartRequest(
                 app_id=app_id,
                 chart_type=chart_type,
                 chart_index=chart_index,
-                chart_title=chart_title,
+                chart_title=chart_title or "",
+                **kwargs
             )
         except Exception as e:
             return ChartResponse(
@@ -54,6 +57,9 @@ class AnalyticsClient(BaseClappiaClient):
         if request.chart_title:
             payload["chartTitle"] = request.chart_title
 
+        extra_fields = request.get_extra_fields()
+        payload.update(extra_fields)
+
         logger.info(f"Adding chart for app_id: {app_id} with chart_type: {chart_type}")
 
         success, error_message, response_data = self.api_utils.make_request(
@@ -74,7 +80,7 @@ class AnalyticsClient(BaseClappiaClient):
             operation="add",
             data=response_data,
         )
-
+    
     def remove_chart(self, app_id: str, chart_index: int) -> ChartResponse:
         try:
             request = RemoveChartRequest(
@@ -124,6 +130,7 @@ class AnalyticsClient(BaseClappiaClient):
         chart_index: int,
         update_data: Dict[str, Any],
     ) -> ChartResponse:
+        """Update a chart in a Clappia app's analytics dashboard"""
         try:
             request = UpdateChartRequest(
                 app_id=app_id,
@@ -262,4 +269,40 @@ class AnalyticsClient(BaseClappiaClient):
             app_id=app_id,
             operation="get_charts",
             data=response_data,
+        )
+
+    def get_schema(self) -> BaseResponse:
+        """Get the schema for analytics and charts.
+
+        Returns:
+            BaseResponse: Response containing the analytics schema
+        """
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return BaseResponse(
+                success=False, 
+                message=env_error, 
+                operation="get_schema"
+            )
+
+        logger.info("Getting analytics schema")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="GET", 
+            endpoint="analytics/getSchema"
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return BaseResponse(
+                success=False, 
+                message=error_message, 
+                operation="get_schema"
+            )
+
+        return BaseResponse(
+            success=True,
+            message="Successfully retrieved analytics schema",
+            data=response_data,
+            operation="get_schema",
         )

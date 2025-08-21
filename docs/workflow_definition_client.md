@@ -25,6 +25,28 @@ client = WorkflowDefinitionClient(
 
 ## Available Methods
 
+### Get Schema
+
+Retrieve the schema for workflow definitions. This provides information about the structure and configuration options available for workflows.
+
+```python
+result = client.get_schema()
+
+if result.success:
+    print(f"Schema retrieved: {result.message}")
+    print(f"Schema data: {result.data}")
+else:
+    print(f"Error: {result.message}")
+```
+
+**Parameters:**
+
+-  None (no parameters required)
+
+**Returns:**
+
+-  `WorkflowResponse`: Response containing the workflow schema data
+
 ### Get Workflow Definition
 
 Retrieve the complete workflow definition for a specific app and trigger type.

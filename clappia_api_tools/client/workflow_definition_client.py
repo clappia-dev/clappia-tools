@@ -8,7 +8,7 @@ from clappia_api_tools.models.request import (
     UpdateWorkflowStepRequest,
     ReorderWorkflowStepRequest,
 )
-from clappia_api_tools.models.response import WorkflowResponse, WorkflowStepResponse
+from clappia_api_tools.models.response import WorkflowResponse, WorkflowStepResponse, BaseResponse
 
 logger = get_logger(__name__)
 
@@ -64,14 +64,17 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         app_id: str,
         trigger_type: str,
         node_type: str,
-        parent_variable_name: str = "Start",
+        parent_variable_name: Optional[str] = None,
+        **kwargs
     ) -> WorkflowStepResponse:
+        """Add a workflow step to a Clappia app"""
         try:
             request = AddWorkflowStepRequest(
                 app_id=app_id,
                 trigger_type=trigger_type,
                 node_type=node_type,
                 parent_variable_name=parent_variable_name,
+                **kwargs
             )
         except Exception as e:
             return WorkflowStepResponse(
@@ -94,10 +97,13 @@ class WorkflowDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "triggerType": request.trigger_type.value,
+            "triggerType": request.trigger_type.value if hasattr(request.trigger_type, 'value') else request.trigger_type,
             "nodeType": request.node_type.value,
             "parentVariableName": request.parent_variable_name,
         }
+        
+        extra_fields = request.get_extra_fields()
+        payload.update(extra_fields)
 
         logger.info(
             f"Adding workflow step for app_id: {app_id} with node_type: {node_type}"
@@ -202,6 +208,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         step_variable_name: str,
         update_data: Dict[str, Any],
     ) -> WorkflowStepResponse:
+        """Update a workflow step in a Clappia app"""
         try:
             request = UpdateWorkflowStepRequest(
                 app_id=app_id,
@@ -230,7 +237,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "triggerType": request.trigger_type.value,
+            "triggerType": request.trigger_type.value if hasattr(request.trigger_type, 'value') else request.trigger_type,
             "stepVariableName": request.step_variable_name,
             **update_data,
         }
@@ -334,4 +341,40 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             step_variable_name=step_variable_name,
             parent_variable_name=parent_variable_name,
             data=response_data,
+        )
+
+    def get_schema(self) -> BaseResponse:
+        """Get the schema for workflow definitions.
+
+        Returns:
+            WorkflowResponse: Response containing the workflow schema
+        """
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return BaseResponse(
+                success=False, 
+                message=env_error, 
+                operation="get_schema"
+            )
+
+        logger.info("Getting workflow schema")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="GET", 
+            endpoint="workflowdefinitionv2/schema"
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return BaseResponse(
+                success=False, 
+                message=error_message, 
+                operation="get_schema"
+            )
+
+        return BaseResponse(
+            success=True,
+            message="Successfully retrieved workflow schema",
+            data=response_data,
+            operation="get_schema",
         )

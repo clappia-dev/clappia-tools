@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field, EmailStr, field_validator, ValidationInfo
+from pydantic import BaseModel, Field, EmailStr, field_validator, ValidationInfo, model_validator
 import re
 from ...enums import ChartType
 
@@ -8,6 +8,10 @@ class BaseAnalyticsRequest(BaseModel):
     """Base class for analytics requests with common validation"""
 
     app_id: str = Field(description="App Id")
+
+    class Config:
+        extra = "forbid"
+
 
     @field_validator("app_id")
     @classmethod
@@ -20,16 +24,19 @@ class BaseAnalyticsRequest(BaseModel):
 
 
 class AddChartRequest(BaseAnalyticsRequest):
-    """Request model for adding a chart"""
+    """Request model for adding a chart to analytics dashboard"""
 
-    chart_index: int = Field(description="Index where to add the chart")
+    chart_index: int = Field(ge=0, description="Chart position index (non-negative)")
     chart_type: ChartType = Field(description="Type of chart to add")
-    chart_title: Optional[str] = Field(None, description="Title for the chart")
+    chart_title: str = Field(default="", description="Chart title")
+    
+    class Config:
+        extra = "allow"
 
     @field_validator("chart_index")
     @classmethod
     def validate_chart_index(cls, v: int) -> int:
-        if not isinstance(v, int) or v < 0:
+        if v < 0:
             raise ValueError('Parameter "chartIndex" should be a non-negative number')
         return v
 
@@ -43,12 +50,24 @@ class AddChartRequest(BaseAnalyticsRequest):
             )
         return v
 
-    @field_validator("chart_title")
+    @model_validator(mode='before')
     @classmethod
-    def validate_chart_title(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None:
-            return v.strip() if v.strip() else ""
-        return ""
+    def validate_required_fields(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if isinstance(values, dict):
+            if 'chart_index' in values and (not isinstance(values['chart_index'], int) or values['chart_index'] < 0):
+                raise ValueError('Parameter "chartIndex" should be a non-negative number')
+            if 'chart_type' not in values:
+                raise ValueError('Parameter "chartType" is required')
+        return values
+
+    def get_extra_fields(self) -> Dict[str, Any]:
+        """Get all extra fields that were passed beyond the defined schema"""
+        base_fields = {
+            'app_id', 'chart_index', 'chart_type', 'chart_title'
+        }
+        all_fields = set(self.model_dump().keys())
+        extra_field_names = all_fields - base_fields
+        return {field: getattr(self, field) for field in extra_field_names if hasattr(self, field)}
 
 
 class RemoveChartRequest(BaseAnalyticsRequest):
@@ -65,16 +84,37 @@ class RemoveChartRequest(BaseAnalyticsRequest):
 
 
 class UpdateChartRequest(BaseAnalyticsRequest):
-    """Request model for updating a chart"""
+    """Request model for updating a chart in analytics dashboard"""
 
-    chart_index: int = Field(description="Index of the chart to update")
+    chart_index: int = Field(ge=0, description="Chart position index (non-negative)")
+    chart_title: Optional[str] = Field(None, description="Updated chart title")
+    
+    class Config:
+        extra = "allow"
 
     @field_validator("chart_index")
     @classmethod
     def validate_chart_index(cls, v: int) -> int:
-        if not isinstance(v, int) or v < 0:
+        if v < 0:
             raise ValueError('Parameter "chartIndex" should be a non-negative number')
         return v
+
+    @model_validator(mode='before')
+    @classmethod
+    def validate_required_fields(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if isinstance(values, dict):
+            if 'chart_index' in values and (not isinstance(values['chart_index'], int) or values['chart_index'] < 0):
+                raise ValueError('Parameter "chartIndex" should be a non-negative number')
+        return values
+
+    def get_extra_fields(self) -> Dict[str, Any]:
+        """Get all extra fields that were passed beyond the defined schema"""
+        base_fields = {
+            'app_id', 'chart_index', 'chart_title'
+        }
+        all_fields = set(self.model_dump().keys())
+        extra_field_names = all_fields - base_fields
+        return {field: getattr(self, field) for field in extra_field_names if hasattr(self, field)}
 
 
 class ReorderChartRequest(BaseAnalyticsRequest):

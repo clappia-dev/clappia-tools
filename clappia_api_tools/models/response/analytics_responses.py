@@ -8,7 +8,6 @@ class ChartResponse(BaseResponse):
     app_id: str = Field(None, description="App ID")
     chart_index: Optional[int] = Field(None, description="Index of the chart")
     chart_type: Optional[ChartType] = Field(None, description="Type of chart")
-    operation: str = Field(description="Type of operation performed")
 
 
 class ChartDefinition(BaseModel):
@@ -21,4 +20,3 @@ class ChartDefinition(BaseModel):
 
 class GetAppChartsResponse(BaseResponse):
     app_id: str = Field(description="App ID")
-    operation: str = Field(default="get", description="Type of operation performed")

@@ -6,13 +6,23 @@ from clappia_api_tools.models.request import (
     GetAppDefinitionRequest,
     CreateAppRequest,
     AddFieldRequest,
+    AddSectionRequest,
+    UpdateSectionRequest,
     UpdateFieldRequest,
+    RemovePageBreakRequest,
+    AddPageBreakRequest,
+    UpdatePageBreakRequest,
+    ReorderSectionRequest,
 )
 from clappia_api_tools.models.definition import AppField, AppSection
 from clappia_api_tools.models.response import (
     AppDefinitionResponse,
     AppCreationResponse,
     FieldOperationResponse,
+    PageBreakOperationResponse,
+    SectionOperationResponse,
+    AddSectionResponse,
+    UpdateSectionResponse,
 )
 
 logger = get_logger(__name__)
@@ -70,7 +80,7 @@ class AppDefinitionClient(BaseClappiaClient):
             return AppDefinitionResponse(
                 success=False, message=error_message, app_id=app_id
             )
-
+        
         app_info = {
             "app_id": response_data.get("appId") if response_data else None,
             "version": response_data.get("version") if response_data else None,
@@ -356,6 +366,224 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
+    def add_section(
+        self,
+        app_id: str,
+        requesting_user_email_address: str,
+        section_index: int,
+        page_index: int,
+        section_name: str,
+        description: Optional[str] = None,
+        is_collapsible: Optional[bool] = None,
+        is_collapsed_by_default: Optional[bool] = None,
+    ) -> AddSectionResponse:
+        """Add a new section to a Clappia app.
+
+        Args:
+            app_id: The ID of the app to add the section to
+            requesting_user_email_address: Email of the user adding the section
+            section_index: Position where section will be inserted (0-based)
+            page_index: Page index where section will be added
+            section_name: Display name for the section
+            description: Optional help text for the section
+            is_collapsible: Allow users to expand/collapse section
+            is_collapsed_by_default: Initial collapsed state
+
+        Returns:
+            AddSectionResponse: Response containing the result of the operation
+        """
+        try:
+            request = AddSectionRequest(
+                app_id=app_id,
+                requesting_user_email_address=requesting_user_email_address,
+                section_index=section_index,
+                page_index=page_index,
+                section_name=section_name,
+                description=description,
+                is_collapsible=is_collapsible,
+                is_collapsed_by_default=is_collapsed_by_default,
+            )
+        except Exception as e:
+            return AddSectionResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id,
+            )
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return AddSectionResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+            )
+
+        payload = {
+            "appId": request.app_id,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
+            "sectionIndex": request.section_index,
+            "pageIndex": request.page_index,
+            "sectionName": request.section_name,
+        }
+
+        if request.description is not None:
+            payload["description"] = request.description.strip()
+        if request.is_collapsible is not None:
+            payload["isCollapsible"] = request.is_collapsible
+        if request.is_collapsed_by_default is not None:
+            payload["isCollapsedByDefault"] = request.is_collapsed_by_default
+
+        logger.info(f"Adding section to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addSection",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return AddSectionResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                data=response_data,
+            )
+
+        section_id = response_data.get("sectionId") if response_data else None
+        section_index_response = response_data.get("sectionIndex") if response_data else None
+
+        return AddSectionResponse(
+            success=True,
+            message=f"Successfully added section '{section_name}' to app {app_id}",
+            app_id=app_id,
+            section_id=section_id,
+            section_index=section_index_response,
+            section_name=section_name,
+            data=response_data,
+        )
+
+    def update_section(
+        self,
+        app_id: str,
+        requesting_user_email_address: str,
+        section_index: int,
+        page_index: int,
+        section_name: Optional[str] = None,
+        description: Optional[str] = None,
+        is_collapsible: Optional[bool] = None,
+        is_collapsed_by_default: Optional[bool] = None,
+        keep_section_collapsed: Optional[bool] = None,
+        allow_copy: Optional[bool] = None,
+        max_number_of_copies: Optional[int] = None,
+        add_section_text: Optional[str] = None,
+        display_condition: Optional[str] = None,
+    ) -> UpdateSectionResponse:
+        """Update an existing section in a Clappia app.
+
+        Args:
+            app_id: The ID of the app containing the section
+            requesting_user_email_address: Email of the user updating the section
+            section_index: Index of the section to update
+            page_index: Page index of the section
+            section_name: Display title of the section
+            description: Help text or instructions for the section
+            is_collapsible: Enable/disable expand/collapse functionality
+            is_collapsed_by_default: Set initial display state
+            keep_section_collapsed: Keep section collapsed
+            allow_copy: Allow copying of the section
+            max_number_of_copies: Maximum number of copies allowed
+            add_section_text: Text for add section button
+            display_condition: Display condition for the section
+
+        Returns:
+            UpdateSectionResponse: Response containing the result of the operation
+        """
+        try:
+            request = UpdateSectionRequest(
+                app_id=app_id,
+                requesting_user_email_address=requesting_user_email_address,
+                section_index=section_index,
+                page_index=page_index,
+                section_name=section_name,
+                description=description,
+                is_collapsible=is_collapsible,
+                is_collapsed_by_default=is_collapsed_by_default,
+                keep_section_collapsed=keep_section_collapsed,
+                allow_copy=allow_copy,
+                max_number_of_copies=max_number_of_copies,
+                add_section_text=add_section_text,
+                display_condition=display_condition,
+            )
+        except Exception as e:
+            return UpdateSectionResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id,
+            )
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return UpdateSectionResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+            )
+
+        payload = {
+            "appId": request.app_id,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
+            "sectionIndex": request.section_index,
+            "pageIndex": request.page_index,
+        }
+
+        if request.section_name is not None:
+            payload["sectionName"] = request.section_name.strip()
+        if request.description is not None:
+            payload["description"] = request.description.strip()
+        if request.is_collapsible is not None:
+            payload["isCollapsible"] = request.is_collapsible
+        if request.is_collapsed_by_default is not None:
+            payload["isCollapsedByDefault"] = request.is_collapsed_by_default
+        if request.keep_section_collapsed is not None:
+            payload["keepSectionCollapsed"] = request.keep_section_collapsed
+        if request.allow_copy is not None:
+            payload["allowCopy"] = request.allow_copy
+        if request.max_number_of_copies is not None:
+            payload["maxNumberOfCopies"] = request.max_number_of_copies
+        if request.add_section_text is not None:
+            payload["addSectionText"] = request.add_section_text.strip()
+        if request.display_condition is not None:
+            payload["displayCondition"] = request.display_condition.strip()
+
+        logger.info(f"Updating section in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/updateSection",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return UpdateSectionResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                data=response_data,
+            )
+
+        section_index_response = response_data.get("sectionIndex") if response_data else None
+
+        return UpdateSectionResponse(
+            success=True,
+            message=f"Successfully updated section at index {section_index} in app {app_id}",
+            app_id=app_id,
+            section_index=section_index_response,
+            section_name=section_name,
+            data=response_data,
+        )
+
     def update_field(
         self,
         app_id: str,
@@ -533,5 +761,359 @@ class AppDefinitionClient(BaseClappiaClient):
             app_id=app_id,
             field_name=field_name,
             operation="update_field",
+            data=response_data,
+        )
+
+    def remove_page_break(
+        self,
+        app_id: str,
+        requesting_user_email_address: str,
+        page_index: int,
+    ) -> PageBreakOperationResponse:
+        """Remove a page break from an app.
+
+        Args:
+            app_id: The app ID
+            requesting_user_email_address: Email of requesting user
+            page_index: Page index to remove (must be > 0)
+
+        Returns:
+            PageBreakOperationResponse: Response with operation result
+        """
+        try:
+            request = RemovePageBreakRequest(
+                app_id=app_id,
+                requesting_user_email_address=requesting_user_email_address,
+                page_index=page_index,
+            )
+        except Exception as e:
+            return PageBreakOperationResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id,
+                page_index=page_index,
+                operation="remove_page_break",
+            )
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return PageBreakOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                page_index=page_index,
+                operation="remove_page_break",
+            )
+
+        payload = {
+            "appId": request.app_id,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
+            "pageIndex": request.page_index,
+        }
+
+        logger.info(f"Removing page break from app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/removePageBreak",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return PageBreakOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                page_index=page_index,
+                operation="remove_page_break",
+                data=response_data,
+            )
+
+        return PageBreakOperationResponse(
+            success=True,
+            message=f"Page break at page with index {page_index} removed successfully",
+            app_id=app_id,
+            page_index=page_index,
+            operation="remove_page_break",
+            data=response_data,
+        )
+
+    def add_page_break(
+        self,
+        app_id: str,
+        requesting_user_email_address: str,
+        page_index: int,
+        section_index: int,
+    ) -> PageBreakOperationResponse:
+        """Add a page break to an app.
+
+        Args:
+            app_id: The app ID
+            requesting_user_email_address: Email of requesting user
+            page_index: Page index where to add page break
+            section_index: Section index where to add page break
+
+        Returns:
+            PageBreakOperationResponse: Response with operation result
+        """
+        try:
+            request = AddPageBreakRequest(
+                app_id=app_id,
+                requesting_user_email_address=requesting_user_email_address,
+                page_index=page_index,
+                section_index=section_index,
+            )
+        except Exception as e:
+            return PageBreakOperationResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id,
+                page_index=page_index,
+                operation="add_page_break",
+            )
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return PageBreakOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                page_index=page_index,
+                operation="add_page_break",
+            )
+
+        payload = {
+            "appId": request.app_id,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
+            "pageIndex": request.page_index,
+            "sectionIndex": request.section_index,
+        }
+
+        logger.info(f"Adding page break to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addPageBreak",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return PageBreakOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                page_index=page_index,
+                operation="add_page_break",
+                data=response_data,
+            )
+
+        return PageBreakOperationResponse(
+            success=True,
+            message=f"Page break after Page with index {page_index} and after section with index {section_index} added successfully",
+            app_id=app_id,
+            page_index=page_index,
+            operation="add_page_break",
+            data=response_data,
+        )
+
+    def update_page(
+        self,
+        app_id: str,
+        requesting_user_email_address: str,
+        page_index: int,
+        show_submit_button: Optional[bool] = None,
+        previous_button_text: Optional[str] = None,
+        next_button_text: Optional[str] = None,
+    ) -> PageBreakOperationResponse:
+        """Update page break settings in an app.
+
+        Args:
+            app_id: The app ID
+            requesting_user_email_address: Email of requesting user
+            page_index: Page index to update
+            show_submit_button: Show submit button
+            previous_button_text: Previous button text
+            next_button_text: Next button text
+
+        Returns:
+            PageBreakOperationResponse: Response with operation result
+        """
+        try:
+            request = UpdatePageBreakRequest(
+                app_id=app_id,
+                requesting_user_email_address=requesting_user_email_address,
+                page_index=page_index,
+                show_submit_button=show_submit_button,
+                previous_button_text=previous_button_text,
+                next_button_text=next_button_text,
+            )
+        except Exception as e:
+            return PageBreakOperationResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id,
+                page_index=page_index,
+                operation="update_page",
+            )
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return PageBreakOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                page_index=page_index,
+                operation="update_page",
+            )
+
+        payload = {
+            "appId": request.app_id,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
+            "pageIndex": request.page_index,
+        }
+
+        updated_properties = []
+
+        if request.show_submit_button is not None:
+            payload["showSubmitButton"] = request.show_submit_button
+            updated_properties.append("show_submit_button")
+        if request.previous_button_text is not None:
+            payload["previousButtonText"] = request.previous_button_text.strip()
+            updated_properties.append("previous_button_text")
+        if request.next_button_text is not None:
+            payload["nextButtonText"] = request.next_button_text.strip()
+            updated_properties.append("next_button_text")
+
+        logger.info(
+            f"Updating page '{page_index}' in app_id: {app_id} with payload: {payload}"
+        )
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/updatePageBreak",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return PageBreakOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                page_index=page_index,
+                operation="update_page",
+                data=response_data,
+            )
+
+        return PageBreakOperationResponse(
+            success=True,
+            message=f"Page at index {page_index} updated successfully",
+            app_id=app_id,
+            page_index=page_index,
+            operation="update_page",
+            data=response_data,
+        )
+
+    def reorder_section(
+        self,
+        app_id: str,
+        requesting_user_email_address: str,
+        source_section_index: int,
+        target_section_index: int,
+        source_page_index: Optional[int] = None,
+        target_page_index: Optional[int] = None,
+    ) -> SectionOperationResponse:
+        """Reorder a section within an app.
+
+        Args:
+            app_id: The app ID
+            requesting_user_email_address: Email of requesting user
+            source_section_index: Source section index
+            target_section_index: Target section index
+            source_page_index: Source page index (optional)
+            target_page_index: Target page index (optional)
+
+        Returns:
+            SectionOperationResponse: Response containing section operation result
+        """
+        try:
+            request = ReorderSectionRequest(
+                app_id=app_id,
+                requesting_user_email_address=requesting_user_email_address,
+                source_section_index=source_section_index,
+                target_section_index=target_section_index,
+                source_page_index=source_page_index,
+                target_page_index=target_page_index,
+            )
+        except Exception as e:
+            return SectionOperationResponse(
+                success=False,
+                message=str(e),
+                app_id=app_id,
+                source_section_index=source_section_index,
+                target_section_index=target_section_index,
+                source_page_index=source_page_index,
+                target_page_index=target_page_index,
+                operation="reorder_section",
+            )
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return SectionOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                source_section_index=source_section_index,
+                target_section_index=target_section_index,
+                source_page_index=source_page_index,
+                target_page_index=target_page_index,
+                operation="reorder_section",
+            )
+
+        payload = {
+            "appId": request.app_id,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
+            "sourceSectionIndex": request.source_section_index,
+            "targetSectionIndex": request.target_section_index,
+        }
+
+        if request.source_page_index is not None:
+            payload["sourcePageIndex"] = request.source_page_index
+        if request.target_page_index is not None:
+            payload["targetPageIndex"] = request.target_page_index
+
+        logger.info(f"Reordering section in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/reorderSection",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return SectionOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                source_section_index=source_section_index,
+                target_section_index=target_section_index,
+                source_page_index=source_page_index,
+                target_page_index=target_page_index,
+                operation="reorder_section",
+                data=response_data,
+            )
+
+        return SectionOperationResponse(
+            success=True,
+            message="Section reordered successfully",
+            app_id=app_id,
+            source_section_index=source_section_index,
+            target_section_index=target_section_index,
+            source_page_index=source_page_index,
+            target_page_index=target_page_index,
+            operation="reorder_section",
             data=response_data,
         )
