@@ -9,10 +9,57 @@ from clappia_api_tools.models.request import (
     AddSectionRequest,
     UpdateSectionRequest,
     UpdateFieldRequest,
-    RemovePageBreakRequest,
     AddPageBreakRequest,
     UpdatePageBreakRequest,
     ReorderSectionRequest,
+
+    AddFieldTextRequest,
+    AddFieldTextAreaRequest,
+    AddFieldDependencyAppRequest,
+    AddFieldRestApiRequest,
+    AddFieldAddressRequest,
+    AddFieldDatabaseRequest,
+    AddFieldDateRequest,
+    AddFieldAIRequest,
+    AddFieldCodeRequest,
+    AddFieldCodeReaderRequest,
+    AddFieldEmailInputRequest,
+    AddFieldEmojiRequest,
+    AddFieldFileRequest,
+    AddFieldGpsLocationRequest,
+    AddFieldLiveTrackingRequest,
+    AddFieldManualAddressRequest,
+    AddFieldPhoneNumberRequest,
+    AddFieldProgressBarRequest,
+    AddFieldSignatureRequest,
+    AddFieldRangeRequest,
+    AddFieldCounterRequest,
+    AddFieldSliderRequest,
+    AddFieldTimeRequest,
+    AddFieldToggleRequest,
+    AddFieldValidationRequest,
+    AddFieldVideoViewerRequest,
+    AddFieldVoiceRequest,
+    AddFieldFormulaRequest,
+    AddFieldImageViewerRequest,
+    AddFieldRichTextEditorRequest,
+    AddFieldNfcReaderRequest,
+    AddFieldNumberInputRequest,
+    AddFieldPdfViewerRequest,
+    AddFieldReadOnlyFileRequest,
+    AddFieldReadOnlyTextRequest,
+    AddFieldTagsRequest,
+    AddFieldUniqueSequentialRequest,
+    AddFieldDropdownRequest,
+    AddFieldRadioRequest,
+    AddFieldUrlInputRequest,
+    AddFieldCheckboxRequest,
+    AddFieldPaymentGatewayRequest,
+    AddFieldRazorpayPaymentGatewayRequest,
+    AddFieldEazypayPaymentGatewayRequest,
+    AddFieldPaypalPaymentGatewayRequest,
+    AddFieldStripePaymentGatewayRequest,
+    AddFieldButtonRequest,
 )
 from clappia_api_tools.models.definition import AppField, AppSection
 from clappia_api_tools.models.response import (
@@ -35,21 +82,2181 @@ class AppDefinitionClient(BaseClappiaClient):
     getting app definitions, creating apps, adding fields, and updating fields.
     """
 
+    def add_field_text(
+    self,
+    request: AddFieldTextRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_text",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding text field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding text field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_text",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added text field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_text",
+            data=response_data,
+        )
+
+
+    def add_field_text_area(
+        self,
+        request: AddFieldTextAreaRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_textarea",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding textarea field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding textarea field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_textarea",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added textarea field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_textarea",
+            data=response_data,
+        )
+
+
+    def add_field_dependency_app(
+        self,
+        request: AddFieldDependencyAppRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_dependency_app",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding dependency app field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding dependency app field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_dependency_app",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added dependency app field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_dependency_app",
+            data=response_data,
+        )
+
+
+    def add_field_rest_api(
+        self,
+        request: AddFieldRestApiRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_rest_api",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding REST API field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding REST API field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_rest_api",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added REST API field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_rest_api",
+            data=response_data,
+        )
+
+
+    def add_field_address(
+        self,
+        request: AddFieldAddressRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_address",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding address field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding address field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_address",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added address field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_address",
+            data=response_data,
+        )
+
+    def add_field_database(
+        self,
+        request: AddFieldDatabaseRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_database",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding database field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding database field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_database",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added database field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_database",
+            data=response_data,
+        )
+
+    def add_field_date(
+        self,
+        request: AddFieldDateRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_date",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding date field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding date field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_date",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added date field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_date",
+            data=response_data,
+        )
+
+    def add_field_ai(
+        self,
+        request: AddFieldAIRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_ai",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding AI field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding AI field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_ai",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added AI field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_ai",
+            data=response_data,
+        )
+
+    def add_field_code(
+        self,
+        request: AddFieldCodeRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_code",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding code field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding code field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_code",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added code field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_code",
+            data=response_data,
+        )
+
+    def add_field_code_reader(
+        self,
+        request: AddFieldCodeReaderRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_code_reader",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding code reader field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding code reader field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_code_reader",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added code reader field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_code_reader",
+            data=response_data,
+        )
+
+    def add_field_email_input(
+        self,
+        request: AddFieldEmailInputRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_email_input",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding email input field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding email input field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_email_input",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added email input field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_email_input",
+            data=response_data,
+        )
+
+    def add_field_emoji(
+        self,
+        request: AddFieldEmojiRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_emoji",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding emoji field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding emoji field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_emoji",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added emoji field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_emoji",
+            data=response_data,
+        )
+
+    def add_field_file(
+        self,
+        request: AddFieldFileRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_file",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding file field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding file field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_file",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added file field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_file",
+            data=response_data,
+        )
+
+    def add_field_gps_location(
+        self,
+        request: AddFieldGpsLocationRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_gps_location",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding GPS location field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding GPS location field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_gps_location",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added GPS location field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_gps_location",
+            data=response_data,
+        )
+
+    def add_field_live_tracking(
+        self,
+        request: AddFieldLiveTrackingRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_live_tracking",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding live tracking field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding live tracking field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_live_tracking",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added live tracking field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_live_tracking",
+            data=response_data,
+        )
+
+    def add_field_manual_address(
+        self,
+        request: AddFieldManualAddressRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_manual_address",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding manual address field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding manual address field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_manual_address",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added manual address field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_manual_address",
+            data=response_data,
+        )
+
+    def add_field_phone_number(
+        self,
+        request: AddFieldPhoneNumberRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_phone_number",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding phone number field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding phone number field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_phone_number",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added phone number field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_phone_number",
+            data=response_data,
+        )
+
+    def add_field_progress_bar(
+        self,
+        request: AddFieldProgressBarRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_progress_bar",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding progress bar field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding progress bar field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_progress_bar",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added progress bar field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_progress_bar",
+            data=response_data,
+        )
+
+    def add_field_signature(
+        self,
+        request: AddFieldSignatureRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_signature",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding signature field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding signature field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_signature",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added signature field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_signature",
+            data=response_data,
+        )
+
+    def add_field_range(
+        self,
+        request: AddFieldRangeRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_range",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding range field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding range field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_range",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added range field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_range",
+            data=response_data,
+        )
+
+    def add_field_counter(
+        self,
+        request: AddFieldCounterRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_counter",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding counter field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding counter field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_counter",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added counter field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_counter",
+            data=response_data,
+        )
+
+    def add_field_slider(
+        self,
+        request: AddFieldSliderRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_slider",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding slider field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding slider field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_slider",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added slider field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_slider",
+            data=response_data,
+        )
+
+    def add_field_time(
+        self,
+        request: AddFieldTimeRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_time",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding time field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding time field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_time",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added time field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_time",
+            data=response_data,
+        )
+
+    def add_field_toggle(
+        self,
+        request: AddFieldToggleRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_toggle",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding toggle field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding toggle field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_toggle",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added toggle field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_toggle",
+            data=response_data,
+        )
+
+    def add_field_validation(
+        self,
+        request: AddFieldValidationRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_validation",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding validation field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding validation field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_validation",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added validation field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_validation",
+            data=response_data,
+        )
+
+    def add_field_video_viewer(
+        self,
+        request: AddFieldVideoViewerRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_video_viewer",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding video viewer field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding video viewer field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_video_viewer",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added video viewer field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_video_viewer",
+            data=response_data,
+        )
+
+    def add_field_voice(
+        self,
+        request: AddFieldVoiceRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_voice",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding voice field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding voice field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_voice",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added voice field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_voice",
+            data=response_data,
+        )
+
+    def add_field_formula(
+        self,
+        request: AddFieldFormulaRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_formula",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding formula field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding formula field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_formula",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added formula field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_formula",
+            data=response_data,
+        )
+
+    def add_field_image_viewer(
+        self,
+        request: AddFieldImageViewerRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_image_viewer",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding image viewer field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding image viewer field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_image_viewer",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added image viewer field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_image_viewer",
+            data=response_data,
+        )
+
+    def add_field_rich_text_editor(
+        self,
+        request: AddFieldRichTextEditorRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_rich_text_editor",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding rich text editor field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding rich text editor field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_rich_text_editor",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added rich text editor field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_rich_text_editor",
+            data=response_data,
+        )
+
+    def add_field_nfc_reader(
+        self,
+        request: AddFieldNfcReaderRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_nfc_reader",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding NFC reader field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding NFC reader field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_nfc_reader",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added NFC reader field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_nfc_reader",
+            data=response_data,
+        )
+
+    def add_field_number_input(
+        self,
+        request: AddFieldNumberInputRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_number_input",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding number input field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding number input field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_number_input",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added number input field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_number_input",
+            data=response_data,
+        )
+
+    def add_field_pdf_viewer(
+        self,
+        request: AddFieldPdfViewerRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_pdf_viewer",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding PDF viewer field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding PDF viewer field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_pdf_viewer",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added PDF viewer field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_pdf_viewer",
+            data=response_data,
+        )
+
+    def add_field_read_only_file(
+        self,
+        request: AddFieldReadOnlyFileRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_read_only_file",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding read-only file field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding read-only file field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_read_only_file",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added read-only file field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_read_only_file",
+            data=response_data,
+        )
+
+    def add_field_read_only_text(
+        self,
+        request: AddFieldReadOnlyTextRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_read_only_text",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding read-only text field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding read-only text field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_read_only_text",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added read-only text field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_read_only_text",
+            data=response_data,
+        )
+
+    def add_field_tags(
+        self,
+        request: AddFieldTagsRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_tags",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding tags field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding tags field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_tags",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added tags field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_tags",
+            data=response_data,
+        )
+
+    def add_field_unique_sequential(
+        self,
+        request: AddFieldUniqueSequentialRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_unique_sequential",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding unique sequential field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding unique sequential field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_unique_sequential",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added unique sequential field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_unique_sequential",
+            data=response_data,
+        )
+
+    def add_field_dropdown(
+        self,
+        request: AddFieldDropdownRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_dropdown",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding dropdown field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding dropdown field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_dropdown",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added dropdown field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_dropdown",
+            data=response_data,
+        )
+
+    def add_field_radio(
+        self,
+        request: AddFieldRadioRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_radio",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding radio field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding radio field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_radio",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added radio field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_radio",
+            data=response_data,
+        )
+
+    def add_field_url_input(
+        self,
+        request: AddFieldUrlInputRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_url_input",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding URL input field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding URL input field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_url_input",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added URL input field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_url_input",
+            data=response_data,
+        )
+
+    def add_field_checkbox(
+        self,
+        request: AddFieldCheckboxRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_checkbox",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding checkbox field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding checkbox field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_checkbox",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added checkbox field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_checkbox",
+            data=response_data,
+        )
+
+    def add_field_payment_gateway(
+        self,
+        request: AddFieldPaymentGatewayRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_payment_gateway",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding payment gateway field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding payment gateway field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_payment_gateway",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added payment gateway field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_payment_gateway",
+            data=response_data,
+        )
+
+    def add_field_razorpay_payment_gateway(
+        self,
+        request: AddFieldRazorpayPaymentGatewayRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_razorpay_payment_gateway",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding Razorpay payment gateway field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding Razorpay payment gateway field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_razorpay_payment_gateway",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added Razorpay payment gateway field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_razorpay_payment_gateway",
+            data=response_data,
+        )
+
+    def add_field_eazypay_payment_gateway(
+        self,
+        request: AddFieldEazypayPaymentGatewayRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_eazypay_payment_gateway",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding Eazypay payment gateway field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding Eazypay payment gateway field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_eazypay_payment_gateway",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added Eazypay payment gateway field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_eazypay_payment_gateway",
+            data=response_data,
+        )
+
+    def add_field_paypal_payment_gateway(
+        self,
+        request: AddFieldPaypalPaymentGatewayRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_paypal_payment_gateway",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding PayPal payment gateway field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding PayPal payment gateway field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_paypal_payment_gateway",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added PayPal payment gateway field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_paypal_payment_gateway",
+            data=response_data,
+        )
+
+    def add_field_stripe_payment_gateway(
+        self,
+        request: AddFieldStripePaymentGatewayRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_stripe_payment_gateway",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding Stripe payment gateway field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding Stripe payment gateway field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_stripe_payment_gateway",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added Stripe payment gateway field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_stripe_payment_gateway",
+            data=response_data,
+        )
+
+    def add_field_button(
+        self,
+        request: AddFieldButtonRequest,
+    ) -> FieldOperationResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return FieldOperationResponse(
+                success=False,
+                message=env_error,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_button",
+            )
+        
+        payload = request.to_json()
+        
+        logger.info(f"Adding button field to app_id: {request.app_id} with payload: {json.dumps(payload, indent=2)}")
+        
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/addField",
+            data=payload,
+        )
+        
+        if not success:
+            logger.error(f"Error adding button field: {error_message}")
+            return FieldOperationResponse(
+                success=False,
+                message=error_message,
+                app_id=request.app_id,
+                field_name=request.field_type,
+                operation="add_field_button",
+                data=response_data,
+            )
+        
+        field_name = response_data.get("fieldName") if response_data else None
+        
+        return FieldOperationResponse(
+            success=True,
+            message=f"Successfully added button field to app {request.app_id}",
+            app_id=request.app_id,
+            field_name=field_name,
+            operation="add_field_button",
+            data=response_data,
+        )
+
     def get_definition(
         self,
         app_id: str,
         language: str = "en",
-        strip_html: bool = True,
-        include_tags: bool = True,
     ) -> AppDefinitionResponse:
         try:
-            supporting_user_email_address = "support@clappia.com"
             request = GetAppDefinitionRequest(
                 app_id=app_id,
-                requesting_user_email_address=supporting_user_email_address,
                 language=language,
-                strip_html=strip_html,
-                include_tags=include_tags,
             )
         except Exception as e:
             return AppDefinitionResponse(
@@ -61,8 +2268,8 @@ class AppDefinitionClient(BaseClappiaClient):
         params = {
             "appId": request.app_id,
             "language": request.language,
-            "stripHtml": str(request.strip_html).lower(),
-            "includeTags": str(request.include_tags).lower(),
+            "stripHtml": str(True).lower(),
+            "includeTags": str(True).lower(),
         }
 
         logger.info(
@@ -80,38 +2287,11 @@ class AppDefinitionClient(BaseClappiaClient):
             return AppDefinitionResponse(
                 success=False, message=error_message, app_id=app_id
             )
-        
-        app_info = {
-            "app_id": response_data.get("appId") if response_data else None,
-            "version": response_data.get("version") if response_data else None,
-            "state": response_data.get("state") if response_data else None,
-            "page_count": len(response_data.get("pageIds", [])) if response_data else 0,
-            "section_count": (
-                len(response_data.get("sectionIds", [])) if response_data else 0
-            ),
-            "field_count": (
-                len(response_data.get("fieldDefinitions", {})) if response_data else 0
-            ),
-            "app_name": (
-                response_data.get("metadata", {}).get("name", "Unknown")
-                if response_data
-                else "Unknown"
-            ),
-            "description": (
-                response_data.get("metadata", {}).get("description", "")
-                if response_data
-                else ""
-            ),
-            "field_definitions": (
-                response_data.get("fieldDefinitions", {}) if response_data else {}
-            ),
-        }
-
         return AppDefinitionResponse(
             success=True,
             message="Successfully retrieved app definition",
             app_id=app_id,
-            data=app_info,
+            data=response_data,
         )
 
     def create_app(
@@ -197,7 +2377,6 @@ class AppDefinitionClient(BaseClappiaClient):
     def add_field(
         self,
         app_id: str,
-        requesting_user_email_address: str,
         section_index: int,
         field_index: int,
         field_type: str,
@@ -226,7 +2405,6 @@ class AppDefinitionClient(BaseClappiaClient):
         try:
             request = AddFieldRequest(
                 app_id=app_id,
-                requesting_user_email_address=requesting_user_email_address,
                 section_index=section_index,
                 field_index=field_index,
                 field_type=field_type,
@@ -273,7 +2451,6 @@ class AppDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "sectionIndex": request.section_index,
             "fieldIndex": request.field_index,
             "fieldType": request.field_type.value,
@@ -369,7 +2546,6 @@ class AppDefinitionClient(BaseClappiaClient):
     def add_section(
         self,
         app_id: str,
-        requesting_user_email_address: str,
         section_index: int,
         page_index: int,
         section_name: str,
@@ -381,7 +2557,6 @@ class AppDefinitionClient(BaseClappiaClient):
 
         Args:
             app_id: The ID of the app to add the section to
-            requesting_user_email_address: Email of the user adding the section
             section_index: Position where section will be inserted (0-based)
             page_index: Page index where section will be added
             section_name: Display name for the section
@@ -395,7 +2570,6 @@ class AppDefinitionClient(BaseClappiaClient):
         try:
             request = AddSectionRequest(
                 app_id=app_id,
-                requesting_user_email_address=requesting_user_email_address,
                 section_index=section_index,
                 page_index=page_index,
                 section_name=section_name,
@@ -420,7 +2594,6 @@ class AppDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "sectionIndex": request.section_index,
             "pageIndex": request.page_index,
             "sectionName": request.section_name,
@@ -466,7 +2639,6 @@ class AppDefinitionClient(BaseClappiaClient):
     def update_section(
         self,
         app_id: str,
-        requesting_user_email_address: str,
         section_index: int,
         page_index: int,
         section_name: Optional[str] = None,
@@ -483,7 +2655,6 @@ class AppDefinitionClient(BaseClappiaClient):
 
         Args:
             app_id: The ID of the app containing the section
-            requesting_user_email_address: Email of the user updating the section
             section_index: Index of the section to update
             page_index: Page index of the section
             section_name: Display title of the section
@@ -502,7 +2673,6 @@ class AppDefinitionClient(BaseClappiaClient):
         try:
             request = UpdateSectionRequest(
                 app_id=app_id,
-                requesting_user_email_address=requesting_user_email_address,
                 section_index=section_index,
                 page_index=page_index,
                 section_name=section_name,
@@ -532,7 +2702,6 @@ class AppDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "sectionIndex": request.section_index,
             "pageIndex": request.page_index,
         }
@@ -587,7 +2756,6 @@ class AppDefinitionClient(BaseClappiaClient):
     def update_field(
         self,
         app_id: str,
-        requesting_user_email_address: str,
         field_name: str,
         label: Optional[str] = None,
         description: Optional[str] = None,
@@ -615,7 +2783,6 @@ class AppDefinitionClient(BaseClappiaClient):
         try:
             request = UpdateFieldRequest(
                 app_id=app_id,
-                requesting_user_email_address=requesting_user_email_address,
                 field_name=field_name,
                 label=label,
                 description=description,
@@ -660,7 +2827,6 @@ class AppDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "fieldName": request.field_name,
         }
 
@@ -764,85 +2930,9 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def remove_page_break(
-        self,
-        app_id: str,
-        requesting_user_email_address: str,
-        page_index: int,
-    ) -> PageBreakOperationResponse:
-        """Remove a page break from an app.
-
-        Args:
-            app_id: The app ID
-            requesting_user_email_address: Email of requesting user
-            page_index: Page index to remove (must be > 0)
-
-        Returns:
-            PageBreakOperationResponse: Response with operation result
-        """
-        try:
-            request = RemovePageBreakRequest(
-                app_id=app_id,
-                requesting_user_email_address=requesting_user_email_address,
-                page_index=page_index,
-            )
-        except Exception as e:
-            return PageBreakOperationResponse(
-                success=False,
-                message=str(e),
-                app_id=app_id,
-                page_index=page_index,
-                operation="remove_page_break",
-            )
-
-        env_valid, env_error = self.api_utils.validate_environment()
-        if not env_valid:
-            return PageBreakOperationResponse(
-                success=False,
-                message=env_error,
-                app_id=app_id,
-                page_index=page_index,
-                operation="remove_page_break",
-            )
-
-        payload = {
-            "appId": request.app_id,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
-            "pageIndex": request.page_index,
-        }
-
-        logger.info(f"Removing page break from app_id: {app_id} with payload: {payload}")
-
-        success, error_message, response_data = self.api_utils.make_request(
-            method="POST",
-            endpoint="appdefinitionv2/removePageBreak",
-            data=payload,
-        )
-
-        if not success:
-            logger.error(f"Error: {error_message}")
-            return PageBreakOperationResponse(
-                success=False,
-                message=error_message,
-                app_id=app_id,
-                page_index=page_index,
-                operation="remove_page_break",
-                data=response_data,
-            )
-
-        return PageBreakOperationResponse(
-            success=True,
-            message=f"Page break at page with index {page_index} removed successfully",
-            app_id=app_id,
-            page_index=page_index,
-            operation="remove_page_break",
-            data=response_data,
-        )
-
     def add_page_break(
         self,
         app_id: str,
-        requesting_user_email_address: str,
         page_index: int,
         section_index: int,
     ) -> PageBreakOperationResponse:
@@ -850,7 +2940,6 @@ class AppDefinitionClient(BaseClappiaClient):
 
         Args:
             app_id: The app ID
-            requesting_user_email_address: Email of requesting user
             page_index: Page index where to add page break
             section_index: Section index where to add page break
 
@@ -860,7 +2949,6 @@ class AppDefinitionClient(BaseClappiaClient):
         try:
             request = AddPageBreakRequest(
                 app_id=app_id,
-                requesting_user_email_address=requesting_user_email_address,
                 page_index=page_index,
                 section_index=section_index,
             )
@@ -885,7 +2973,6 @@ class AppDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "pageIndex": request.page_index,
             "sectionIndex": request.section_index,
         }
@@ -921,7 +3008,6 @@ class AppDefinitionClient(BaseClappiaClient):
     def update_page(
         self,
         app_id: str,
-        requesting_user_email_address: str,
         page_index: int,
         show_submit_button: Optional[bool] = None,
         previous_button_text: Optional[str] = None,
@@ -931,7 +3017,6 @@ class AppDefinitionClient(BaseClappiaClient):
 
         Args:
             app_id: The app ID
-            requesting_user_email_address: Email of requesting user
             page_index: Page index to update
             show_submit_button: Show submit button
             previous_button_text: Previous button text
@@ -943,7 +3028,6 @@ class AppDefinitionClient(BaseClappiaClient):
         try:
             request = UpdatePageBreakRequest(
                 app_id=app_id,
-                requesting_user_email_address=requesting_user_email_address,
                 page_index=page_index,
                 show_submit_button=show_submit_button,
                 previous_button_text=previous_button_text,
@@ -970,7 +3054,6 @@ class AppDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "pageIndex": request.page_index,
         }
 
@@ -1019,7 +3102,6 @@ class AppDefinitionClient(BaseClappiaClient):
     def reorder_section(
         self,
         app_id: str,
-        requesting_user_email_address: str,
         source_section_index: int,
         target_section_index: int,
         source_page_index: Optional[int] = None,
@@ -1029,7 +3111,6 @@ class AppDefinitionClient(BaseClappiaClient):
 
         Args:
             app_id: The app ID
-            requesting_user_email_address: Email of requesting user
             source_section_index: Source section index
             target_section_index: Target section index
             source_page_index: Source page index (optional)
@@ -1041,7 +3122,6 @@ class AppDefinitionClient(BaseClappiaClient):
         try:
             request = ReorderSectionRequest(
                 app_id=app_id,
-                requesting_user_email_address=requesting_user_email_address,
                 source_section_index=source_section_index,
                 target_section_index=target_section_index,
                 source_page_index=source_page_index,
@@ -1074,7 +3154,6 @@ class AppDefinitionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "sourceSectionIndex": request.source_section_index,
             "targetSectionIndex": request.target_section_index,
         }
