@@ -1,9 +1,17 @@
+from .app_definition import (
+    AddFieldTextRequest,
+    AddFieldTextAreaRequest,
+    AddFieldDependencyAppRequest,
+    AddFieldRestApiRequest,
+    AddFieldAddressRequest,
+)
+
+
 from .app_definition_requests import (
     GetAppDefinitionRequest,
     CreateAppRequest,
     AddFieldRequest,
     UpdateFieldRequest,
-    RemovePageBreakRequest,
     AddPageBreakRequest,
     UpdatePageBreakRequest,
     ReorderSectionRequest,
@@ -34,13 +42,11 @@ from .submission_requests import (
 from .workflow_requests import (
     GetWorkflowRequest,
     AddWorkflowStepRequest,
-    RemoveWorkflowStepRequest,
     UpdateWorkflowStepRequest,
     ReorderWorkflowStepRequest,
 )
 from .analytics_requests import (
     AddChartRequest,
-    RemoveChartRequest,
     UpdateChartRequest,
     ReorderChartRequest,
     GetAppChartsRequest
@@ -51,7 +57,6 @@ __all__ = [
     "CreateAppRequest",
     "AddFieldRequest",
     "UpdateFieldRequest",
-    "RemovePageBreakRequest",
     "AddPageBreakRequest",
     "UpdatePageBreakRequest",
     "ReorderSectionRequest",
@@ -73,11 +78,9 @@ __all__ = [
     "GetSubmissionsCountRequest",
     "GetWorkflowRequest",
     "AddWorkflowStepRequest",
-    "RemoveWorkflowStepRequest",
     "UpdateWorkflowStepRequest",
     "ReorderWorkflowStepRequest",
     "AddChartRequest",
-    "RemoveChartRequest",
     "UpdateChartRequest",
     "ReorderChartRequest",
     "GetAppChartsRequest",
@@ -85,4 +88,11 @@ __all__ = [
     "GetWorkplaceUserAppsRequest",
     "AddSectionRequest",
     "UpdateSectionRequest",
+
+
+    "AddFieldTextRequest",
+    "AddFieldTextAreaRequest",
+    "AddFieldDependencyAppRequest",
+    "AddFieldRestApiRequest",
+    "AddFieldAddressRequest",
 ]

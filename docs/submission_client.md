@@ -28,7 +28,7 @@ client = SubmissionClient(
 ### create_submission
 
 ```python
-def create_submission(app_id: str, data: Dict[str, Any], requesting_user_email_address: str) -> str
+def create_submission(app_id: str, data: Dict[str, Any]) -> str
 ```
 
 Creates a new submission in a Clappia application with specified field data.
@@ -37,7 +37,6 @@ Creates a new submission in a Clappia application with specified field data.
 
 -  `app_id` (str): Application ID in uppercase letters and numbers format (e.g., MFX093412). Specifies which Clappia app to create the submission in.
 -  `data` (Dict[str, Any]): Dictionary of field data to submit. Keys should match field names from the app definition, values should match expected field types. Example: `{ "employee_name": "John Doe", "department": "Engineering" }`.
--  `requesting_user_email_address` (str): Email address of the user creating the submission. Must be a valid email format.
 
 **Returns:**
 
@@ -48,7 +47,7 @@ Creates a new submission in a Clappia application with specified field data.
 ### edit_submission
 
 ```python
-def edit_submission(app_id: str, submission_id: str, data: Dict[str, Any], requesting_user_email_address: str) -> str
+def edit_submission(app_id: str, submission_id: str, data: Dict[str, Any]) -> str
 ```
 
 Edits an existing Clappia submission by updating specified field values.
@@ -58,7 +57,6 @@ Edits an existing Clappia submission by updating specified field values.
 -  `app_id` (str): Application ID in uppercase letters and numbers format (e.g., MFX093412).
 -  `submission_id` (str): Unique identifier of the submission to update (e.g., HGO51464561).
 -  `data` (Dict[str, Any]): Dictionary of field data to update. Only specified fields will be updated.
--  `requesting_user_email_address` (str): Email address of the user requesting the edit. Must be a valid email format.
 
 **Returns:**
 
@@ -69,7 +67,7 @@ Edits an existing Clappia submission by updating specified field values.
 ### update_owners
 
 ```python
-def update_owners(app_id: str, submission_id: str, requesting_user_email_address: str, email_ids: List[str]) -> str
+def update_owners(app_id: str, submission_id: str, email_ids: List[str]) -> str
 ```
 
 Updates the ownership of a Clappia submission by adding new owners to share access.
@@ -78,7 +76,6 @@ Updates the ownership of a Clappia submission by adding new owners to share acce
 
 -  `app_id` (str): Application ID in uppercase letters and numbers format (e.g., MFX093412).
 -  `submission_id` (str): Unique identifier of the submission to update (e.g., HGO51464561).
--  `requesting_user_email_address` (str): Email address of the user making the ownership change. Must be a valid email format.
 -  `email_ids` (List[str]): List of email addresses to add as new owners. Each email must be valid.
 
 **Returns:**
@@ -90,7 +87,7 @@ Updates the ownership of a Clappia submission by adding new owners to share acce
 ### update_status
 
 ```python
-def update_status(app_id: str, submission_id: str, requesting_user_email_address: str, status_name: str, comments: str) -> str
+def update_status(app_id: str, submission_id: str,status_name: str, comments: str) -> str
 ```
 
 Updates the status of a Clappia submission to track workflow progress and approvals.
@@ -99,7 +96,6 @@ Updates the status of a Clappia submission to track workflow progress and approv
 
 -  `app_id` (str): Application ID in uppercase letters and numbers format (e.g., MFX093412).
 -  `submission_id` (str): Unique identifier of the submission to update (e.g., HGO51464561).
--  `requesting_user_email_address` (str): Email address of the user making the status change. Must be a valid email format.
 -  `status_name` (str): Name of the new status to apply to the submission.
 -  `comments` (str): Optional comments to include with the status change.
 
@@ -112,7 +108,7 @@ Updates the status of a Clappia submission to track workflow progress and approv
 ### get_submissions
 
 ```python
-def get_submissions(app_id: str, requesting_user_email_address: str, page_size: int = 10, filters: Optional[Filters] = None) -> str
+def get_submissions(app_id: str, page_size: int = 10, filters: Optional[Filters] = None) -> str
 ```
 
 Retrieves Clappia form submissions with optional filtering capabilities.
@@ -120,7 +116,6 @@ Retrieves Clappia form submissions with optional filtering capabilities.
 **Args:**
 
 -  `app_id` (str): Application ID in uppercase letters and numbers format (e.g., MFX093412).
--  `requesting_user_email_address` (str): Email address of the user requesting the submissions. Must be a valid email format.
 -  `page_size` (int, optional): Number of results to retrieve (1-1000, default: 10).
 -  `filters` (Optional[Filters], optional): Filter conditions using the Filters class for advanced querying.
 
@@ -139,7 +134,7 @@ Retrieves Clappia form submissions with optional filtering capabilities.
 ### get_submissions_aggregation
 
 ```python
-def get_submissions_aggregation(app_id: str, dimensions: List[Dimension] = None, aggregation_dimensions: List[AggregationDimension] = None, x_axis_labels: List[str] = None, requesting_user_email_address: str = "dev@clappia.com", forward: bool = True, page_size: int = 1000, filters: Optional[Filters] = None) -> str
+def get_submissions_aggregation(app_id: str, dimensions: List[Dimension] = None, aggregation_dimensions: List[AggregationDimension] = None, x_axis_labels: List[str] = None, forward: bool = True, page_size: int = 1000, filters: Optional[Filters] = None) -> str
 ```
 
 Aggregates Clappia submission data for analytics and reporting.
@@ -150,7 +145,6 @@ Aggregates Clappia submission data for analytics and reporting.
 -  `dimensions` (List[Dimension], optional): Fields to group by for analysis.
 -  `aggregation_dimensions` (List[AggregationDimension], optional): Calculations to perform (count, sum, average, etc.).
 -  `x_axis_labels` (List[str], optional): Output column labels for the aggregated data.
--  `requesting_user_email_address` (str, optional): User email. Defaults to "dev@clappia.com".
 -  `forward` (bool, optional): Pagination direction. Defaults to True.
 -  `page_size` (int, optional): Max results (1-1000). Defaults to 1000.
 -  `filters` (Optional[Filters], optional): Filter conditions for the aggregation.
@@ -328,7 +322,6 @@ client = SubmissionClient(
 result = client.create_submission(
     app_id="MFX093412",
     data={"employee_name": "John Doe", "department": "Engineering"},
-    requesting_user_email_address="user@example.com"
 )
 print(result)
 
@@ -345,7 +338,6 @@ filters = Filters(queries=[query_group])
 
 result = client.get_submissions(
     app_id="MFX093412",
-    requesting_user_email_address="user@example.com",
     page_size=50,
     filters=filters
 )
@@ -366,7 +358,6 @@ result = client.get_submissions_aggregation(
     dimensions=[region_dimension],
     aggregation_dimensions=[count_aggregation],
     x_axis_labels=["Region", "Count"],
-    requesting_user_email_address="user@example.com"
 )
 print(result)
 ```

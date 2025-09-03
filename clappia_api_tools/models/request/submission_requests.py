@@ -12,9 +12,6 @@ from ...enums import ExcelFormat
 
 class BaseSubmissionRequest(BaseModel):
     app_id: str = Field(description="App Id")
-    requesting_user_email_address: EmailStr = Field(
-        description="Email of requesting user"
-    )
 
     @field_validator("app_id")
     def validate_app_id(cls, v: str) -> str:
@@ -120,6 +117,7 @@ class UpdateSubmissionOwnersRequest(BaseSubmissionRequest):
 
 class GetSubmissionsInExcelRequest(BaseSubmissionRequest):
     filters: Optional[SubmissionFilters] = Field(None, description="Optional filters")
+    requesting_user_email_address: EmailStr = Field(description="Email of requesting user")
     field_names: Optional[List[str]] = Field(
         None,
         description="List of field names to include in export, both standard and custom fields",

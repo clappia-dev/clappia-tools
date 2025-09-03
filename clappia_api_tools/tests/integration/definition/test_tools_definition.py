@@ -151,7 +151,6 @@ class TestDefinitionToolsIntegration:
         client = dummy_app_definition_client()
         result = client.add_field(
             app_id="MFX093412",
-            requesting_user_email_address="admin@example.com",
             section_index=0,
             field_index=1,
             field_type="singleLineText",
@@ -179,7 +178,6 @@ class TestDefinitionToolsIntegration:
         client = dummy_app_definition_client()
         result = client.add_field(
             app_id="MFX093412",
-            requesting_user_email_address="admin@example.com",
             section_index=0,
             field_index=2,
             field_type="dropDown",
@@ -204,7 +202,6 @@ class TestDefinitionToolsIntegration:
         client = dummy_app_definition_client()
         result = client.add_field(
             app_id="MFX093412",
-            requesting_user_email_address="admin@example.com",
             section_index=1,
             field_index=0,
             field_type="singleSelector",
@@ -229,7 +226,6 @@ class TestDefinitionToolsIntegration:
         client = dummy_app_definition_client()
         result = client.add_field(
             app_id="MFX093412",
-            requesting_user_email_address="admin@example.com",
             section_index=2,
             field_index=0,
             field_type="file",
@@ -249,7 +245,6 @@ class TestDefinitionToolsIntegration:
         client = dummy_app_definition_client()
         result = client.add_field(
             app_id="MFX093412",
-            requesting_user_email_address="admin@example.com",
             section_index=0,
             field_index=0,
             field_type="invalidFieldType",
@@ -411,7 +406,6 @@ class TestDefinitionToolsIntegration:
         client = dummy_app_definition_client()
         result = client.add_field(
             app_id="MFX093412",
-            requesting_user_email_address="admin@example.com",
             section_index=1,
             field_index=3,
             field_type="calculationsAndLogic",
@@ -437,7 +431,6 @@ class TestDefinitionToolsIntegration:
         client = dummy_app_definition_client()
         result = client.add_field(
             app_id="MFX093412",
-            requesting_user_email_address="admin@example.com",
             section_index=0,
             field_index=5,
             field_type="singleLineText",
@@ -472,7 +465,6 @@ class TestDefinitionToolsIntegration:
         client = dummy_app_definition_client()
         result = client.add_field(
             app_id="MFX093412",
-            requesting_user_email_address="admin@example.com",
             section_index=0,
             field_index=0,
             field_type="singleLineText",

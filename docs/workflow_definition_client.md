@@ -8,7 +8,6 @@ Workflows in Clappia are automated processes that trigger specific actions when 
 
 -  Retrieve existing workflow definitions
 -  Add new workflow steps
--  Remove workflow steps
 -  Update workflow step configurations
 -  Reorder workflow steps
 
@@ -30,7 +29,8 @@ client = WorkflowDefinitionClient(
 Retrieve the schema for workflow definitions. This provides information about the structure and configuration options available for workflows.
 
 ```python
-result = client.get_schema()
+# Get schema for a specific node type
+result = client.get_schema(node_type="Email")
 
 if result.success:
     print(f"Schema retrieved: {result.message}")
@@ -41,7 +41,7 @@ else:
 
 **Parameters:**
 
--  None (no parameters required)
+-  `node_type` (str): Node type to filter the schema (e.g., "Email", "SMS", "Slack", etc.)
 
 **Returns:**
 
@@ -55,7 +55,6 @@ Retrieve the complete workflow definition for a specific app and trigger type.
 result = client.get_workflow(
     app_id="MFX093412",
     trigger_type="submissionCreated",
-    requesting_user_email_address="user@example.com"
 )
 
 if result.success:
@@ -69,7 +68,6 @@ else:
 
 -  `app_id` (str): App Id
 -  `trigger_type` (str): The trigger type for the workflow
--  `requesting_user_email_address` (str): Email of the requesting user
 
 **Valid Trigger Types:**
 
@@ -87,7 +85,6 @@ result = client.add_workflow_step(
     app_id="MFX093412",
     trigger_type="submissionCreated",
     node_type="Email",
-    requesting_user_email_address="user@example.com",
     parent_variable_name="Start"  # Optional, defaults to "Start"
 )
 
@@ -102,7 +99,6 @@ else:
 -  `app_id` (str): App Id
 -  `trigger_type` (str): The trigger type for the workflow
 -  `node_type` (str): Type of workflow node to add
--  `requesting_user_email_address` (str): Email of the requesting user
 -  `parent_variable_name` (str, optional): Parent workflow step variable name (default: "Start")
 
 **Valid Node Types:**
@@ -119,30 +115,13 @@ else:
 -  `FindClappiaAppSubmission` - Find submissions in other apps
 -  `DeleteClappiaAppSubmission` - Delete submissions in other apps
 
-### Remove Workflow Step
-
-Remove a workflow step from an existing workflow.
-
-```python
-result = client.remove_workflow_step(
-    app_id="MFX093412",
-    trigger_type="submissionCreated",
-    step_variable_name="email_notification",
-    requesting_user_email_address="user@example.com"
-)
-
-if result.success:
-    print(f"Step removed: {result.message}")
-else:
-    print(f"Error: {result.message}")
 ```
 
 **Parameters:**
 
 -  `app_id` (str): App Id
 -  `trigger_type` (str): The trigger type for the workflow
--  `step_variable_name` (str): Variable name of the workflow step to remove
--  `requesting_user_email_address` (str): Email of the requesting user
+-  `step_variable_name` (str): Variable name of the workflow step to update
 
 ### Update Workflow Step
 
@@ -159,7 +138,6 @@ result = client.update_workflow_step(
     app_id="MFX093412",
     trigger_type="submissionCreated",
     step_variable_name="email_notification",
-    requesting_user_email_address="user@example.com",
     update_data=update_data
 )
 
@@ -174,7 +152,6 @@ else:
 -  `app_id` (str): App Id
 -  `trigger_type` (str): The trigger type for the workflow
 -  `step_variable_name` (str): Variable name of the workflow step to update
--  `requesting_user_email_address` (str): Email of the requesting user
 -  `update_data` (dict): Dictionary containing the fields to update
 
 ### Reorder Workflow Step
@@ -187,7 +164,6 @@ result = client.reorder_workflow_step(
     trigger_type="submissionCreated",
     step_variable_name="email_notification",
     parent_variable_name="validation_step",
-    requesting_user_email_address="user@example.com"
 )
 
 if result.success:
@@ -202,7 +178,6 @@ else:
 -  `trigger_type` (str): The trigger type for the workflow
 -  `step_variable_name` (str): Variable name of the workflow step to move
 -  `parent_variable_name` (str): Variable name of the new parent workflow step
--  `requesting_user_email_address` (str): Email of the requesting user
 
 ## Response Models
 
@@ -240,7 +215,6 @@ All methods return response objects with consistent error handling:
 result = client.get_workflow(
     app_id="INVALID_ID",
     trigger_type="submissionCreated",
-    requesting_user_email_address="user@example.com"
 )
 
 if not result.success:
@@ -265,7 +239,6 @@ client = WorkflowDefinitionClient(
 workflow = client.get_workflow(
     app_id="MFX093412",
     trigger_type="submissionCreated",
-    requesting_user_email_address="admin@company.com"
 )
 
 if workflow.success:
@@ -276,7 +249,6 @@ if workflow.success:
         app_id="MFX093412",
         trigger_type="submissionCreated",
         node_type="Email",
-        requesting_user_email_address="admin@company.com"
     )
 
     if add_result.success:
@@ -292,7 +264,6 @@ if workflow.success:
             app_id="MFX093412",
             trigger_type="submissionCreated",
             step_variable_name="email_notification",  # Generated variable name
-            requesting_user_email_address="admin@company.com",
             update_data=update_data
         )
 

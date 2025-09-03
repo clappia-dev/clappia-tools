@@ -32,6 +32,3 @@ class SubmissionsCountResponse(BaseResponse):
     filtered_count: int = Field(
         None, description="Number of submissions after applying filters"
     )
-    requesting_user_email_address: Optional[str] = Field(
-        None, description="Email address where file was sent"
-    )

@@ -19,7 +19,7 @@ Clappia API Tools is a Python package that provides a set of clients for seamles
 -  **Submission Management**: Create, edit, update owners, and change status of submissions.
 -  **App Definition Retrieval**: Fetch complete app structure and metadata and manage the app structure via fields and sections updates.
 -  **Workflow Management**: Retrieve, create, modify, and manage workflow definitions and steps.
--  **Analytics Management**: Add, remove, update, and reorder charts and analytics configurations.
+-  **Analytics Management**: Add, update, and reorder charts and analytics configurations.
 
 ---
 
@@ -27,8 +27,8 @@ Clappia API Tools is a Python package that provides a set of clients for seamles
 
 -  `SubmissionClient`: Manage submissions (create, edit, update owners, change status)
 -  `AppDefinitionClient`: Retrieve app definitions and metadata and Manage app structure (fields, sections, creation)
--  `WorkflowDefinitionClient`: Manage workflow definitions (get, add, remove, update, reorder workflow steps)
--  `AnalyticsClient`: Manage analytics and charts (add, remove, update, reorder charts)
+-  `WorkflowDefinitionClient`: Manage workflow definitions (get, add, update, reorder workflow steps)
+-  `AnalyticsClient`: Manage analytics and charts (add, update, reorder charts)
 
 ---
 
@@ -83,7 +83,6 @@ client = SubmissionClient(
 result = client.create_submission(
     app_id="MFX093412",
     data={"employee_name": "John Doe", "department": "Engineering"},
-    requesting_user_email_address="user@example.com"
 )
 print(result)
 ```
@@ -117,7 +116,6 @@ client = WorkflowDefinitionClient(
 result = client.get_workflow(
     app_id="MFX093412",
     trigger_type="submissionCreated",
-    requesting_user_email_address="user@example.com"
 )
 print(result)
 
@@ -126,7 +124,6 @@ add_result = client.add_workflow_step(
     app_id="MFX093412",
     trigger_type="submissionCreated",
     node_type="Email",
-    requesting_user_email_address="user@example.com"
 )
 print(add_result)
 ```
@@ -145,7 +142,6 @@ client = AnalyticsClient(
 result = client.add_chart(
     app_id="MFX093412",
     chart_type="Bar",
-    requesting_user_email_address="user@example.com",
     chart_title="Sales Overview"
 )
 print(result)
@@ -159,7 +155,6 @@ update_data = {
 update_result = client.update_chart(
     app_id="MFX093412",
     chart_index=0,
-    requesting_user_email_address="user@example.com",
     update_data=update_data
 )
 print(update_result)

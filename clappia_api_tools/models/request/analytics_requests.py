@@ -69,20 +69,6 @@ class AddChartRequest(BaseAnalyticsRequest):
         extra_field_names = all_fields - base_fields
         return {field: getattr(self, field) for field in extra_field_names if hasattr(self, field)}
 
-
-class RemoveChartRequest(BaseAnalyticsRequest):
-    """Request model for removing a chart"""
-
-    chart_index: int = Field(description="Index of the chart to remove")
-
-    @field_validator("chart_index")
-    @classmethod
-    def validate_chart_index(cls, v: int) -> int:
-        if not isinstance(v, int) or v < 0:
-            raise ValueError('Parameter "chartIndex" should be a non-negative number')
-        return v
-
-
 class UpdateChartRequest(BaseAnalyticsRequest):
     """Request model for updating a chart in analytics dashboard"""
 

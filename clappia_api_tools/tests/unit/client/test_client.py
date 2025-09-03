@@ -43,7 +43,6 @@ class TestSubmissionClient:
         client = SubmissionClient()
         result = client.create_submission("MFX093412", {"test": "data"}, "")
         assert result.success is False
-        assert "requesting_user_email_address" in result.message
 
     def test_create_submission_invalid_email(self):
         """Test create_submission with invalid email format"""
@@ -52,7 +51,6 @@ class TestSubmissionClient:
             "MFX093412", {"test": "data"}, "invalid-email"
         )
         assert result.success is False
-        assert "requesting_user_email_address" in result.message
 
     def test_create_submission_empty_data(self):
         """Test create_submission with empty data"""

@@ -3,7 +3,6 @@ from .base_client import BaseClappiaClient
 from clappia_api_tools.utils.logging_utils import get_logger
 from clappia_api_tools.models.request import (
     AddChartRequest,
-    RemoveChartRequest,
     UpdateChartRequest,
     ReorderChartRequest,
     GetAppChartsRequest
@@ -78,49 +77,6 @@ class AnalyticsClient(BaseClappiaClient):
             app_id=app_id,
             chart_type=chart_type,
             operation="add",
-            data=response_data,
-        )
-    
-    def remove_chart(self, app_id: str, chart_index: int) -> ChartResponse:
-        try:
-            request = RemoveChartRequest(
-                app_id=app_id,
-                chart_index=chart_index,
-            )
-        except Exception as e:
-            return ChartResponse(
-                success=False, message=str(e), app_id=app_id, operation="remove"
-            )
-
-        env_valid, env_error = self.api_utils.validate_environment()
-        if not env_valid:
-            return ChartResponse(
-                success=False, message=env_error, app_id=app_id, operation="remove"
-            )
-
-        payload = {
-            "appId": request.app_id,
-            "chartIndex": request.chart_index,
-        }
-
-        logger.info(f"Removing chart for app_id: {app_id} at index: {chart_index}")
-
-        success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/removeChart", data=payload
-        )
-
-        if not success:
-            logger.error(f"Error: {error_message}")
-            return ChartResponse(
-                success=False, message=error_message, app_id=app_id, operation="remove"
-            )
-
-        return ChartResponse(
-            success=True,
-            message="Successfully removed chart",
-            app_id=app_id,
-            chart_index=chart_index,
-            operation="remove",
             data=response_data,
         )
 

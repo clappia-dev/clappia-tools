@@ -21,9 +21,6 @@ class BaseAppDefinitionRequest(BaseModel):
 
 
 class GetAppDefinitionRequest(BaseAppDefinitionRequest):
-    requesting_user_email_address: EmailStr = Field(
-        description="Email of requesting user"
-    )
     language: str = Field(default="en", description="Language code")
     strip_html: bool = Field(default=True, description="Remove HTML formatting")
     include_tags: bool = Field(default=True, description="Include metadata tags")
@@ -40,9 +37,6 @@ class CreateAppRequest(BaseModel):
 
 
 class AddFieldRequest(BaseAppDefinitionRequest):
-    requesting_user_email_address: EmailStr = Field(
-        description="Email of user adding field"
-    )
     section_index: int = Field(ge=0, description="Section index")
     field_index: int = Field(ge=0, description="Field index")
     field_type: FieldType = Field(
@@ -84,9 +78,6 @@ class AddFieldRequest(BaseAppDefinitionRequest):
 
 
 class AddSectionRequest(BaseAppDefinitionRequest):
-    requesting_user_email_address: EmailStr = Field(
-        description="Email of user adding section"
-    )
     section_index: int = Field(ge=0, description="Position where section will be inserted (0-based)")
     page_index: int = Field(ge=0, description="Page index where section will be added")
     section_name: str = Field(description="Display name for the section")
@@ -96,9 +87,6 @@ class AddSectionRequest(BaseAppDefinitionRequest):
 
 
 class UpdateSectionRequest(BaseAppDefinitionRequest):
-    requesting_user_email_address: EmailStr = Field(
-        description="Email of user updating section"
-    )
     section_index: int = Field(ge=0, description="Index of the section to update")
     page_index: int = Field(ge=0, description="Page index of the section")
     section_name: Optional[str] = Field(None, description="Display title of the section")
@@ -113,9 +101,6 @@ class UpdateSectionRequest(BaseAppDefinitionRequest):
 
 
 class UpdateFieldRequest(BaseAppDefinitionRequest):
-    requesting_user_email_address: EmailStr = Field(
-        description="Email of user updating field"
-    )
     field_name: str = Field(description="Variable name of field to update")
     label: Optional[str] = Field(None, description="New display label")
     description: Optional[str] = Field(None, description="New field description")
@@ -160,9 +145,6 @@ class UpdateFieldRequest(BaseAppDefinitionRequest):
 
 
 class RemovePageBreakRequest(BaseAppDefinitionRequest):
-    requesting_user_email_address: EmailStr = Field(
-        description="Email of requesting user"
-    )
     page_index: int = Field(ge=0, description="Page index to remove")
 
     @field_validator("page_index")
@@ -174,17 +156,11 @@ class RemovePageBreakRequest(BaseAppDefinitionRequest):
 
 
 class AddPageBreakRequest(BaseAppDefinitionRequest):
-    requesting_user_email_address: EmailStr = Field(
-        description="Email of requesting user"
-    )
     page_index: int = Field(ge=0, description="Page index where to add page break")
     section_index: int = Field(ge=0, description="Section index where to add page break")
 
 
 class UpdatePageBreakRequest(BaseAppDefinitionRequest):
-    requesting_user_email_address: EmailStr = Field(
-        description="Email of requesting user"
-    )
     page_index: int = Field(ge=0, description="Page index to update")
     show_submit_button: Optional[bool] = Field(None, description="Show submit button")
     previous_button_text: Optional[str] = Field(None, description="Previous button text")
@@ -217,10 +193,8 @@ class UpdatePageBreakRequest(BaseAppDefinitionRequest):
 
 
 class ReorderSectionRequest(BaseAppDefinitionRequest):
-    requesting_user_email_address: EmailStr = Field(
-        description="Email of requesting user"
-    )
     source_section_index: int = Field(ge=0, description="Source section index")
     target_section_index: int = Field(ge=0, description="Target section index")
     source_page_index: Optional[int] = Field(None, ge=0, description="Source page index")
     target_page_index: Optional[int] = Field(None, ge=0, description="Target page index")
+

@@ -4,7 +4,6 @@ from clappia_api_tools.utils.logging_utils import get_logger
 from clappia_api_tools.models.request import (
     GetWorkflowRequest,
     AddWorkflowStepRequest,
-    RemoveWorkflowStepRequest,
     UpdateWorkflowStepRequest,
     ReorderWorkflowStepRequest,
 )
@@ -129,75 +128,6 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             app_id=app_id,
             trigger_type=trigger_type,
             operation="add",
-            data=response_data,
-        )
-
-    def remove_workflow_step(
-        self,
-        app_id: str,
-        trigger_type: str,
-        step_variable_name: str,
-    ) -> WorkflowStepResponse:
-        try:
-            request = RemoveWorkflowStepRequest(
-                app_id=app_id,
-                trigger_type=trigger_type,
-                step_variable_name=step_variable_name,
-                delete_type="node",
-            )
-        except Exception as e:
-            return WorkflowStepResponse(
-                success=False,
-                message=str(e),
-                app_id=app_id,
-                trigger_type=trigger_type,
-                operation="remove",
-            )
-
-        env_valid, env_error = self.api_utils.validate_environment()
-        if not env_valid:
-            return WorkflowStepResponse(
-                success=False,
-                message=env_error,
-                app_id=app_id,
-                trigger_type=trigger_type,
-                operation="remove",
-            )
-
-        payload = {
-            "appId": request.app_id,
-            "triggerType": request.trigger_type.value,
-            "stepVariableName": request.step_variable_name,
-            "deleteType": request.delete_type,
-        }
-
-        logger.info(
-            f"Removing workflow step for app_id: {app_id} with step: {step_variable_name}"
-        )
-
-        success, error_message, response_data = self.api_utils.make_request(
-            method="POST",
-            endpoint="workflowdefinitionv2/removeWorkflowStep",
-            data=payload,
-        )
-
-        if not success:
-            logger.error(f"Error: {error_message}")
-            return WorkflowStepResponse(
-                success=False,
-                message=error_message,
-                app_id=app_id,
-                trigger_type=trigger_type,
-                operation="remove",
-            )
-
-        return WorkflowStepResponse(
-            success=True,
-            message="Successfully removed workflow step",
-            app_id=app_id,
-            trigger_type=trigger_type,
-            operation="remove",
-            step_variable_name=step_variable_name,
             data=response_data,
         )
 

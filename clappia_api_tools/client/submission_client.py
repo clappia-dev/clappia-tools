@@ -38,7 +38,6 @@ class SubmissionClient(BaseClappiaClient):
     def get_submissions(
         self,
         app_id: str,
-        requesting_user_email_address: str,
         fields: Optional[List[str]] = None,
         page_size: int = 10,
         forward: bool = True,
@@ -48,7 +47,6 @@ class SubmissionClient(BaseClappiaClient):
         try:
             request = GetSubmissionsRequest(
                 app_id=app_id,
-                requesting_user_email_address=requesting_user_email_address,
                 page_size=page_size,
                 forward=forward,
                 filters=filters,
@@ -64,7 +62,6 @@ class SubmissionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "pageSize": request.page_size,
             "forward": request.forward,
         }
@@ -101,7 +98,6 @@ class SubmissionClient(BaseClappiaClient):
     def get_submissions_aggregation(
         self,
         app_id: str,
-        requesting_user_email_address: str,
         dimensions: Optional[List[AggregationDimension]] = None,
         aggregation_dimensions: Optional[List[AggregationMetric]] = None,
         x_axis_labels: Optional[List[str]] = None,
@@ -112,7 +108,6 @@ class SubmissionClient(BaseClappiaClient):
         try:
             request = GetSubmissionsAggregationRequest(
                 app_id=app_id,
-                requesting_user_email_address=requesting_user_email_address,
                 dimensions=dimensions,
                 aggregation_dimensions=aggregation_dimensions,
                 x_axis_labels=x_axis_labels,
@@ -140,7 +135,6 @@ class SubmissionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "forward": request.forward,
             "pageSize": request.page_size,
             "xAxisLabels": request.x_axis_labels or [],
@@ -179,12 +173,11 @@ class SubmissionClient(BaseClappiaClient):
         )
 
     def create_submission(
-        self, app_id: str, data: Dict[str, Any], requesting_user_email_address: str
+        self, app_id: str, data: Dict[str, Any],
     ) -> SubmissionResponse:
         try:
             request = CreateSubmissionRequest(
                 app_id=app_id,
-                requesting_user_email_address=requesting_user_email_address,
                 data=data,
             )
         except Exception as e:
@@ -214,7 +207,6 @@ class SubmissionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "data": request.data,
         }
 
@@ -249,13 +241,11 @@ class SubmissionClient(BaseClappiaClient):
         app_id: str,
         submission_id: str,
         data: Dict[str, Any],
-        requesting_user_email_address: str,
     ) -> SubmissionResponse:
         try:
             request = EditSubmissionRequest(
                 app_id=app_id,
                 submission_id=submission_id,
-                requesting_user_email_address=requesting_user_email_address,
                 data=data,
             )
         except Exception as e:
@@ -289,7 +279,6 @@ class SubmissionClient(BaseClappiaClient):
         payload = {
             "appId": request.app_id,
             "submissionId": request.submission_id,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "data": request.data,
         }
 
@@ -324,7 +313,6 @@ class SubmissionClient(BaseClappiaClient):
         self,
         app_id: str,
         submission_id: str,
-        requesting_user_email_address: str,
         status_name: str,
         comments: Optional[str] = None,
     ) -> SubmissionResponse:
@@ -332,7 +320,6 @@ class SubmissionClient(BaseClappiaClient):
             request = UpdateSubmissionStatusRequest(
                 app_id=app_id,
                 submission_id=submission_id,
-                requesting_user_email_address=requesting_user_email_address,
                 status_name=status_name,
                 comments=comments,
             )
@@ -363,7 +350,6 @@ class SubmissionClient(BaseClappiaClient):
         payload = {
             "appId": request.app_id,
             "submissionId": request.submission_id,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "status": status,
         }
 
@@ -396,7 +382,6 @@ class SubmissionClient(BaseClappiaClient):
         self,
         app_id: str,
         submission_id: str,
-        requesting_user_email_address: str,
         email_ids: List[str],
         phone_numbers: Optional[List[str]] = None,
     ) -> SubmissionResponse:
@@ -404,7 +389,6 @@ class SubmissionClient(BaseClappiaClient):
             request = UpdateSubmissionOwnersRequest(
                 app_id=app_id,
                 submission_id=submission_id,
-                requesting_user_email_address=requesting_user_email_address,
                 email_ids=email_ids,
                 phone_numbers=phone_numbers,
             )
@@ -430,7 +414,6 @@ class SubmissionClient(BaseClappiaClient):
         payload = {
             "appId": request.app_id,
             "submissionId": request.submission_id,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "emailIds": [str(email) for email in request.email_ids],
         }
 
@@ -532,13 +515,11 @@ class SubmissionClient(BaseClappiaClient):
     def get_submissions_count(
         self,
         app_id: str,
-        requesting_user_email_address: str,
         filters: Optional[SubmissionFilters] = None,
     ) -> SubmissionsCountResponse:
         try:
             request = GetSubmissionsCountRequest(
                 app_id=app_id,
-                requesting_user_email_address=requesting_user_email_address,
                 filters=filters,
             )
         except Exception as e:
@@ -554,7 +535,6 @@ class SubmissionClient(BaseClappiaClient):
 
         payload = {
             "appId": request.app_id,
-            "requestingUserEmailAddress": str(request.requesting_user_email_address),
         }
 
         if request.filters:

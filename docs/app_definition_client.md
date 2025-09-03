@@ -35,8 +35,8 @@ Creates a new Clappia app with specified sections and fields.
 **Parameters:**
 
 -  `app_name` (str): Name of the app to create
--  `requesting_user_email_address` (str): Email of requesting user
 -  `sections` (List[Dict]): Array of sections with fields
+-  `requesting_user_email_address` (EmailStr): Owner of the app created
 
 **Returns:**
 
@@ -62,14 +62,13 @@ if response.success:
     print(f"App created with ID: {response.app_id}")
 ```
 
-### `add_field(app_id, requesting_user_email_address, section_index, field_index, field_type, **kwargs)`
+### `add_field(app_id, section_index, field_index, field_type, **kwargs)`
 
 Adds a new field to an existing Clappia app.
 
 **Parameters:**
 
 -  `app_id` (str): The app ID
--  `requesting_user_email_address` (str): Email of requesting user
 -  `section_index` (int): Section index where to add the field
 -  `field_index` (int): Field index within the section
 -  `field_type` (str): Type of field to add
@@ -84,7 +83,6 @@ Adds a new field to an existing Clappia app.
 ```python
 response = client.add_field(
     app_id="APP123",
-    requesting_user_email_address="user@example.com",
     section_index=0,
     field_index=1,
     field_type="singleLineText",
@@ -93,14 +91,13 @@ response = client.add_field(
 )
 ```
 
-### `update_field(app_id, requesting_user_email_address, field_name, **kwargs)`
+### `update_field(app_id, field_name, **kwargs)`
 
 Updates an existing field in a Clappia app.
 
 **Parameters:**
 
 -  `app_id` (str): The app ID
--  `requesting_user_email_address` (str): Email of requesting user
 -  `field_name` (str): Variable name of field to update
 -  `**kwargs`: Field properties to update (label, required, options, etc.)
 
@@ -113,47 +110,19 @@ Updates an existing field in a Clappia app.
 ```python
 response = client.update_field(
     app_id="APP123",
-    requesting_user_email_address="user@example.com",
     field_name="email_field",
     label="Email Address",
     required=True
 )
 ```
 
-### `remove_page_break(app_id, requesting_user_email_address, page_index)`
-
-Removes a page break from an app.
-
-**Parameters:**
-
--  `app_id` (str): The app ID
--  `requesting_user_email_address` (str): Email of requesting user
--  `page_index` (int): Page index to remove (must be > 0)
-
-**Returns:**
-
--  `PageBreakOperationResponse`: Response containing page break operation result
-
-**Example:**
-
-```python
-response = client.remove_page_break(
-    app_id="APP123",
-    requesting_user_email_address="user@example.com",
-    page_index=1
-)
-if response.success:
-    print("Page break removed successfully")
-```
-
-### `add_page_break(app_id, requesting_user_email_address, page_index, section_index)`
+### `add_page_break(app_id, page_index, section_index)`
 
 Adds a page break to an app.
 
 **Parameters:**
 
 -  `app_id` (str): The app ID
--  `requesting_user_email_address` (str): Email of requesting user
 -  `page_index` (int): Page index where to add page break
 -  `section_index` (int): Section index where to add page break
 
@@ -166,7 +135,6 @@ Adds a page break to an app.
 ```python
 response = client.add_page_break(
     app_id="APP123",
-    requesting_user_email_address="user@example.com",
     page_index=1,
     section_index=0
 )
@@ -174,14 +142,13 @@ if response.success:
     print(f"Page break added with ID: {response.page_id}")
 ```
 
-### `update_page(app_id, requesting_user_email_address, page_index, page_id, **kwargs)`
+### `update_page(app_id, page_index, page_id, **kwargs)`
 
 Updates page break settings in an app.
 
 **Parameters:**
 
 -  `app_id` (str): The app ID
--  `requesting_user_email_address` (str): Email of requesting user
 -  `page_index` (int): Page index to update
 -  `page_id` (str): Page ID
 -  `show_submit_button` (bool, optional): Show submit button
@@ -197,7 +164,6 @@ Updates page break settings in an app.
 ```python
 response = client.update_page(
     app_id="APP123",
-    requesting_user_email_address="user@example.com",
     page_index=1,
     page_id="page_123",
     show_submit_button=True,
@@ -208,14 +174,13 @@ if response.success:
     print("Page settings updated successfully")
 ```
 
-### `reorder_section(app_id, requesting_user_email_address, source_section_index, target_section_index, **kwargs)`
+### `reorder_section(app_id, source_section_index, target_section_index, **kwargs)`
 
 Reorders a section within an app.
 
 **Parameters:**
 
 -  `app_id` (str): The app ID
--  `requesting_user_email_address` (str): Email of requesting user
 -  `source_section_index` (int): Source section index
 -  `target_section_index` (int): Target section index
 -  `source_page_index` (int, optional): Source page index
@@ -230,7 +195,6 @@ Reorders a section within an app.
 ```python
 response = client.reorder_section(
     app_id="APP123",
-    requesting_user_email_address="user@example.com",
     source_section_index=0,
     target_section_index=2,
     source_page_index=0,

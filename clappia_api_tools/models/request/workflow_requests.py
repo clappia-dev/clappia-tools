@@ -79,34 +79,6 @@ class AddWorkflowStepRequest(BaseWorkflowRequest):
         extra_field_names = all_fields - base_fields
         return {field: getattr(self, field) for field in extra_field_names if hasattr(self, field)}
 
-
-class RemoveWorkflowStepRequest(BaseWorkflowRequest):
-    """Request model for removing a workflow step"""
-
-    step_variable_name: str = Field(
-        description="Variable name of the workflow step to remove"
-    )
-    delete_type: str = Field(description="Type of deletion: 'subtree' or 'node'")
-
-    @field_validator("step_variable_name")
-    @classmethod
-    def validate_step_variable_name(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Parameter stepVariableName is required")
-        return v.strip()
-
-    @field_validator("delete_type")
-    @classmethod
-    def validate_delete_type(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Parameter deleteType is required")
-        if v not in ["subtree", "node"]:
-            raise ValueError(
-                "Parameter deleteType is not valid, valid values are subtree, node"
-            )
-        return v.strip()
-
-
 class UpdateWorkflowStepRequest(BaseWorkflowRequest):
     """Request model for updating a workflow step"""
 

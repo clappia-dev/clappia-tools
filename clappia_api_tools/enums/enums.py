@@ -46,27 +46,59 @@ class SortDirection(Enum):
 
 
 class FieldType(Enum):
+    # Data Input Blocks
     SINGLE_LINE_TEXT = "singleLineText"
     MULTI_LINE_TEXT = "multiLineText"
+    RICH_TEXT_EDITOR = "richTextEditor"
+    NUMBER_INPUT = "numberInput"
+    URL_INPUT = "urlInput"
+    EMAIL_INPUT = "emailInput"
+    DROP_DOWN = "dropDown"
     SINGLE_SELECTOR = "singleSelector"
     MULTI_SELECTOR = "multiSelector"
-    DROP_DOWN = "dropDown"
+    TAGS = "tags"
     DATE_SELECTOR = "dateSelector"
     TIME_SELECTOR = "timeSelector"
-    PHONE_NUMBER = "phoneNumber"
-    UNIQUE_NUMBERING = "uniqueNumbering"
-    FILE = "file"
-    GPS_LOCATION = "gpsLocation"
-    HTML = "html"
-    CALCULATIONS_AND_LOGIC = "calculationsAndLogic"
     CODE_SCANNER = "codeScanner"
+    NFC_READER = "nfcReader"
+    RATINGS = "ratings"
+    TOGGLE = "toggle"
+    RANGE = "range"
     COUNTER = "counter"
     SLIDER = "slider"
-    SIGNATURE = "signature"
-    VALIDATION = "validation"
-    LIVE_TRACKING = "liveTracking"
-    NFC_READER = "nfcReader"
+    PHONE_NUMBER = "phoneNumber"
     ADDRESS = "address"
+    GEO_ADDRESS = "geoAddress"
+    PAYMENT_GATEWAY = "paymentGateway"
+    
+    # Data Upload Blocks
+    FILE = "file"  # Camera, Image & Files
+    AUDIO = "audio"
+    GPS_LOCATION = "gpsLocation"
+    LIVE_TRACKING = "liveTracking"
+    SIGNATURE = "signature"
+    
+    # Data Processing Blocks
+    CALCULATIONS_AND_LOGIC = "calculationsAndLogic"
+    UNIQUE_NUMBERING = "uniqueNumbering"
+    GET_DATA_FROM_OTHER_APPS = "getDataFromOtherApps"
+    GET_DATA_FROM_REST_APIS = "getDataFromRestApis"
+    GET_DATA_FROM_DATABASE = "getDataFromDatabase"
+    AI = "ai"
+    
+    # Content Blocks
+    HTML = "html"  # Text, HTML & Embedding
+    ATTACHED_FILES = "attachedFiles"
+    IMAGE_VIEWER = "imageViewer"
+    VIDEO_VIEWER = "videoViewer"
+    PDF_VIEWER = "pdfViewer"
+    PROGRESS_BAR = "progressBar"
+    VALIDATION = "validation"
+    BUTTON = "button"
+    CODE = "code"
+    
+    # Additional field types
+    DATABASE = "database"
 
 
 class ImageQuality(Enum):
@@ -93,6 +125,25 @@ class ValidationType(Enum):
     EMAIL = "email"
     URL = "url"
     CUSTOM = "custom"
+
+
+class DatabaseType(Enum):
+    MYSQL = "MySql"
+    POSTGRESQL = "PostgreSql"
+    AZURE_SQL = "AzureSql"
+
+
+class LLMProvider(Enum):
+    OPENAI = "OpenAI"
+    CLAUDE = "Claude"
+    GEMINI = "Gemini"
+
+
+class WatermarkPosition(Enum):
+    TOP_RIGHT = "TR"
+    BOTTOM_RIGHT = "BR"
+    BOTTOM_LEFT = "BL"
+    TOP_LEFT = "TL"
 
 
 class ExcelFormat(Enum):

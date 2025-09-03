@@ -7,7 +7,6 @@ The `AnalyticsClient` provides a comprehensive interface for managing analytics 
 Analytics in Clappia allow you to visualize data from your apps through various chart types. The AnalyticsClient allows you to:
 
 -  Add new charts to apps
--  Remove existing charts
 -  Update chart configurations
 -  Reorder charts within an app
 
@@ -29,7 +28,8 @@ client = AnalyticsClient(
 Retrieve the schema for analytics and charts. This provides information about the structure and configuration options available for charts and analytics.
 
 ```python
-result = client.get_schema()
+# Get schema for a specific chart type
+result = client.get_schema(chart_type="Bar")
 
 if result.success:
     print(f"Schema retrieved: {result.message}")
@@ -40,7 +40,7 @@ else:
 
 **Parameters:**
 
--  None (no parameters required)
+-  `chart_type` (str): Chart type to filter the schema (e.g., "Bar", "Pie", "Line", etc.)
 
 **Returns:**
 
@@ -54,7 +54,6 @@ Add a new chart to an app with specified type and configuration.
 result = client.add_chart(
     app_id="MFX093412",
     chart_type="Bar",
-    requesting_user_email_address="user@example.com",
     chart_index=0,  # Optional: position where to add the chart
     chart_title="Sales Overview"  # Optional: title for the chart
 )
@@ -69,7 +68,6 @@ else:
 
 -  `app_id` (str): App Id
 -  `chart_type` (str): Type of chart to add
--  `requesting_user_email_address` (str): Email of the requesting user
 -  `chart_index` (int, optional): Index where to add the chart
 -  `chart_title` (str, optional): Title for the chart
 
@@ -84,28 +82,12 @@ else:
 -  `Geo` - Geographic chart
 -  `Gantt` - Gantt chart
 
-### Remove Chart
-
-Remove a chart from an app by its index.
-
-```python
-result = client.remove_chart(
-    app_id="MFX093412",
-    chart_index=0,
-    requesting_user_email_address="user@example.com"
-)
-
-if result.success:
-    print(f"Chart removed: {result.message}")
-else:
-    print(f"Error: {result.message}")
 ```
 
 **Parameters:**
 
 -  `app_id` (str): App Id
--  `chart_index` (int): Index of the chart to remove
--  `requesting_user_email_address` (str): Email of the requesting user
+-  `chart_index` (int): Index of the chart to update
 
 ### Update Chart
 
@@ -124,7 +106,6 @@ update_data = {
 result = client.update_chart(
     app_id="MFX093412",
     chart_index=0,
-    requesting_user_email_address="user@example.com",
     update_data=update_data
 )
 
@@ -138,7 +119,6 @@ else:
 
 -  `app_id` (str): App Id
 -  `chart_index` (int): Index of the chart to update
--  `requesting_user_email_address` (str): Email of the requesting user
 -  `update_data` (dict): Dictionary containing the fields to update
 
 ### Reorder Chart
@@ -150,7 +130,6 @@ result = client.reorder_chart(
     app_id="MFX093412",
     source_index=0,
     target_index=2,
-    requesting_user_email_address="user@example.com"
 )
 
 if result.success:
@@ -164,7 +143,6 @@ else:
 -  `app_id` (str): App Id
 -  `source_index` (int): Current index of the chart to move
 -  `target_index` (int): New index where to move the chart
--  `requesting_user_email_address` (str): Email of the requesting user
 
 ## Response Models
 
@@ -211,7 +189,6 @@ All methods return response objects with consistent error handling:
 result = client.add_chart(
     app_id="INVALID_ID",
     chart_type="InvalidType",
-    requesting_user_email_address="user@example.com"
 )
 
 if not result.success:
@@ -236,7 +213,6 @@ client = AnalyticsClient(
 add_result = client.add_chart(
     app_id="MFX093412",
     chart_type="Bar",
-    requesting_user_email_address="admin@company.com",
     chart_title="Sales by Region"
 )
 
@@ -254,7 +230,6 @@ if add_result.success:
     update_result = client.update_chart(
         app_id="MFX093412",
         chart_index=0,
-        requesting_user_email_address="admin@company.com",
         update_data=update_data
     )
 
@@ -265,7 +240,6 @@ if add_result.success:
         pie_result = client.add_chart(
             app_id="MFX093412",
             chart_type="Pie",
-            requesting_user_email_address="admin@company.com",
             chart_title="Product Distribution"
         )
 
@@ -277,7 +251,6 @@ if add_result.success:
                 app_id="MFX093412",
                 source_index=1,
                 target_index=0,
-                requesting_user_email_address="admin@company.com"
             )
 
             if reorder_result.success:
