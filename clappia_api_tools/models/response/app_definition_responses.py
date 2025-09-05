@@ -9,10 +9,7 @@ class AppDefinitionResponse(BaseResponse):
 
 class AppCreationResponse(BaseResponse):
     app_id: str = Field(None, description="Generated app ID")
-    app_name: Optional[str] = Field(None, description="Name of created app")
-    sections_created: Optional[int] = Field(
-        None, description="Number of sections created"
-    )
+    name: Optional[str] = Field(None, description="Name of created app")
 
 
 class FieldOperationResponse(BaseResponse):
@@ -25,7 +22,7 @@ class PageBreakOperationResponse(BaseResponse):
     page_index: Optional[int] = Field(None, description="Page index")
 
 
-class SectionOperationResponse(BaseResponse):
+class ReorderSectionOperationResponse(BaseResponse):
     app_id: str = Field(description="App ID where section was modified")
     source_section_index: Optional[int] = Field(None, description="Source section index")
     target_section_index: Optional[int] = Field(None, description="Target section index")
@@ -33,14 +30,7 @@ class SectionOperationResponse(BaseResponse):
     target_page_index: Optional[int] = Field(None, description="Target page index")
 
 
-class AddSectionResponse(BaseResponse):
+class UpsertSectionOperationResponse(BaseResponse):
     app_id: str = Field(description="App ID where section was added")
-    section_id: Optional[str] = Field(None, description="Generated section ID")
     section_index: Optional[int] = Field(None, description="Index where section was added")
-    section_name: Optional[str] = Field(None, description="Name of the added section")
-
-
-class UpdateSectionResponse(BaseResponse):
-    app_id: str = Field(description="App ID where section was updated")
-    section_index: Optional[int] = Field(None, description="Index of the updated section")
-    section_name: Optional[str] = Field(None, description="Name of the updated section")
+    page_index: Optional[int] = Field(None, description="Page index where section was added")

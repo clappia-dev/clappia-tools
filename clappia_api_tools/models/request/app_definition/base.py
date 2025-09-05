@@ -1,26 +1,41 @@
-from typing import Optional, List, Literal, Dict, Any
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 import re
 import json
 from urllib.parse import urlparse
-
+from enum import Enum
+from datetime import datetime, date
 
 class JsonSerializableMixin:
-    """Mixin to provide common JSON serialization functionality"""
-    
+    """Mixin to provide robust JSON serialization functionality."""
+
     def to_json(self) -> Dict[str, Any]:
+        """Convert the object to a JSON-serializable dictionary."""
+        def _serialize(value: Any) -> Any:
+            if hasattr(value, "to_json"):
+                return value.to_json()
+            elif isinstance(value, dict):
+                return {k: _serialize(v) for k, v in value.items()}
+            elif isinstance(value, list):
+                return [_serialize(v) for v in value]
+            elif isinstance(value, tuple) or isinstance(value, set):
+                return [_serialize(v) for v in value]
+            elif isinstance(value, Enum):
+                return value.value
+            elif isinstance(value, (datetime, date)):
+                return value.isoformat()
+            else:
+                return value
+
         data = {}
         for field_name, field_value in self.__dict__.items():
+            # Skip None fields (optional: include them if desired)
             if field_value is not None:
                 camel_case_key = self._to_camel_case(field_name)
-                if hasattr(field_value, 'to_json'):
-                    data[camel_case_key] = field_value.to_json()
-                elif isinstance(field_value, list) and all(hasattr(item, 'to_json') for item in field_value):
-                    data[camel_case_key] = [item.to_json() for item in field_value]
-                else:
-                    data[camel_case_key] = field_value
+                data[camel_case_key] = _serialize(field_value)
+
         return data
-    
+
     @staticmethod
     def _to_camel_case(snake_str: str) -> str:
         components = snake_str.split('_')
@@ -88,38 +103,27 @@ class BaseFieldComponent(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
 
 
-# Field type enum
-FieldTypeEnum = Literal[
-    "singleLineText", "multiLineText", "richTextEditor", "numberInput", "urlInput", "emailInput",
-    "dropDown", "singleSelector", "multiSelector", "tags", "dateSelector", "timeSelector",
-    "codeScanner", "nfcReader", "ratings", "toggle", "range", "counter", "slider",
-    "phoneNumber", "address", "geoAddress", "paymentGateway", "file", "audio",
-    "gpsLocation", "liveTracking", "signature", "calculationsAndLogic", "uniqueNumbering",
-    "getDataFromOtherApps", "getDataFromRestApis", "getDataFromDatabase", "ai",
-    "html", "attachedFiles", "imageViewer", "videoViewer", "pdfViewer", "progressBar",
-    "validation", "button", "code"
-]
+"""
+    For this class we need to provide the extra things
+    In case of add 
+    app_id
+    pade_index      
+    section_index
+    field_index
+    field_type
+    field_name
 
-
-# Base request class - this would need to be imported from the parent directory
-# For now, we'll define a placeholder that can be updated later
-class BaseAppDefinitionRequest(BaseModel):
-    """Base class for app definition requests - placeholder for now"""
-    pass
-
-
-class BaseAddFieldRequest(BaseAppDefinitionRequest, JsonSerializableMixin):
+    In case of update
+    app_id
+    field_name
+    newFieldName (if field name need to change)
+"""
+class BaseUpsertFieldRequest(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
-    app_id: str = Field(description="App ID, must be a valid Clappia app ID")
-    page_index: int = Field(ge=0, description="Page index, must be a valid page index and greater than or equal to 0")
-    section_index: int = Field(ge=0, description="Section index, must be a valid section index and greater than or equal to 0")
-    field_index: int = Field(ge=0, description="Field index, must be a valid field index and greater than or equal to 0")
-    field_type: FieldTypeEnum = Field(description="Type of field to add")
-    field_name: str = Field(description="Field name, should be a valid field name and should be unique")
     label: str = Field(description="Display label for the field")
     description: Optional[str] = Field(None, description="Field description, Example: This is a description for the field")
     placeholder: Optional[str] = Field(None, description="Field placeholder")
-    dependency_app_id: Optional[str] = Field(None, description="Dependency app ID, must be a valid Clappia app ID, mandatory if dependency_type is getDataFromOtherApps")
+    dependency_app_id: Optional[str] = Field(None, description="Dependency app ID, must be a valid Clappia app ID")
     server_url: Optional[str] = Field(None, description="Server URL, mandatory if field type is getDataFromRestApis")
     display_condition: Optional[str] = Field(None, description="Display condition Example: {field_name} == 'value'")
     required: bool = Field(default=False, description="Whether field is required")
@@ -131,12 +135,30 @@ class BaseAddFieldRequest(BaseAppDefinitionRequest, JsonSerializableMixin):
     mobile_width: int = Field(default=100, description="Mobile width")
     retain_values: bool = Field(default=True, description="Retain values when hidden")
 
-    @field_validator("field_name")
-    @classmethod
-    def validate_field_names(cls, v: Optional[str]) -> Optional[str]:
-        return ValidatedString.field_name_validator(v)
-
     @field_validator("label")
     @classmethod
     def validate_label(cls, v: str) -> str:
         return ValidatedString.non_empty_string_validator(v, "Label")
+
+
+class BaseUpsertPageRequest(BaseModel, JsonSerializableMixin):
+    model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
+    app_id: str = Field(description="App ID")
+
+    @field_validator("app_id")
+    @classmethod
+    def validate_app_id(cls, v: str) -> str:
+        return ValidatedString.non_empty_string_validator(v, "App ID")
+    
+
+class BaseUpsertSectionRequest(BaseModel, JsonSerializableMixin):
+    model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
+    app_id: str = Field(description="App ID")
+    section_index: int = Field(ge=0, description="Section index")
+    page_index: int = Field(ge=0, description="Page index")
+
+    @field_validator("app_id")
+    @classmethod
+    def validate_app_id(cls, v: str) -> str:
+        return ValidatedString.non_empty_string_validator(v, "App ID")
+    

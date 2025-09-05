@@ -219,7 +219,6 @@ if response.success:
 -  `message` (str): Response message
 -  `app_id` (str): Generated app ID
 -  `app_name` (str): Name of created app
--  `sections_created` (int): Number of sections created
 -  `data` (dict): Additional response data
 
 ### `FieldOperationResponse`

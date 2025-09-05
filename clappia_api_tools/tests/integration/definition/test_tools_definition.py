@@ -43,7 +43,7 @@ class TestDefinitionToolsIntegration:
         assert result.success is True
         assert "Successfully retrieved app definition" in result.message
         assert result.app_id == "MFX093412"
-        assert result.data["app_name"] == "Test App"
+        assert result.data["name"] == "Test App"
 
         mock_make_request.assert_called_once_with(
             method="GET",
@@ -81,7 +81,7 @@ class TestDefinitionToolsIntegration:
         assert result.success is True
         assert "Successfully retrieved app definition" in result.message
         assert result.app_id == "MFX093412"
-        assert result.data["app_name"] == "Aplicación de Prueba"
+        assert result.data["name"] == "Aplicación de Prueba"
 
         mock_make_request.assert_called_once_with(
             method="GET",

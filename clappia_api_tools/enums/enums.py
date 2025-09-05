@@ -115,8 +115,8 @@ class AllowedFileTypes(Enum):
 
 
 class ChipType(Enum):
-    STANDARD = "standard"
-    CHIPS = "chips"
+    STANDARD = "Standard"
+    CHIPS = "Chips"
 
 
 class ValidationType(Enum):
@@ -131,13 +131,6 @@ class DatabaseType(Enum):
     MYSQL = "MySql"
     POSTGRESQL = "PostgreSql"
     AZURE_SQL = "AzureSql"
-
-
-class LLMProvider(Enum):
-    OPENAI = "OpenAI"
-    CLAUDE = "Claude"
-    GEMINI = "Gemini"
-
 
 class WatermarkPosition(Enum):
     TOP_RIGHT = "TR"
@@ -209,3 +202,8 @@ class AppUserRole(Enum):
     ADMIN = "Admin"
     DEVELOPER = "Developer"
     USER = "User"
+
+
+class SectionType(Enum):
+    SECTION = "Section"
+    TABLE = "Table"

@@ -2,11 +2,12 @@ from .base_response import BaseResponse
 from .app_definition_responses import (
     AppDefinitionResponse,
     AppCreationResponse,
+
     FieldOperationResponse,
     PageBreakOperationResponse,
-    SectionOperationResponse,
-    AddSectionResponse,
-    UpdateSectionResponse,
+
+    UpsertSectionOperationResponse,
+    ReorderSectionOperationResponse,
 )
 from .submission_responses import (
     SubmissionResponse,
@@ -35,14 +36,14 @@ from .workplace_responses import (
 __all__ = [
     # Base Response
     "BaseResponse",
-    # App Definition Responses
+
     "AppDefinitionResponse",
     "AppCreationResponse",
+    "FieldOperationResponse",
     "PageBreakOperationResponse",
-    "SectionOperationResponse",
-    "AddSectionResponse",
-    "UpdateSectionResponse",
-    # Submission Responses
+    "UpsertSectionOperationResponse",
+    "ReorderSectionOperationResponse",
+
     "SubmissionResponse",
     "SubmissionsResponse",
     "SubmissionsAggregationResponse",

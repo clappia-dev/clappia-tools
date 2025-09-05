@@ -156,7 +156,7 @@ class TestAppDefinitionClient:
         client = AppDefinitionClient()
         result = client.create_app("", "test@example.com", [])
         assert result.success is False
-        assert "app_name" in result.message
+        assert "name" in result.message
 
     def test_create_app_invalid_email(self):
         """Test create_app with invalid email"""

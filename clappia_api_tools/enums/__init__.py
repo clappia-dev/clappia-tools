@@ -19,6 +19,9 @@ from .enums import (
     NodeType,
     ChartType,
     WorkplaceUserRole,
+    DatabaseType,
+    WatermarkPosition,
+    SectionType,
 )
 
 __all__ = [
@@ -38,4 +41,7 @@ __all__ = [
     "NodeType",
     "ChartType",
     "WorkplaceUserRole",
+    "DatabaseType",
+    "WatermarkPosition",
+    "SectionType",
 ]

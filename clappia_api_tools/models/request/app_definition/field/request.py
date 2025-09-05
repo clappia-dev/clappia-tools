@@ -2,15 +2,13 @@ from typing import Optional, List, Literal, Dict, Any, ClassVar
 from pydantic import EmailStr, Field, field_validator, model_validator
 import re
 import json
-from .base import BaseAddFieldRequest, ValidatedString, UniqueListValidator
-from .common_fields import SortField, FilterField, RestApiOutputField
-from ....enums.enums import DatabaseType, LLMProvider, WatermarkPosition
+from ..base import BaseUpsertFieldRequest, ValidatedString, UniqueListValidator
+from ..model import SortField, FilterField, RestApiOutputField
+from .....enums import DatabaseType, WatermarkPosition, ValidationType, ImageQuality, AllowedFileTypes, ChipType
 
 
-class AddFieldTextRequest(BaseAddFieldRequest):
-    field_type: Literal["singleLineText"] = Field(default="singleLineText")
-    place_holder: Optional[str] = Field(None, description="Placeholder text for the input field")
-    validation: Optional[Literal["none", "number", "email", "url", "custom"]] = Field(None, description="Validation type")
+class UpsertFieldTextRequest(BaseUpsertFieldRequest):
+    validation: Optional[ValidationType] = Field(None, description="Validation type")
     custom_validation_condition: Optional[str] = Field(None, description="Custom validation condition")
     custom_validation_error_message: Optional[str] = Field(None, description="Custom validation error message")
 
@@ -21,13 +19,11 @@ class AddFieldTextRequest(BaseAddFieldRequest):
         return self
 
 
-class AddFieldTextAreaRequest(BaseAddFieldRequest):
-    field_type: Literal["multiLineText"] = Field(default="multiLineText")
-    placeholder: Optional[str] = Field(None, description="Placeholder text for the textarea")
+class UpsertFieldTextAreaRequest(BaseUpsertFieldRequest):
+    pass
 
 
-class AddFieldDependencyAppRequest(BaseAddFieldRequest):
-    field_type: Literal["getDataFromOtherApps"] = Field(default="getDataFromOtherApps")
+class UpsertFieldDependencyAppRequest(BaseUpsertFieldRequest):
     dependency_app_id: str = Field(min_length=1, description="ID of the dependency app, the app from which the data will be fetched, mandatory")
     skip_permission_check: Optional[bool] = Field(False, description="Whether to allow users to see all data of the dependency app")
     key_field_names: List[str] = Field(min_length=1, description="Array of key field names for dependency app, Example: ['field_name'], These are the fields that you need to show to the end users so that they can identify the item to be selected")
@@ -60,8 +56,7 @@ class AddFieldDependencyAppRequest(BaseAddFieldRequest):
         return v
 
 
-class AddFieldRestApiRequest(BaseAddFieldRequest):
-    field_type: Literal["getDataFromRestApis"] = Field(default="getDataFromRestApis")
+class UpsertFieldRestApiRequest(BaseUpsertFieldRequest):
     server_url: str = Field(min_length=1, description="URL of the REST API endpoint, mandatory. Example: 'https://api.example.com/data' or 'https://api.example.com/data/{id}'")
     method_type: Literal["GET", "POST", "PATCH", "DELETE"] = Field(description="HTTP method type")
     body_type: Optional[Literal["JSON", "XML", "FORM-DATA"]] = Field(None, description="Type of request body")
@@ -118,8 +113,7 @@ class AddFieldRestApiRequest(BaseAddFieldRequest):
         return self
 
 
-class AddFieldAddressRequest(BaseAddFieldRequest):
-    field_type: Literal["address"] = Field(default="address")
+class UpsertFieldAddressRequest(BaseUpsertFieldRequest):
     countries_list: Optional[List[str]] = Field(None, max_length=5, description="List of country codes to restrict address selection")
 
     @field_validator("countries_list")
@@ -136,8 +130,7 @@ class AddFieldAddressRequest(BaseAddFieldRequest):
         return v
 
 
-class AddFieldDatabaseRequest(BaseAddFieldRequest):
-    field_type: Literal["database"] = Field(default="database")
+class UpsertFieldDatabaseRequest(BaseUpsertFieldRequest):
     database_type: DatabaseType = Field(description="Type of database to connect to")
     database_port: str = Field(min_length=1, description="Database port number")
     database_host: str = Field(min_length=1, description="Database host address")
@@ -159,7 +152,7 @@ class AddFieldDatabaseRequest(BaseAddFieldRequest):
     @classmethod
     def validate_database_host(cls, v: str) -> str:
         if not re.match(r"^[a-zA-Z0-9.-]+$", v):
-            raise ValueError("Database host must be a valid hostname or IP address")
+            raise ValueError("Database host must be a valid hostname or IP Upsertress")
         return v
 
     @field_validator("database_output_fields")
@@ -168,32 +161,15 @@ class AddFieldDatabaseRequest(BaseAddFieldRequest):
         return UniqueListValidator.validate_unique_strings(v, "Database output fields")
 
 
-class AddFieldDateRequest(BaseAddFieldRequest):
-    field_type: Literal["dateSelector"] = Field(default="dateSelector")
+class UpsertFieldDateRequest(BaseUpsertFieldRequest):
     allow_manual_input: bool = Field(True, description="Whether to allow users to manually type dates")
     default_to_current_date: bool = Field(False, description="Whether to default the field to the current date")
     current_date_button_visible: bool = Field(True, description="Whether to show a button to set current date")
     start_date: Optional[str] = Field(None, description="Start date for date range restriction (YYYY-MM-DD format) or {start_date}")
     end_date: Optional[str] = Field(None, description="End date for date range restriction (YYYY-MM-DD format) or {end_date}")
 
-    @field_validator("start_date", "end_date")
-    @classmethod
-    def validate_date_format(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None:
-            if not re.match(r"^\d{4}-\d{2}-\d{2}$", v):
-                raise ValueError("Date must be in YYYY-MM-DD format")
-        return v
 
-    @model_validator(mode="after")
-    def validate_date_range(self):
-        if self.start_date and self.end_date:
-            if self.start_date > self.end_date:
-                raise ValueError("Start date must be before or equal to end date")
-        return self
-
-
-class AddFieldAIRequest(BaseAddFieldRequest):
-    field_type: Literal["ai"] = Field(default="ai")
+class UpsertFieldAIRequest(BaseUpsertFieldRequest):
     instructions: Optional[str] = Field(None, description="Instructions for the AI model")
     model: Optional[str] = Field(None, description="Specific AI model to use")
     llm: Optional[Literal["OpenAI", "Claude", "Gemini"]] = Field(None, description="Large Language Model provider")
@@ -220,8 +196,7 @@ class AddFieldAIRequest(BaseAddFieldRequest):
         return self
 
 
-class AddFieldCodeRequest(BaseAddFieldRequest):
-    field_type: Literal["code"] = Field(default="code")
+class UpsertFieldCodeRequest(BaseUpsertFieldRequest):
     code: str = Field(default="""function main() {
     // Your code here
     output = {};
@@ -239,8 +214,7 @@ class AddFieldCodeRequest(BaseAddFieldRequest):
         return UniqueListValidator.validate_unique_strings(v, "Code output fields")
 
 
-class AddFieldGpsLocationRequest(BaseAddFieldRequest):
-    field_type: Literal["gpsLocation"] = Field(default="gpsLocation")
+class UpsertFieldGpsLocationRequest(BaseUpsertFieldRequest):
     allow_manual_input: bool = Field(False, description="Whether to allow manual location input")
     default_to_current_location: bool = Field(True, description="Whether to default to current GPS location")
     target_locations: List[str] = Field(default_factory=list, description="Array of target location coordinates for geofencing")
@@ -264,8 +238,7 @@ class AddFieldGpsLocationRequest(BaseAddFieldRequest):
         return self
 
 
-class AddFieldLiveTrackingRequest(BaseAddFieldRequest):
-    field_type: Literal["liveTracking"] = Field(default="liveTracking")
+class UpsertFieldLiveTrackingRequest(BaseUpsertFieldRequest):
     auto_complete_duration_in_hours: int = Field(8, description="Duration in hours after which location tracking auto-completes")
 
     @field_validator("auto_complete_duration_in_hours")
@@ -276,8 +249,7 @@ class AddFieldLiveTrackingRequest(BaseAddFieldRequest):
         return v
 
 
-class AddFieldManualAddressRequest(BaseAddFieldRequest):
-    field_type: Literal["address"] = Field(default="address")
+class UpsertFieldManualAddressRequest(BaseUpsertFieldRequest):
     countries_list: Optional[List[str]] = Field(None, max_length=5, description="Array of country codes to restrict address input")
     default_country: Optional[str] = Field(None, description="Default country code for address input")
 
@@ -305,8 +277,7 @@ class AddFieldManualAddressRequest(BaseAddFieldRequest):
         return v
 
 
-class AddFieldPhoneNumberRequest(BaseAddFieldRequest):
-    field_type: Literal["phoneNumber"] = Field(default="phoneNumber")
+class UpsertFieldPhoneNumberRequest(BaseUpsertFieldRequest):
     default_country_code: Optional[str] = Field(None, description="Default country code (ISO format)")
     is_country_code_editable: Optional[bool] = Field(None, description="Whether the country code can be edited")
     allow_manual_input: Optional[bool] = Field(None, description="Whether to allow manual phone number input")
@@ -322,34 +293,17 @@ class AddFieldPhoneNumberRequest(BaseAddFieldRequest):
         return v
 
 
-class AddFieldProgressBarRequest(BaseAddFieldRequest):
-    field_type: Literal["progressBar"] = Field(default="progressBar")
-    progress_formula: str = Field("4/10", description="Formula to calculate progress percentage")
-    progress_text: str = Field("4 out of 10", description="Text to display with progress")
-
-    @field_validator("progress_formula")
-    @classmethod
-    def validate_progress_formula(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Progress formula cannot be empty")
-        return v
-
-    @field_validator("progress_text")
-    @classmethod
-    def validate_progress_text(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Progress text cannot be empty")
-        return v
+class UpsertFieldProgressBarRequest(BaseUpsertFieldRequest):
+    progress_formula: Optional[str] = Field(None, description="Formula to calculate progress percentage")
+    progress_text: Optional[str] = Field(None, description="Text to display with progress")
 
 
-class AddFieldSignatureRequest(BaseAddFieldRequest):
-    field_type: Literal["signature"] = Field(default="signature")
+class UpsertFieldSignatureRequest(BaseUpsertFieldRequest):
     allow_manual_input: bool = Field(True, description="Whether to allow manual signature input")
     file_display_name: str = Field("", description="Display name for the signature file")
 
 
-class AddFieldRangeRequest(BaseAddFieldRequest):
-    field_type: Literal["range"] = Field(default="range")
+class UpsertFieldRangeRequest(BaseUpsertFieldRequest):
     minimum_value: float = Field(1.0, description="Minimum value for the range slider")
     maximum_value: float = Field(5.0, description="Maximum value for the range slider")
     step_size: float = Field(1.0, description="Step size for the range slider")
@@ -391,16 +345,15 @@ class AddFieldRangeRequest(BaseAddFieldRequest):
         return self
 
 
-class AddFieldCounterRequest(AddFieldRangeRequest):
-    field_type: Literal["counter"] = Field(default="counter")
+class UpsertFieldCounterRequest(UpsertFieldRangeRequest):
+    pass
 
 
-class AddFieldSliderRequest(AddFieldRangeRequest):
-    field_type: Literal["slider"] = Field(default="slider")
+class UpsertFieldSliderRequest(UpsertFieldRangeRequest):
+    pass
 
 
-class AddFieldTimeRequest(BaseAddFieldRequest):
-    field_type: Literal["timeSelector"] = Field(default="timeSelector")
+class UpsertFieldTimeRequest(BaseUpsertFieldRequest):
     allow_manual_input: bool = Field(True, description="Whether to allow manual time input")
     default_to_current_time: bool = Field(False, description="Whether to default to current time")
     start_time: Optional[str] = Field(None, description="Minimum allowed time (HH:mm format) or {start_time}")
@@ -408,15 +361,13 @@ class AddFieldTimeRequest(BaseAddFieldRequest):
 
 
 
-class AddFieldToggleRequest(BaseAddFieldRequest):
-    field_type: Literal["toggle"] = Field(default="toggle")
+class UpsertFieldToggleRequest(BaseUpsertFieldRequest):
     default_toggle_value: bool = Field(False, description="Default state of the toggle")
     true_value: Optional[str] = Field(None, description="Value to store when toggle is ON")
     false_value: Optional[str] = Field(None, description="Value to store when toggle is OFF")
 
 
-class AddFieldValidationRequest(BaseAddFieldRequest):
-    field_type: Literal["validation"] = Field(default="validation")
+class UpsertFieldValidationRequest(BaseUpsertFieldRequest):
     validation_type: Literal["duplicate", "custom"] = Field("duplicate", description="Type of validation to perform")
     validation_message: str = Field("Validation message", description="Message to display for validation result")
     unique_field_names: Optional[List[str]] = Field(None, description="Array of field names to check for duplicates")
@@ -444,14 +395,35 @@ class AddFieldValidationRequest(BaseAddFieldRequest):
                 raise ValueError("Unique field names cannot be used with custom validation type")
         
         return self
+    
+
+class UpsertFieldReadOnlyFileRequest(BaseUpsertFieldRequest):
+    static_attachment: Dict[str, str] = Field(description="Static attachment object with base64, contentType and fileName")
+
+    @field_validator("static_attachment")
+    @classmethod
+    def validate_static_attachment(cls, v: Dict[str, str]) -> Dict[str, str]:
+        required_keys = ["base64", "contentType", "fileName"]
+        for key in required_keys:
+            if key not in v:
+                raise ValueError(f"Static attachment must contain '{key}'")
+            if not v[key] or not str(v[key]).strip():
+                raise ValueError(f"Static attachment '{key}' cannot be empty")
+        return v
 
 
-class AddFieldVideoViewerRequest(BaseAddFieldRequest):
-    field_type: Literal["videoViewer"] = Field(default="videoViewer")
+class UpsertFieldVideoViewerRequest(UpsertFieldReadOnlyFileRequest):
+    pass
 
 
-class AddFieldVoiceRequest(BaseAddFieldRequest):
-    field_type: Literal["audio"] = Field(default="audio")
+class UpsertFieldImageViewerRequest(UpsertFieldReadOnlyFileRequest):
+    pass
+
+
+class UpsertFieldPdfViewerRequest(UpsertFieldReadOnlyFileRequest):
+    pass
+
+class UpsertFieldVoiceRequest(BaseUpsertFieldRequest):
     max_length: int = Field(60, description="Maximum length of voice recording in seconds (1-300)")
     file_upload_limit: int = Field(10, description="Maximum number of voice files that can be uploaded (1-10)")
     file_display_name: str = Field("", description="Display name for the voice file")
@@ -471,8 +443,7 @@ class AddFieldVoiceRequest(BaseAddFieldRequest):
         return v
 
 
-class AddFieldFormulaRequest(BaseAddFieldRequest):
-    field_type: Literal["calculationsAndLogic"] = Field(default="calculationsAndLogic")
+class UpsertFieldFormulaRequest(BaseUpsertFieldRequest):
     formula: str = Field("", description="Formula expression with field references")
 
     @field_validator("formula")
@@ -483,16 +454,13 @@ class AddFieldFormulaRequest(BaseAddFieldRequest):
         return v
 
 
-class AddFieldImageViewerRequest(BaseAddFieldRequest):
-    field_type: Literal["imageViewer"] = Field(default="imageViewer")
 
-
-class AddFieldRichTextEditorRequest(BaseAddFieldRequest):
-    field_type: Literal["richTextEditor"] = Field(default="richTextEditor")
+class UpsertFieldRichTextEditorRequest(BaseUpsertFieldRequest):
+    pass
 
 
 
-class AddFieldCodeReaderRequest(BaseAddFieldRequest):
+class UpsertFieldCodeReaderRequest(BaseUpsertFieldRequest):
     field_type: Literal["codeScanner"] = Field(default="codeScanner")
     allow_manual_input: bool = Field(False, description="Whether to allow manual input of codes")
     key_field_name: Optional[str] = Field(None, description="Name of the key field for dependency app integration, Example: 'field_name', mandatory if the dependency app ID is provided")
@@ -520,12 +488,10 @@ class AddFieldCodeReaderRequest(BaseAddFieldRequest):
                 raise ValueError("Key field name is required when dependency app ID is provided")
         return self
 
-class AddFieldNfcReaderRequest(AddFieldCodeReaderRequest):
-    field_type: Literal["nfcReader"] = Field(default="nfcReader")
+class UpsertFieldNfcReaderRequest(UpsertFieldCodeReaderRequest):
+    pass
 
-
-class AddFieldNumberInputRequest(BaseAddFieldRequest):
-    field_type: Literal["numberInput"] = Field(default="numberInput")
+class UpsertFieldNumberInputRequest(BaseUpsertFieldRequest):
     min_value: Optional[float] = Field(None, description="Minimum allowed value")
     max_value: Optional[float] = Field(None, description="Maximum allowed value")
     default_input_value: Optional[float] = Field(None, description="Default value for the number input")
@@ -545,33 +511,11 @@ class AddFieldNumberInputRequest(BaseAddFieldRequest):
         return self
 
 
-class AddFieldPdfViewerRequest(BaseAddFieldRequest):
-    field_type: Literal["pdfViewer"] = Field(default="pdfViewer")
-
-
-class AddFieldReadOnlyFileRequest(BaseAddFieldRequest):
-    field_type: Literal["attachedFiles"] = Field(default="attachedFiles")
-    static_attachment: Dict[str, str] = Field(description="Static attachment object with base64, contentType and fileName")
-
-    @field_validator("static_attachment")
-    @classmethod
-    def validate_static_attachment(cls, v: Dict[str, str]) -> Dict[str, str]:
-        required_keys = ["base64", "contentType", "fileName"]
-        for key in required_keys:
-            if key not in v:
-                raise ValueError(f"Static attachment must contain '{key}'")
-            if not v[key] or not str(v[key]).strip():
-                raise ValueError(f"Static attachment '{key}' cannot be empty")
-        return v
-
-
-class AddFieldReadOnlyTextRequest(BaseAddFieldRequest):
-    field_type: Literal["html"] = Field(default="html")
+class UpsertFieldReadOnlyTextRequest(BaseUpsertFieldRequest):
     rich_text: Optional[str] = Field(None, description="Rich text content for display")
 
 
-class AddFieldTagsRequest(BaseAddFieldRequest):
-    field_type: Literal["tags"] = Field(default="tags")
+class UpsertFieldTagsRequest(BaseUpsertFieldRequest):
     tag_names: List[str] = Field(default_factory=list, description="Array of tag names")
 
     @field_validator("tag_names")
@@ -584,8 +528,7 @@ class AddFieldTagsRequest(BaseAddFieldRequest):
         return UniqueListValidator.validate_unique_strings(v, "Tag names")
 
 
-class AddFieldDropdownRequest(BaseAddFieldRequest):
-    field_type: Literal["dropDown"] = Field(default="dropDown")
+class UpsertFieldDropdownRequest(BaseUpsertFieldRequest):
     dependency_field_names: Optional[List[str]] = Field(None, description="Array of field names this select field depends on")
     options: List[str] = Field(default_factory=list, description="Array of select options")
     selecting_multiple_options_allowed: bool = Field(False, description="Whether multiple selections are allowed")
@@ -608,11 +551,10 @@ class AddFieldDropdownRequest(BaseAddFieldRequest):
         return v
 
 
-class AddFieldRadioRequest(BaseAddFieldRequest):
-    field_type: Literal["singleSelector"] = Field(default="singleSelector")
+class UpsertFieldRadioRequest(BaseUpsertFieldRequest):
     options: List[str] = Field(default_factory=lambda: ["value one", "value two"], description="Array of radio button options")
     number_of_cols: Optional[int] = Field(None, description="Number of columns for radio button layout (1-3)")
-    style: Literal["standard", "chips"] = Field("chips", description="Display style for radio buttons")
+    style: ChipType = Field(ChipType.CHIPS, description="Display style for radio buttons")
     dependency_field_names: Optional[List[str]] = Field(None, description="Array of field names this radio field depends on")
 
     @field_validator("options")
@@ -640,29 +582,10 @@ class AddFieldRadioRequest(BaseAddFieldRequest):
         return v
 
 
-class AddFieldUrlInputRequest(BaseAddFieldRequest):
-    field_type: Literal["urlInput"] = Field(default="urlInput")
+class UpsertFieldUrlInputRequest(BaseUpsertFieldRequest):
     default_value: Optional[str] = Field(None, description="Default URL value. Must be a valid URL format")
 
-    @field_validator("default_value")
-    @classmethod
-    def validate_default_value(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None:
-            import re
-            url_pattern = re.compile(
-                r'^https?://'  # http:// or https://
-                r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
-                r'localhost|'  # localhost...
-                r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
-                r'(?::\d+)?'  # optional port
-                r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-            if not url_pattern.match(v):
-                raise ValueError("Default value must be a valid URL format")
-        return v
-
-
-class AddFieldCheckboxRequest(BaseAddFieldRequest):
-    field_type: Literal["multiSelector"] = Field(default="multiSelector")
+class UpsertFieldCheckboxRequest(BaseUpsertFieldRequest):
     options: List[str] = Field(default_factory=lambda: ["value one", "value two"], description="Array of checkbox options")
     number_of_cols: Optional[int] = Field(None, description="Number of columns for checkbox layout (1-3)")
     style: Literal["standard", "chips"] = Field("chips", description="Display style for checkboxes")
@@ -686,8 +609,7 @@ class AddFieldCheckboxRequest(BaseAddFieldRequest):
         return v
 
 
-class AddFieldPaymentGatewayRequest(BaseAddFieldRequest):
-    field_type: Literal["paymentGateway"] = Field(default="paymentGateway")
+class UpsertFieldPaymentGatewayRequest(BaseUpsertFieldRequest):
     payment_gateway: Literal["Razorpay", "Stripe", "Paypal", "Eazypay"] = Field(description="Payment gateway provider")
     currency: str = Field(description="Currency code")
     amount: str = Field(description="Payment amount. Can include field references")
@@ -707,13 +629,12 @@ class AddFieldPaymentGatewayRequest(BaseAddFieldRequest):
         return v
 
 
-class AddFieldRazorpayPaymentGatewayRequest(AddFieldPaymentGatewayRequest):
-    field_type: Literal["razorpayPaymentGateway"] = Field(default="razorpayPaymentGateway")
+class UpsertFieldRazorpayPaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
     key_id: str = Field(description="Razorpay API key ID")
     key_secret: str = Field(description="Razorpay API key secret")
     company_name: Optional[str] = Field(None, description="Company name for payment display")
     image_link: Optional[str] = Field(None, description="Company logo image link for payment display")
-    metadata: Optional[List[Dict[str, str]]] = Field(None, description="Array of key-value pairs for additional metadata")
+    metadata: Optional[List[Dict[str, str]]] = Field(None, description="Array of key-value pairs for Upsertitional metadata")
 
     @field_validator("key_id")
     @classmethod
@@ -744,8 +665,7 @@ class AddFieldRazorpayPaymentGatewayRequest(AddFieldPaymentGatewayRequest):
         return v
 
 
-class AddFieldEazypayPaymentGatewayRequest(AddFieldPaymentGatewayRequest):
-    field_type: Literal["eazypayPaymentGateway"] = Field(default="eazypayPaymentGateway")
+class UpsertFieldEazypayPaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
     merchant_id: str = Field(description="Eazypay merchant ID")
     submerchant_id: str = Field(description="Eazypay submerchant ID")
     reference_no: str = Field(description="Reference number for payment. Can include field references")
@@ -800,8 +720,7 @@ class AddFieldEazypayPaymentGatewayRequest(AddFieldPaymentGatewayRequest):
         return v
 
 
-class AddFieldPaypalPaymentGatewayRequest(AddFieldPaymentGatewayRequest):
-    field_type: Literal["paypalPaymentGateway"] = Field(default="paypalPaymentGateway")
+class UpsertFieldPaypalPaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
     paypal_client_id: str = Field(description="PayPal client ID for API authentication")
     paypal_client_secret: str = Field(description="PayPal client secret for API authentication")
 
@@ -820,11 +739,10 @@ class AddFieldPaypalPaymentGatewayRequest(AddFieldPaymentGatewayRequest):
         return v
 
 
-class AddFieldStripePaymentGatewayRequest(AddFieldPaymentGatewayRequest):
-    field_type: Literal["stripePaymentGateway"] = Field(default="stripePaymentGateway")
+class UpsertFieldStripePaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
     publishable_key: str = Field(description="Stripe publishable key for client-side integration")
     secret_key: str = Field(description="Stripe secret key for server-side integration")
-    metadata: Optional[List[Dict[str, str]]] = Field(None, description="Array of key-value pairs for additional metadata")
+    metadata: Optional[List[Dict[str, str]]] = Field(None, description="Array of key-value pairs for Upsertitional metadata")
 
     @field_validator("publishable_key")
     @classmethod
@@ -855,8 +773,7 @@ class AddFieldStripePaymentGatewayRequest(AddFieldPaymentGatewayRequest):
         return v
 
 
-class AddFieldButtonRequest(BaseAddFieldRequest):
-    field_type: Literal["button"] = Field(default="button")
+class UpsertFieldButtonRequest(BaseUpsertFieldRequest):
     button_position: Literal["left", "center", "right"] = Field("left", description="Position of the button")
     open_link: Literal["sameTab", "newTab", "modalTab"] = Field(description="How to open links")
     placement: Optional[str] = Field(None, description="Button placement on the form")
@@ -898,8 +815,7 @@ class AddFieldButtonRequest(BaseAddFieldRequest):
         return v
 
 
-class AddFieldUniqueSequentialRequest(BaseAddFieldRequest):
-    field_type: Literal["uniqueNumbering"] = Field(default="uniqueNumbering")
+class UpsertFieldUniqueSequentialRequest(BaseUpsertFieldRequest):
     prefix: Optional[str] = Field(None, description="Prefix for the sequential number. Can include field references")
     minimum_length: int = Field(1, description="Minimum length of the sequential number part")
     starting_sequence_number: int = Field(1, description="Starting number for the sequence")
@@ -918,13 +834,11 @@ class AddFieldUniqueSequentialRequest(BaseAddFieldRequest):
             raise ValueError("Starting sequence number must be non-negative")
         return v
 
-class AddFieldEmailInputRequest(BaseAddFieldRequest):
-    field_type: Literal["emailInput"] = Field(default="emailInput")
+class UpsertFieldEmailInputRequest(BaseUpsertFieldRequest):
     default_value: Optional[EmailStr] = Field(None, description="Default email value for the field")
 
 
-class AddFieldEmojiRequest(BaseAddFieldRequest):
-    field_type: Literal["ratings"] = Field(default="ratings")
+class UpsertFieldEmojiRequest(BaseUpsertFieldRequest):
     emojis: List[Dict[str, str]] = Field(default_factory=lambda: [
         {"value": "⭐", "score": "1"},
         {"value": "⭐", "score": "2"},
@@ -976,11 +890,10 @@ class AddFieldEmojiRequest(BaseAddFieldRequest):
         return v
 
 
-class AddFieldFileRequest(BaseAddFieldRequest):
-    field_type: Literal["file"] = Field(default="file")
+class UpsertFieldFileRequest(BaseUpsertFieldRequest):
     allowed_file_types: List[str] = Field(default_factory=list, description="Array of allowed file types")
     file_upload_limit: int = Field(10, description="Maximum number of files allowed (1-10)")
-    image_quality: Literal["low", "medium", "high"] = Field("medium", description="Image quality for camera captures")
+    image_quality: ImageQuality = Field(ImageQuality.MEDIUM, description="Image quality for camera captures")
     image_text: Optional[str] = Field(None, description="Text watermark on captured images")
     image_text_position: Optional[WatermarkPosition] = Field(None, description="Position of text watermark")
     logo: Optional[str] = Field(None, description="Logo watermark on captured images")
@@ -992,7 +905,7 @@ class AddFieldFileRequest(BaseAddFieldRequest):
     @field_validator("allowed_file_types")
     @classmethod
     def validate_allowed_file_types(cls, v: List[str]) -> List[str]:
-        valid_types = ["images_camera_upload", "images_gallery_upload", "videos", "documents"]
+        valid_types = [allowed_file_type.value for allowed_file_type in AllowedFileTypes]
         for file_type in v:
             if file_type not in valid_types:
                 raise ValueError(f"Invalid file type: {file_type}. Allowed types: {', '.join(valid_types)}")
