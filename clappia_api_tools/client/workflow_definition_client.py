@@ -1,13 +1,28 @@
 from typing import Dict, Any, Optional
 from .base_client import BaseClappiaClient
 from clappia_api_tools.utils.logging_utils import get_logger
+
 from clappia_api_tools.models.request import (
-    GetWorkflowRequest,
-    AddWorkflowStepRequest,
-    UpdateWorkflowStepRequest,
-    ReorderWorkflowStepRequest,
+    UpsertAiWorkflowStepRequest,
+    UpsertApprovalWorkflowStepRequest,
+    UpsertCodeWorkflowStepRequest,
+    UpsertConditionWorkflowStepRequest,
+    UpsertDatabaseWorkflowStepRequest,
+    UpsertEmailWorkflowStepRequest,
+    UpsertLoopWorkflowStepRequest,
+    UpsertMobileNotificationWorkflowStepRequest,
+    UpsertRestApiWorkflowStepRequest,
+    UpsertSlackWorkflowStepRequest,
+    UpsertSmsWorkflowStepRequest,
+    UpsertWaitWorkflowStepRequest,
+    UpsertWhatsAppWorkflowStepRequest,
+    UpsertCreateSubmissionWorkflowStepRequest,
+    UpsertDeleteSubmissionWorkflowStepRequest,
+    UpsertFindSubmissionWorkflowStepRequest,
+    UpsertEditSubmissionWorkflowStepRequest,
 )
 from clappia_api_tools.models.response import WorkflowResponse, WorkflowStepResponse, BaseResponse
+from clappia_api_tools.enums import TriggerType, NodeType
 
 logger = get_logger(__name__)
 
@@ -21,21 +36,23 @@ class WorkflowDefinitionClient(BaseClappiaClient):
     """
 
     def get_workflow(self, app_id: str, trigger_type: str) -> WorkflowResponse:
-        try:
-            request = GetWorkflowRequest(
-                app_id=app_id,
-                trigger_type=trigger_type,
-            )
-        except Exception as e:
-            return WorkflowResponse(success=False, message=str(e), app_id=app_id, operation="get_workflow")
+        """Get a workflow definition for a specific app and trigger type"""
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
             return WorkflowResponse(success=False, message=env_error, app_id=app_id, operation="get_workflow")
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                operation="get_workflow"
+            )
 
         params = {
-            "appId": request.app_id,
-            "triggerType": request.trigger_type.value,
+            "appId": app_id,
+            "triggerType": trigger_type,
         }
 
         logger.info(
@@ -58,31 +75,16 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             operation="get_workflow",
         )
 
-    def add_workflow_step(
+
+    def add_ai_workflow_step(
         self,
         app_id: str,
         trigger_type: str,
-        node_type: str,
+        request: UpsertAiWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
         parent_variable_name: Optional[str] = None,
-        **kwargs
     ) -> WorkflowStepResponse:
-        """Add a workflow step to a Clappia app"""
-        try:
-            request = AddWorkflowStepRequest(
-                app_id=app_id,
-                trigger_type=trigger_type,
-                node_type=node_type,
-                parent_variable_name=parent_variable_name,
-                **kwargs
-            )
-        except Exception as e:
-            return WorkflowStepResponse(
-                success=False,
-                message=str(e),
-                app_id=app_id,
-                trigger_type=trigger_type,
-                operation="add",
-            )
+        """Add an AI workflow step to a Clappia app"""
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
@@ -91,25 +93,35 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=env_error,
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="add",
+                operation="add_ai_workflow_step",
             )
-
-        payload = {
-            "appId": request.app_id,
-            "triggerType": request.trigger_type.value if hasattr(request.trigger_type, 'value') else request.trigger_type,
-            "nodeType": request.node_type.value,
-            "parentVariableName": request.parent_variable_name,
-        }
         
-        extra_fields = request.get_extra_fields()
-        payload.update(extra_fields)
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_ai_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.AI_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
 
-        logger.info(
-            f"Adding workflow step for app_id: {app_id} with node_type: {node_type}"
-        )
+        logger.info(f"Adding AI workflow step to app_id: {app_id} with payload: {payload}")
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="workflowdefinitionv2/addWorkflowStep", data=payload
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
         )
 
         if not success:
@@ -119,41 +131,28 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="add",
+                operation="add_ai_workflow_step",
             )
 
         return WorkflowStepResponse(
             success=True,
-            message="Successfully added workflow step",
+            message="Successfully added AI workflow step",
             app_id=app_id,
             trigger_type=trigger_type,
-            operation="add",
+            operation="add_ai_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
             data=response_data,
         )
-
-    def update_workflow_step(
+    
+    def update_ai_workflow_step(
         self,
         app_id: str,
         trigger_type: str,
         step_variable_name: str,
-        update_data: Dict[str, Any],
+        request: UpsertAiWorkflowStepRequest,
     ) -> WorkflowStepResponse:
-        """Update a workflow step in a Clappia app"""
-        try:
-            request = UpdateWorkflowStepRequest(
-                app_id=app_id,
-                trigger_type=trigger_type,
-                step_variable_name=step_variable_name,
-                **update_data,
-            )
-        except Exception as e:
-            return WorkflowStepResponse(
-                success=False,
-                message=str(e),
-                app_id=app_id,
-                trigger_type=trigger_type,
-                operation="update",
-            )
+        """Update an AI workflow step in a Clappia app"""
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
@@ -162,19 +161,26 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=env_error,
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="update",
+                operation="update_ai_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_ai_workflow_step",
             )
 
         payload = {
-            "appId": request.app_id,
-            "triggerType": request.trigger_type.value if hasattr(request.trigger_type, 'value') else request.trigger_type,
-            "stepVariableName": request.step_variable_name,
-            **update_data,
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
         }
 
-        logger.info(
-            f"Updating workflow step for app_id: {app_id} with step: {step_variable_name}"
-        )
+        logger.info(f"Updating AI workflow step in app_id: {app_id} with payload: {payload}")
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -189,15 +195,15 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 trigger_type=trigger_type,
-                operation="update",
+                operation="update_ai_workflow_step",
             )
 
         return WorkflowStepResponse(
             success=True,
-            message="Successfully updated workflow step",
+            message="Successfully updated AI workflow step",
             app_id=app_id,
             trigger_type=trigger_type,
-            operation="update",
+            operation="update_ai_workflow_step",
             step_variable_name=step_variable_name,
             data=response_data,
         )
@@ -209,21 +215,8 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         step_variable_name: str,
         parent_variable_name: str,
     ) -> WorkflowStepResponse:
-        try:
-            request = ReorderWorkflowStepRequest(
-                app_id=app_id,
-                trigger_type=trigger_type,
-                step_variable_name=step_variable_name,
-                parent_variable_name=parent_variable_name,
-            )
-        except Exception as e:
-            return WorkflowStepResponse(
-                success=False,
-                message=str(e),
-                app_id=app_id,
-                trigger_type=trigger_type,
-                operation="reorder",
-            )
+        
+        """Reorder a workflow step in a Clappia app"""
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
@@ -235,11 +228,20 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 operation="reorder",
             )
 
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="reorder",
+            )
+
         payload = {
-            "appId": request.app_id,
-            "triggerType": request.trigger_type.value,
-            "stepVariableName": request.step_variable_name,
-            "parentVariableName": request.parent_variable_name,
+            "appId": app_id,                    
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            "parentVariableName": parent_variable_name,
         }
 
         logger.info(
@@ -273,38 +275,2132 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def get_schema(self) -> BaseResponse:
-        """Get the schema for workflow definitions.
+    # Approval Workflow Step Methods
+    def add_approval_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertApprovalWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add an approval workflow step to a Clappia app"""
 
-        Returns:
-            WorkflowResponse: Response containing the workflow schema
-        """
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return BaseResponse(
-                success=False, 
-                message=env_error, 
-                operation="get_schema"
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_approval_workflow_step",
             )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_approval_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.APPROVAL_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
 
-        logger.info("Getting workflow schema")
+        logger.info(f"Adding approval workflow step to app_id: {app_id} with payload: {payload}")
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="GET", 
-            endpoint="workflowdefinitionv2/schema"
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
         )
 
         if not success:
             logger.error(f"Error: {error_message}")
-            return BaseResponse(
-                success=False, 
-                message=error_message, 
-                operation="get_schema"
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_approval_workflow_step",
             )
 
-        return BaseResponse(
+        return WorkflowStepResponse(
             success=True,
-            message="Successfully retrieved workflow schema",
+            message="Successfully added approval workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_approval_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
             data=response_data,
-            operation="get_schema",
         )
+    
+    def update_approval_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertApprovalWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update an approval workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_approval_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_approval_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating approval workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_approval_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated approval workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_approval_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    # Code Workflow Step Methods
+    def add_code_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertCodeWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add a code workflow step to a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_code_workflow_step",
+            )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_code_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.CODE_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
+
+        logger.info(f"Adding code workflow step to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_code_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully added code workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_code_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
+            data=response_data,
+        )
+    
+    def update_code_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertCodeWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update a code workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_code_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_code_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating code workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_code_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated code workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_code_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    # Condition Workflow Step Methods
+    def add_condition_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertConditionWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add a condition workflow step to a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_condition_workflow_step",
+            )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_condition_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.CONDITION_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
+
+        logger.info(f"Adding condition workflow step to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_condition_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully added condition workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_condition_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
+            data=response_data,
+        )
+    
+    def update_condition_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertConditionWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update a condition workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_condition_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_condition_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating condition workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_condition_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated condition workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_condition_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    # Database Workflow Step Methods
+    def add_database_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertDatabaseWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add a database workflow step to a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_database_workflow_step",
+            )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_database_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.DATABASE_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
+
+        logger.info(f"Adding database workflow step to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_database_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully added database workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_database_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
+            data=response_data,
+        )
+    
+    def update_database_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertDatabaseWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update a database workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_database_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_database_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating database workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_database_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated database workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_database_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    # Email Workflow Step Methods
+    def add_email_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertEmailWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add an email workflow step to a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_email_workflow_step",
+            )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_email_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.EMAIL_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
+
+        logger.info(f"Adding email workflow step to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_email_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully added email workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_email_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
+            data=response_data,
+        )
+    
+    def update_email_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertEmailWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update an email workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_email_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_email_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating email workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_email_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated email workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_email_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    # Loop Workflow Step Methods
+    def add_loop_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertLoopWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add a loop workflow step to a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_loop_workflow_step",
+            )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_loop_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.LOOP_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
+
+        logger.info(f"Adding loop workflow step to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_loop_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully added loop workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_loop_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
+            data=response_data,
+        )
+    
+    def update_loop_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertLoopWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update a loop workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_loop_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_loop_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating loop workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_loop_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated loop workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_loop_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    # Mobile Notification Workflow Step Methods
+    def add_mobile_notification_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertMobileNotificationWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add a mobile notification workflow step to a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_mobile_notification_workflow_step",
+            )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_mobile_notification_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.MOBILE_NOTIFICATION_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
+
+        logger.info(f"Adding mobile notification workflow step to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_mobile_notification_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully added mobile notification workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_mobile_notification_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
+            data=response_data,
+        )
+    
+    def update_mobile_notification_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertMobileNotificationWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update a mobile notification workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_mobile_notification_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_mobile_notification_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating mobile notification workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_mobile_notification_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated mobile notification workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_mobile_notification_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    # REST API Workflow Step Methods
+    def add_rest_api_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertRestApiWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add a REST API workflow step to a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_rest_api_workflow_step",
+            )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_rest_api_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.REST_API_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
+
+        logger.info(f"Adding REST API workflow step to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_rest_api_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully added REST API workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_rest_api_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
+            data=response_data,
+        )
+    
+    def update_rest_api_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertRestApiWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update a REST API workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_rest_api_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_rest_api_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating REST API workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_rest_api_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated REST API workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_rest_api_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    # Slack Workflow Step Methods
+    def add_slack_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertSlackWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add a Slack workflow step to a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_slack_workflow_step",
+            )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_slack_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.SLACK_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
+
+        logger.info(f"Adding Slack workflow step to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_slack_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully added Slack workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_slack_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
+            data=response_data,
+        )
+    
+    def update_slack_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertSlackWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update a Slack workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_slack_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_slack_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating Slack workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_slack_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated Slack workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_slack_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    # SMS Workflow Step Methods
+    def add_sms_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertSmsWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add an SMS workflow step to a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_sms_workflow_step",
+            )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_sms_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.SMS_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
+
+        logger.info(f"Adding SMS workflow step to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_sms_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully added SMS workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_sms_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
+            data=response_data,
+        )
+    
+    def update_sms_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertSmsWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update an SMS workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_sms_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_sms_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating SMS workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_sms_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated SMS workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_sms_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    # Wait Workflow Step Methods
+    def add_wait_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertWaitWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add a wait workflow step to a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_wait_workflow_step",
+            )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_wait_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.WAIT_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
+
+        logger.info(f"Adding wait workflow step to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_wait_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully added wait workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_wait_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
+            data=response_data,
+        )
+    
+    def update_wait_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertWaitWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update a wait workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_wait_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_wait_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating wait workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_wait_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated wait workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_wait_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    # WhatsApp Workflow Step Methods
+    def add_whatsapp_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertWhatsAppWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add a WhatsApp workflow step to a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_whatsapp_workflow_step",
+            )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_whatsapp_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.WHATSAPP_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
+
+        logger.info(f"Adding WhatsApp workflow step to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_whatsapp_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully added WhatsApp workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_whatsapp_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
+            data=response_data,
+        )
+    
+    def update_whatsapp_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertWhatsAppWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update a WhatsApp workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_whatsapp_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_whatsapp_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating WhatsApp workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_whatsapp_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated WhatsApp workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_whatsapp_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    # Create Submission Workflow Step Methods
+    def add_create_submission_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertCreateSubmissionWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add a create submission workflow step to a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_create_submission_workflow_step",
+            )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_create_submission_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.CREATE_SUBMISSION_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
+
+        logger.info(f"Adding create submission workflow step to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_create_submission_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully added create submission workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_create_submission_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
+            data=response_data,
+        )
+    
+    def update_create_submission_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertCreateSubmissionWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update a create submission workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_create_submission_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_create_submission_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating create submission workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_create_submission_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated create submission workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_create_submission_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    # Delete Submission Workflow Step Methods
+    def add_delete_submission_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertDeleteSubmissionWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add a delete submission workflow step to a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_delete_submission_workflow_step",
+            )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_delete_submission_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.DELETE_SUBMISSION_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
+
+        logger.info(f"Adding delete submission workflow step to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_delete_submission_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully added delete submission workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_delete_submission_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
+            data=response_data,
+        )
+    
+    def update_delete_submission_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertDeleteSubmissionWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update a delete submission workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_delete_submission_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_delete_submission_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating delete submission workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_delete_submission_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated delete submission workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_delete_submission_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    # Find Submission Workflow Step Methods
+    def add_find_submission_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertFindSubmissionWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add a find submission workflow step to a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_find_submission_workflow_step",
+            )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_find_submission_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.FIND_SUBMISSION_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
+
+        logger.info(f"Adding find submission workflow step to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_find_submission_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully added find submission workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_find_submission_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
+            data=response_data,
+        )
+    
+    def update_find_submission_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertFindSubmissionWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update a find submission workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_find_submission_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_find_submission_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating find submission workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_find_submission_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated find submission workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_find_submission_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    # Edit Submission Workflow Step Methods
+    def add_edit_submission_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: UpsertEditSubmissionWorkflowStepRequest,
+        step_variable_name: Optional[str] = None,
+        parent_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add an edit submission workflow step to a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_edit_submission_workflow_step",
+            )
+        
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_edit_submission_workflow_step",
+            )
+        
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "nodeType": NodeType.EDIT_SUBMISSION_NODE.value,
+            **request.to_json(),
+        }
+        if step_variable_name is not None:
+            payload["stepVariableName"] = step_variable_name
+        if parent_variable_name is not None:
+            payload["parentVariableName"] = parent_variable_name
+
+        logger.info(f"Adding edit submission workflow step to app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/addWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="add_edit_submission_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully added edit submission workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="add_edit_submission_workflow_step",
+            step_variable_name=step_variable_name,
+            parent_variable_name=parent_variable_name,
+            data=response_data,
+        )
+    
+    def update_edit_submission_workflow_step(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: UpsertEditSubmissionWorkflowStepRequest,
+    ) -> WorkflowStepResponse:
+        """Update an edit submission workflow step in a Clappia app"""
+
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return WorkflowStepResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_edit_submission_workflow_step",
+            )
+
+        if trigger_type not in [t.value for t in TriggerType]:
+            return WorkflowStepResponse(
+                success=False,
+                message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_edit_submission_workflow_step",
+            )
+
+        payload = {
+            "appId": app_id,
+            "triggerType": trigger_type,
+            "stepVariableName": step_variable_name,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating edit submission workflow step in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return WorkflowStepResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                trigger_type=trigger_type,
+                operation="update_edit_submission_workflow_step",
+            )
+
+        return WorkflowStepResponse(
+            success=True,
+            message="Successfully updated edit submission workflow step",
+            app_id=app_id,
+            trigger_type=trigger_type,
+            operation="update_edit_submission_workflow_step",
+            step_variable_name=step_variable_name,
+            data=response_data,
+        )
+
+    

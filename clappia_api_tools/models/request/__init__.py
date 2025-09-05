@@ -56,6 +56,26 @@ from .app_definition import (
     
 )
 
+from .workflow_definition import (
+    UpsertAiWorkflowStepRequest,
+    UpsertApprovalWorkflowStepRequest,
+    UpsertCodeWorkflowStepRequest,
+    UpsertConditionWorkflowStepRequest,
+    UpsertDatabaseWorkflowStepRequest,
+    UpsertEmailWorkflowStepRequest,
+    UpsertLoopWorkflowStepRequest,
+    UpsertMobileNotificationWorkflowStepRequest,
+    UpsertRestApiWorkflowStepRequest,
+    UpsertSlackWorkflowStepRequest,
+    UpsertSmsWorkflowStepRequest,
+    UpsertWaitWorkflowStepRequest,
+    UpsertWhatsAppWorkflowStepRequest,
+    UpsertCreateSubmissionWorkflowStepRequest,
+    UpsertDeleteSubmissionWorkflowStepRequest,
+    UpsertFindSubmissionWorkflowStepRequest,
+    UpsertEditSubmissionWorkflowStepRequest,
+)
+
 
 from .workplace_requests import (
     AddUserToWorkplaceRequest,
@@ -68,6 +88,8 @@ from .workplace_requests import (
     GetWorkplaceUserAppsRequest,
     GetWorkplaceUsersRequest,
 )
+
+
 from .submission_requests import (
     GetSubmissionsRequest,
     GetSubmissionsAggregationRequest,
@@ -78,12 +100,8 @@ from .submission_requests import (
     GetSubmissionsInExcelRequest,
     GetSubmissionsCountRequest,
 )
-from .workflow_requests import (
-    GetWorkflowRequest,
-    AddWorkflowStepRequest,
-    UpdateWorkflowStepRequest,
-    ReorderWorkflowStepRequest,
-)
+
+
 from .analytics_requests import (
     AddChartRequest,
     UpdateChartRequest,
@@ -168,10 +186,25 @@ __all__ = [
     "GetSubmissionsInExcelRequest",
     "GetSubmissionsCountRequest",
 
-    "GetWorkflowRequest",
-    "AddWorkflowStepRequest",
-    "UpdateWorkflowStepRequest",
-    "ReorderWorkflowStepRequest",
+
+
+    "UpsertAiWorkflowStepRequest",
+    "UpsertApprovalWorkflowStepRequest",
+    "UpsertCodeWorkflowStepRequest",
+    "UpsertConditionWorkflowStepRequest",
+    "UpsertDatabaseWorkflowStepRequest",
+    "UpsertEmailWorkflowStepRequest",
+    "UpsertLoopWorkflowStepRequest",
+    "UpsertMobileNotificationWorkflowStepRequest",
+    "UpsertRestApiWorkflowStepRequest",
+    "UpsertSlackWorkflowStepRequest",
+    "UpsertSmsWorkflowStepRequest",
+    "UpsertWaitWorkflowStepRequest",
+    "UpsertWhatsAppWorkflowStepRequest",
+    "UpsertCreateSubmissionWorkflowStepRequest",
+    "UpsertDeleteSubmissionWorkflowStepRequest",
+    "UpsertFindSubmissionWorkflowStepRequest",
+    "UpsertEditSubmissionWorkflowStepRequest",
 
     "AddChartRequest",
     "UpdateChartRequest",

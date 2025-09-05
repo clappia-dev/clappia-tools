@@ -152,23 +152,23 @@ class TriggerType(Enum):
 
 class NodeType(Enum):
     """Enumeration of supported workflow node types"""
-    EMAIL = "email"
-    WAIT = "wait"
-    CONDITION = "condition"
-    SMS = "sms"
-    LOOP = "loop"
-    MOBILE_NOTIFICATION = "mobileNotification"
-    WHATSAPP = "whatsApp"
-    SLACK = "slack"
-    EDIT_SUBMISSION = "editSubmission"
-    DELETE_SUBMISSION = "deleteSubmission"
-    REST_API = "restApi"
-    DATABASE = "database"
-    CREATE_SUBMISSION = "createSubmission"
-    APPROVAL = "approval"
-    FIND_SUBMISSION = "findSubmission"
-    AI = "ai"
-    CODE = "code"
+    EMAIL_NODE = 'email'
+    WAIT_NODE = 'wait'
+    CONDITION_NODE = 'condition'    
+    SMS_NODE = 'sms'
+    LOOP_NODE = 'loop'
+    MOBILE_NOTIFICATION_NODE = 'mobileNotification'
+    WHATSAPP_NODE = 'whatsApp'
+    SLACK_NODE = 'slack'
+    EDIT_SUBMISSION_NODE = 'editSubmission'
+    DELETE_SUBMISSION_NODE = 'deleteSubmission'     
+    REST_API_NODE = 'restApi'   
+    DATABASE_NODE = 'database'  
+    CREATE_SUBMISSION_NODE = 'createSubmission' 
+    APPROVAL_NODE = 'approval'  
+    FIND_SUBMISSION_NODE = 'findSubmission'
+    AI_NODE = 'ai'
+    CODE_NODE = 'code'
 
 class ChartType(Enum):
     PIE_CHART = "pieChart"

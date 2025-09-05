@@ -112,7 +112,7 @@ class AppDefinitionClient(BaseClappiaClient):
         if not success:
             logger.error(f"Error: {error_message}")
             return AppDefinitionResponse(
-                success=False, message=error_message, app_id=app_id
+                success=False, message=error_message, app_id=app_id, operation="get_definition"
             )
         
         return AppDefinitionResponse(
@@ -120,6 +120,7 @@ class AppDefinitionClient(BaseClappiaClient):
             message="Successfully retrieved app definition",
             app_id=app_id,
             data=response_data,
+            operation="get_definition",
         )
     
     def add_text_field(
