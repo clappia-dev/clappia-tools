@@ -6,11 +6,13 @@ from urllib.parse import urlparse
 from enum import Enum
 from datetime import datetime, date
 
+
 class JsonSerializableMixin:
     """Mixin to provide robust JSON serialization functionality."""
 
     def to_json(self) -> Dict[str, Any]:
         """Convert the object to a JSON-serializable dictionary."""
+
         def _serialize(value: Any) -> Any:
             if hasattr(value, "to_json"):
                 return value.to_json()
@@ -38,13 +40,13 @@ class JsonSerializableMixin:
 
     @staticmethod
     def _to_camel_case(snake_str: str) -> str:
-        components = snake_str.split('_')
-        return components[0] + ''.join(word.capitalize() for word in components[1:])
+        components = snake_str.split("_")
+        return components[0] + "".join(word.capitalize() for word in components[1:])
 
 
 class ValidatedString(str):
     """Custom string type with common validation patterns"""
-    
+
     @classmethod
     def field_name_validator(cls, v: Optional[str]) -> Optional[str]:
         if v is not None:
@@ -52,15 +54,19 @@ class ValidatedString(str):
                 raise ValueError("Field name cannot be empty")
             v = v.strip()
             if not re.match(r"^[_a-z][\d_a-z]*$", v):
-                raise ValueError("Field name must start with letter/underscore and contain only lowercase letters, numbers, underscore")
+                raise ValueError(
+                    "Field name must start with letter/underscore and contain only lowercase letters, numbers, underscore"
+                )
         return v
-    
+
     @classmethod
-    def non_empty_string_validator(cls, v: Optional[str], field_name: str = "Field") -> Optional[str]:
+    def non_empty_string_validator(
+        cls, v: Optional[str], field_name: str = "Field"
+    ) -> Optional[str]:
         if v is not None and (not v or not v.strip()):
             raise ValueError(f"{field_name} cannot be empty")
         return v.strip() if v else v
-    
+
     @classmethod
     def url_validator(cls, v: str) -> str:
         if not v or not v.strip():
@@ -73,7 +79,7 @@ class ValidatedString(str):
         except Exception:
             raise ValueError("Must be a valid URL")
         return v
-    
+
     @classmethod
     def json_string_validator(cls, v: Optional[str]) -> Optional[str]:
         if v is not None:
@@ -86,9 +92,11 @@ class ValidatedString(str):
 
 class UniqueListValidator:
     """Validator for ensuring list uniqueness"""
-    
+
     @classmethod
-    def validate_unique_strings(cls, v: Optional[List[str]], field_name: str = "Items") -> Optional[List[str]]:
+    def validate_unique_strings(
+        cls, v: Optional[List[str]], field_name: str = "Items"
+    ) -> Optional[List[str]]:
         if v is not None:
             if len(set(v)) != len(v):
                 raise ValueError(f"{field_name} must be unique")
@@ -100,6 +108,7 @@ class UniqueListValidator:
 
 class BaseFieldComponent(BaseModel, JsonSerializableMixin):
     """Base component for field-related models"""
+
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
 
 
@@ -118,19 +127,34 @@ class BaseFieldComponent(BaseModel, JsonSerializableMixin):
     field_name
     newFieldName (if field name need to change)
 """
+
+
 class BaseUpsertFieldRequest(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
     label: str = Field(description="Display label for the field")
-    description: Optional[str] = Field(None, description="Field description, Example: This is a description for the field")
+    description: Optional[str] = Field(
+        None,
+        description="Field description, Example: This is a description for the field",
+    )
     placeholder: Optional[str] = Field(None, description="Field placeholder")
-    dependency_app_id: Optional[str] = Field(None, description="Dependency app ID, must be a valid Clappia app ID")
-    server_url: Optional[str] = Field(None, description="Server URL, mandatory if field type is getDataFromRestApis")
-    display_condition: Optional[str] = Field(None, description="Display condition Example: {field_name} == 'value'")
+    dependency_app_id: Optional[str] = Field(
+        None, description="Dependency app ID, must be a valid Clappia app ID"
+    )
+    server_url: Optional[str] = Field(
+        None, description="Server URL, mandatory if field type is getDataFromRestApis"
+    )
+    display_condition: Optional[str] = Field(
+        None, description="Display condition Example: {field_name} == 'value'"
+    )
     required: bool = Field(default=False, description="Whether field is required")
     hidden: bool = Field(default=False, description="Whether field is hidden")
     is_editable: bool = Field(default=True, description="Whether field is editable")
-    editability_condition: Optional[str] = Field(None, description="Editability condition, Example: {field_name} == 'value'")
-    default_value: Optional[str] = Field(None, description="Default value, Example: 'value'")
+    editability_condition: Optional[str] = Field(
+        None, description="Editability condition, Example: {field_name} == 'value'"
+    )
+    default_value: Optional[str] = Field(
+        None, description="Default value, Example: 'value'"
+    )
     width: int = Field(default=100, description="Desktop width")
     mobile_width: int = Field(default=100, description="Mobile width")
     retain_values: bool = Field(default=True, description="Retain values when hidden")
@@ -149,7 +173,7 @@ class BaseUpsertPageRequest(BaseModel, JsonSerializableMixin):
     @classmethod
     def validate_app_id(cls, v: str) -> str:
         return ValidatedString.non_empty_string_validator(v, "App ID")
-    
+
 
 class BaseUpsertSectionRequest(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
@@ -161,4 +185,3 @@ class BaseUpsertSectionRequest(BaseModel, JsonSerializableMixin):
     @classmethod
     def validate_app_id(cls, v: str) -> str:
         return ValidatedString.non_empty_string_validator(v, "App ID")
-    

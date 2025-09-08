@@ -1,7 +1,6 @@
 from unittest.mock import patch, Mock
 import pytest
 from clappia_api_tools.client.analytics_client import AnalyticsClient
-from clappia_api_tools.models.response import GetAppChartsResponse, ChartDefinition
 from clappia_api_tools.enums import ChartType
 
 
@@ -30,7 +29,7 @@ class TestAnalyticsClient:
         """Test successful get_charts with charts data"""
         # Mock environment validation
         mock_validate_env.return_value = (True, None)
-        
+
         # Mock successful API response with charts data
         mock_response_data = {
             "charts": [
@@ -38,14 +37,14 @@ class TestAnalyticsClient:
                     "chartId": "chart1",
                     "chartType": "pieChart",
                     "chartTitle": "Test Pie Chart",
-                    "configuration": {"key": "value"}
+                    "configuration": {"key": "value"},
                 },
                 {
-                    "chartId": "chart2", 
+                    "chartId": "chart2",
                     "chartType": "barGraph",
                     "chartTitle": "Test Bar Chart",
-                    "configuration": None
-                }
+                    "configuration": None,
+                },
             ]
         }
         mock_request.return_value = (True, None, mock_response_data)
@@ -62,13 +61,13 @@ class TestAnalyticsClient:
         assert result.app_id == "MFX093412"
         assert result.operation == "get"
         assert len(result.charts) == 2
-        
+
         # Verify first chart
         assert result.charts[0].chart_id == "chart1"
         assert result.charts[0].chart_type == ChartType.PIE_CHART
         assert result.charts[0].chart_title == "Test Pie Chart"
         assert result.charts[0].configuration == {"key": "value"}
-        
+
         # Verify second chart
         assert result.charts[1].chart_id == "chart2"
         assert result.charts[1].chart_type == ChartType.BAR_GRAPH
@@ -76,9 +75,7 @@ class TestAnalyticsClient:
         assert result.charts[1].configuration is None
 
         mock_request.assert_called_once_with(
-            method="POST", 
-            endpoint="analytics/getCharts", 
-            data={"appId": "MFX093412"}
+            method="POST", endpoint="analytics/getCharts", data={"appId": "MFX093412"}
         )
 
     @patch("clappia_api_tools.utils.api_utils.ClappiaAPIUtils.make_request")
@@ -87,7 +84,7 @@ class TestAnalyticsClient:
         """Test successful get_charts with no charts data"""
         # Mock environment validation
         mock_validate_env.return_value = (True, None)
-        
+
         # Mock successful API response with no charts
         mock_response_data = {"charts": []}
         mock_request.return_value = (True, None, mock_response_data)
@@ -111,7 +108,7 @@ class TestAnalyticsClient:
         """Test get_charts with API error"""
         # Mock environment validation
         mock_validate_env.return_value = (True, None)
-        
+
         # Mock API error response
         mock_request.return_value = (False, "API Error: Invalid request", None)
 
@@ -147,14 +144,14 @@ class TestAnalyticsClient:
         """Test get_charts with malformed response data"""
         # Mock environment validation
         mock_validate_env.return_value = (True, None)
-        
+
         # Mock successful API response but with malformed chart data
         mock_response_data = {
             "charts": [
                 {
                     "chartId": "chart1",
                     "chartType": "invalidType",  # Invalid chart type
-                    "chartTitle": "Test Chart"
+                    "chartTitle": "Test Chart",
                 }
             ]
         }
@@ -181,7 +178,7 @@ class TestAnalyticsClient:
         """Test get_charts with no response data"""
         # Mock environment validation
         mock_validate_env.return_value = (True, None)
-        
+
         # Mock successful API response but with no data
         mock_request.return_value = (True, None, None)
 

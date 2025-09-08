@@ -5,6 +5,7 @@ import json
 from urllib.parse import urlparse
 from enum import Enum
 from datetime import datetime, date
+from .model import ExternalFilter
 
 
 class JsonSerializableMixin:
@@ -43,6 +44,12 @@ class JsonSerializableMixin:
         return components[0] + "".join(word.capitalize() for word in components[1:])
 
 
+class BaseFieldComponent(BaseModel, JsonSerializableMixin):
+    """Base component for field-related models"""
+
+    model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
+
+
 class ValidatedString(str):
     """Custom string type with common validation patterns"""
 
@@ -63,18 +70,10 @@ class ValidatedString(str):
         return v.strip() if v else v
 
 
-class BaseUpsertWorkflowStepRequest(BaseModel, JsonSerializableMixin):
+class BaseUpsertChartRequest(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
-    name: str = Field(description="Name of the workflow step")
-    field_name: Optional[str] = Field(
-        None, description="Field name of the workflow step"
+    chart_title: str = Field(default="", description="Title of the chart")
+    width: int = Field(default=50, description="Width of the chart")
+    filters: Optional[List[ExternalFilter]] = Field(
+        default=None, description="Filters for the chart"
     )
-    enabled: bool = Field(
-        default=True, description="Whether the workflow step is enabled"
-    )
-    public_urls_expiry: int = Field(default=-1, description="Public URLs expiry")
-
-    @field_validator("name")
-    @classmethod
-    def validate_name(cls, v: str) -> str:
-        return ValidatedString.non_empty_string_validator(v, "Name")

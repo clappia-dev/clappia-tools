@@ -35,5 +35,5 @@ __all__ = [
     "UpsertCreateSubmissionWorkflowStepRequest",
     "UpsertDeleteSubmissionWorkflowStepRequest",
     "UpsertFindSubmissionWorkflowStepRequest",
-    "UpsertEditSubmissionWorkflowStepRequest",  
+    "UpsertEditSubmissionWorkflowStepRequest",
 ]

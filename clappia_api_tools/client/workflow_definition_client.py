@@ -21,7 +21,11 @@ from clappia_api_tools.models.request import (
     UpsertFindSubmissionWorkflowStepRequest,
     UpsertEditSubmissionWorkflowStepRequest,
 )
-from clappia_api_tools.models.response import WorkflowResponse, WorkflowStepResponse, BaseResponse
+from clappia_api_tools.models.response import (
+    WorkflowResponse,
+    WorkflowStepResponse,
+    BaseResponse,
+)
 from clappia_api_tools.enums import TriggerType, NodeType
 
 logger = get_logger(__name__)
@@ -40,14 +44,19 @@ class WorkflowDefinitionClient(BaseClappiaClient):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return WorkflowResponse(success=False, message=env_error, app_id=app_id, operation="get_workflow")
-        
+            return WorkflowResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                operation="get_workflow",
+            )
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowResponse(
                 success=False,
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
-                operation="get_workflow"
+                operation="get_workflow",
             )
 
         params = {
@@ -65,7 +74,12 @@ class WorkflowDefinitionClient(BaseClappiaClient):
 
         if not success:
             logger.error(f"Error: {error_message}")
-            return WorkflowResponse(success=False, message=error_message, app_id=app_id, operation="get_workflow")
+            return WorkflowResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                operation="get_workflow",
+            )
 
         return WorkflowResponse(
             success=True,
@@ -74,7 +88,6 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
             operation="get_workflow",
         )
-
 
     def add_ai_workflow_step(
         self,
@@ -95,7 +108,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_ai_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -104,7 +117,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_ai_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -116,7 +129,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding AI workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding AI workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -144,7 +159,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_ai_workflow_step(
         self,
         app_id: str,
@@ -180,7 +195,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating AI workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating AI workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -215,7 +232,6 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         step_variable_name: str,
         parent_variable_name: str,
     ) -> WorkflowStepResponse:
-        
         """Reorder a workflow step in a Clappia app"""
 
         env_valid, env_error = self.api_utils.validate_environment()
@@ -238,7 +254,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             )
 
         payload = {
-            "appId": app_id,                    
+            "appId": app_id,
             "triggerType": trigger_type,
             "stepVariableName": step_variable_name,
             "parentVariableName": parent_variable_name,
@@ -295,7 +311,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_approval_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -304,7 +320,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_approval_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -316,7 +332,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding approval workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding approval workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -344,7 +362,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_approval_workflow_step(
         self,
         app_id: str,
@@ -380,7 +398,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating approval workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating approval workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -428,7 +448,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_code_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -437,7 +457,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_code_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -449,7 +469,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding code workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding code workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -477,7 +499,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_code_workflow_step(
         self,
         app_id: str,
@@ -513,7 +535,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating code workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating code workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -561,7 +585,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_condition_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -570,7 +594,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_condition_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -582,7 +606,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding condition workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding condition workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -610,7 +636,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_condition_workflow_step(
         self,
         app_id: str,
@@ -646,7 +672,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating condition workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating condition workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -694,7 +722,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_database_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -703,7 +731,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_database_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -715,7 +743,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding database workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding database workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -743,7 +773,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_database_workflow_step(
         self,
         app_id: str,
@@ -779,7 +809,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating database workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating database workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -827,7 +859,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_email_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -836,7 +868,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_email_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -848,7 +880,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding email workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding email workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -876,7 +910,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_email_workflow_step(
         self,
         app_id: str,
@@ -912,7 +946,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating email workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating email workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -960,7 +996,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_loop_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -969,7 +1005,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_loop_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -981,7 +1017,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding loop workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding loop workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -1009,7 +1047,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_loop_workflow_step(
         self,
         app_id: str,
@@ -1045,7 +1083,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating loop workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating loop workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -1093,7 +1133,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_mobile_notification_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -1102,7 +1142,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_mobile_notification_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -1114,7 +1154,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding mobile notification workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding mobile notification workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -1142,7 +1184,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_mobile_notification_workflow_step(
         self,
         app_id: str,
@@ -1178,7 +1220,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating mobile notification workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating mobile notification workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -1226,7 +1270,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_rest_api_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -1235,7 +1279,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_rest_api_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -1247,7 +1291,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding REST API workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding REST API workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -1275,7 +1321,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_rest_api_workflow_step(
         self,
         app_id: str,
@@ -1311,7 +1357,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating REST API workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating REST API workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -1359,7 +1407,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_slack_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -1368,7 +1416,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_slack_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -1380,7 +1428,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding Slack workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding Slack workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -1408,7 +1458,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_slack_workflow_step(
         self,
         app_id: str,
@@ -1444,7 +1494,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating Slack workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating Slack workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -1492,7 +1544,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_sms_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -1501,7 +1553,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_sms_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -1513,7 +1565,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding SMS workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding SMS workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -1541,7 +1595,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_sms_workflow_step(
         self,
         app_id: str,
@@ -1577,7 +1631,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating SMS workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating SMS workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -1625,7 +1681,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_wait_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -1634,7 +1690,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_wait_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -1646,7 +1702,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding wait workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding wait workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -1674,7 +1732,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_wait_workflow_step(
         self,
         app_id: str,
@@ -1710,7 +1768,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating wait workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating wait workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -1758,7 +1818,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_whatsapp_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -1767,7 +1827,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_whatsapp_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -1779,7 +1839,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding WhatsApp workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding WhatsApp workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -1807,7 +1869,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_whatsapp_workflow_step(
         self,
         app_id: str,
@@ -1843,7 +1905,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating WhatsApp workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating WhatsApp workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -1891,7 +1955,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_create_submission_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -1900,7 +1964,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_create_submission_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -1912,7 +1976,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding create submission workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding create submission workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -1940,7 +2006,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_create_submission_workflow_step(
         self,
         app_id: str,
@@ -1976,7 +2042,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating create submission workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating create submission workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -2024,7 +2092,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_delete_submission_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -2033,7 +2101,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_delete_submission_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -2045,7 +2113,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding delete submission workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding delete submission workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -2073,7 +2143,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_delete_submission_workflow_step(
         self,
         app_id: str,
@@ -2109,7 +2179,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating delete submission workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating delete submission workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -2157,7 +2229,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_find_submission_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -2166,7 +2238,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_find_submission_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -2178,7 +2250,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding find submission workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding find submission workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -2206,7 +2280,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_find_submission_workflow_step(
         self,
         app_id: str,
@@ -2242,7 +2316,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating find submission workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating find submission workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -2290,7 +2366,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_edit_submission_workflow_step",
             )
-        
+
         if trigger_type not in [t.value for t in TriggerType]:
             return WorkflowStepResponse(
                 success=False,
@@ -2299,7 +2375,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
                 trigger_type=trigger_type,
                 operation="add_edit_submission_workflow_step",
             )
-        
+
         payload = {
             "appId": app_id,
             "triggerType": trigger_type,
@@ -2311,7 +2387,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         if parent_variable_name is not None:
             payload["parentVariableName"] = parent_variable_name
 
-        logger.info(f"Adding edit submission workflow step to app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Adding edit submission workflow step to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -2339,7 +2417,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             parent_variable_name=parent_variable_name,
             data=response_data,
         )
-    
+
     def update_edit_submission_workflow_step(
         self,
         app_id: str,
@@ -2375,7 +2453,9 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             **request.to_json(),
         }
 
-        logger.info(f"Updating edit submission workflow step in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating edit submission workflow step in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -2402,5 +2482,3 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             step_variable_name=step_variable_name,
             data=response_data,
         )
-
-    

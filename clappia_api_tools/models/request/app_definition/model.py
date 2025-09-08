@@ -5,7 +5,9 @@ from .base import BaseFieldComponent, ValidatedString
 
 class RestApiOutputField(BaseFieldComponent):
     name: str = Field(min_length=1, description="Name of the output field")
-    data_type: Literal["textInput", "file", "textArea"] = Field(description="Data type of the output field")
+    data_type: Literal["textInput", "file", "textArea"] = Field(
+        description="Data type of the output field"
+    )
     json_path_query: str = Field(description="JSON path query for extracting data")
     x_path_query: str = Field(description="XPath query for extracting data")
 
@@ -26,8 +28,10 @@ class SortField(BaseFieldComponent):
 
 
 class FilterField(BaseFieldComponent):
-    key: str = Field(min_length=1, description="Filter key field name, Example: 'field_name'")
-    value: str = Field(description="Filter value, Example: 'value'")    
+    key: str = Field(
+        min_length=1, description="Filter key field name, Example: 'field_name'"
+    )
+    value: str = Field(description="Filter value, Example: 'value'")
 
     @field_validator("key")
     @classmethod

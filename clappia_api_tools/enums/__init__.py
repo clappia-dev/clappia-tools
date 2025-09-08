@@ -9,6 +9,8 @@ from .enums import (
     AggregationType,
     DimensionType,
     SortDirection,
+    SortType,
+    ChartDimensionInterval,
     FieldType,
     ImageQuality,
     AllowedFileTypes,
@@ -22,6 +24,7 @@ from .enums import (
     DatabaseType,
     WatermarkPosition,
     SectionType,
+    DateToken,
 )
 
 __all__ = [
@@ -31,6 +34,8 @@ __all__ = [
     "AggregationType",
     "DimensionType",
     "SortDirection",
+    "SortType",
+    "ChartDimensionInterval",
     "FieldType",
     "ImageQuality",
     "AllowedFileTypes",
@@ -44,4 +49,5 @@ __all__ = [
     "DatabaseType",
     "WatermarkPosition",
     "SectionType",
+    "DateToken",
 ]

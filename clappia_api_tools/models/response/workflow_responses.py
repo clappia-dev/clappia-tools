@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from .base_response import BaseResponse
 from ...enums import TriggerType
 
+
 class WorkflowResponse(BaseResponse):
     app_id: str = Field(None, description="App ID")
 

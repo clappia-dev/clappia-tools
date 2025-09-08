@@ -62,14 +62,11 @@ from .definition import (
 )
 
 
-
 __all__ = [
     "ReorderSectionRequest",
     "UpsertSectionRequest",
-
     "AddPageBreakRequest",
     "UpdatePageBreakRequest",
-
     "UpsertFieldTextRequest",
     "UpsertFieldTextAreaRequest",
     "UpsertFieldDependencyAppRequest",
@@ -116,6 +113,5 @@ __all__ = [
     "UpsertFieldPaypalPaymentGatewayRequest",
     "UpsertFieldStripePaymentGatewayRequest",
     "UpsertFieldButtonRequest",
-
     "CreateAppRequest",
 ]

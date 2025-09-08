@@ -173,7 +173,9 @@ class SubmissionClient(BaseClappiaClient):
         )
 
     def create_submission(
-        self, app_id: str, data: Dict[str, Any],
+        self,
+        app_id: str,
+        data: Dict[str, Any],
     ) -> SubmissionResponse:
         try:
             request = CreateSubmissionRequest(

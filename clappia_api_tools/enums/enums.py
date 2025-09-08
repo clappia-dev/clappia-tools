@@ -1,6 +1,28 @@
 from enum import Enum
 
 
+class DateToken(Enum):
+    CUSTOM = ("CUS",)
+    TODAY = ("TOD",)
+    YESTERDAY = ("YES",)
+    TOMORROW = ("TOM",)
+    LAST_WEEK = ("L_W",)
+    LAST_MONTH = ("L_M",)
+    LAST_YEAR = ("L_Y",)
+    LAST_7_DAYS = ("L_7",)
+    LAST_30_DAYS = ("L30",)
+    LAST_90_DAYS = ("L90",)
+    CURRENT_WEEK = ("C_W",)
+    CURRENT_MONTH = ("C_M",)
+    CURRENT_YEAR = ("C_Y",)
+    NEXT_WEEK = ("N_W",)
+    NEXT_MONTH = ("N_M",)
+    NEXT_YEAR = ("N_Y",)
+    NEXT_7_DAYS = ("N_7",)
+    NEXT_30_DAYS = ("N30",)
+    NEXT_90_DAYS = "N90"
+
+
 class FilterOperator(Enum):
     CONTAINS = "CONTAINS"
     NOT_IN = "NOT_IN"
@@ -9,11 +31,12 @@ class FilterOperator(Enum):
     EMPTY = "EMPTY"
     NON_EMPTY = "NON_EMPTY"
     STARTS_WITH = "STARTS_WITH"
-    BETWEEN = "BETWEEN"
     GT = "GT"
     LT = "LT"
     GTE = "GTE"
     LTE = "LTE"
+    ENDS_WITH = "ENDS_WITH"
+    BETWEEN = "BETWEEN"
 
 
 class LogicalOperator(Enum):
@@ -45,6 +68,18 @@ class SortDirection(Enum):
     DESC = "desc"
 
 
+class SortType(Enum):
+    NUMBER = "number"
+    STRING = "string"
+
+
+class ChartDimensionInterval(Enum):
+    DAY = "day"
+    WEEK = "week"
+    MONTH = "month"
+    YEAR = "year"
+
+
 class FieldType(Enum):
     # Data Input Blocks
     SINGLE_LINE_TEXT = "singleLineText"
@@ -70,14 +105,14 @@ class FieldType(Enum):
     ADDRESS = "address"
     GEO_ADDRESS = "geoAddress"
     PAYMENT_GATEWAY = "paymentGateway"
-    
+
     # Data Upload Blocks
     FILE = "file"  # Camera, Image & Files
     AUDIO = "audio"
     GPS_LOCATION = "gpsLocation"
     LIVE_TRACKING = "liveTracking"
     SIGNATURE = "signature"
-    
+
     # Data Processing Blocks
     CALCULATIONS_AND_LOGIC = "calculationsAndLogic"
     UNIQUE_NUMBERING = "uniqueNumbering"
@@ -85,7 +120,7 @@ class FieldType(Enum):
     GET_DATA_FROM_REST_APIS = "getDataFromRestApis"
     GET_DATA_FROM_DATABASE = "getDataFromDatabase"
     AI = "ai"
-    
+
     # Content Blocks
     HTML = "html"  # Text, HTML & Embedding
     ATTACHED_FILES = "attachedFiles"
@@ -96,7 +131,7 @@ class FieldType(Enum):
     VALIDATION = "validation"
     BUTTON = "button"
     CODE = "code"
-    
+
     # Additional field types
     DATABASE = "database"
 
@@ -132,6 +167,7 @@ class DatabaseType(Enum):
     POSTGRESQL = "PostgreSql"
     AZURE_SQL = "AzureSql"
 
+
 class WatermarkPosition(Enum):
     TOP_RIGHT = "TR"
     BOTTOM_RIGHT = "BR"
@@ -152,23 +188,25 @@ class TriggerType(Enum):
 
 class NodeType(Enum):
     """Enumeration of supported workflow node types"""
-    EMAIL_NODE = 'email'
-    WAIT_NODE = 'wait'
-    CONDITION_NODE = 'condition'    
-    SMS_NODE = 'sms'
-    LOOP_NODE = 'loop'
-    MOBILE_NOTIFICATION_NODE = 'mobileNotification'
-    WHATSAPP_NODE = 'whatsApp'
-    SLACK_NODE = 'slack'
-    EDIT_SUBMISSION_NODE = 'editSubmission'
-    DELETE_SUBMISSION_NODE = 'deleteSubmission'     
-    REST_API_NODE = 'restApi'   
-    DATABASE_NODE = 'database'  
-    CREATE_SUBMISSION_NODE = 'createSubmission' 
-    APPROVAL_NODE = 'approval'  
-    FIND_SUBMISSION_NODE = 'findSubmission'
-    AI_NODE = 'ai'
-    CODE_NODE = 'code'
+
+    EMAIL_NODE = "email"
+    WAIT_NODE = "wait"
+    CONDITION_NODE = "condition"
+    SMS_NODE = "sms"
+    LOOP_NODE = "loop"
+    MOBILE_NOTIFICATION_NODE = "mobileNotification"
+    WHATSAPP_NODE = "whatsApp"
+    SLACK_NODE = "slack"
+    EDIT_SUBMISSION_NODE = "editSubmission"
+    DELETE_SUBMISSION_NODE = "deleteSubmission"
+    REST_API_NODE = "restApi"
+    DATABASE_NODE = "database"
+    CREATE_SUBMISSION_NODE = "createSubmission"
+    APPROVAL_NODE = "approval"
+    FIND_SUBMISSION_NODE = "findSubmission"
+    AI_NODE = "ai"
+    CODE_NODE = "code"
+
 
 class ChartType(Enum):
     PIE_CHART = "pieChart"

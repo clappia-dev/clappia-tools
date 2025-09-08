@@ -1,5 +1,12 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, EmailStr, field_validator, ValidationInfo, model_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    EmailStr,
+    field_validator,
+    ValidationInfo,
+    model_validator,
+)
 import re
 from clappia_api_tools.enums import WorkplaceUserRole
 from clappia_api_tools.models.permissions import Permission
@@ -159,11 +166,14 @@ class UpdateWorkplaceUserGroupsRequest(BaseWorkplaceRequest):
         )
         return unique_groups
 
+
 class AddUserToAppRequest(BaseWorkplaceRequest):
     """Request model for adding a user to an app"""
 
     app_id: str = Field(description="App Id")
-    permissions: Permission = Field(description="User permissions, possible keys are: can_submit_data, can_edit_data, can_view_data, can_change_status, can_edit_app, can_bulk_upload, can_view_analytics and can_delete_data. Value must be boolean true/false.")
+    permissions: Permission = Field(
+        description="User permissions, possible keys are: can_submit_data, can_edit_data, can_view_data, can_change_status, can_edit_app, can_bulk_upload, can_view_analytics and can_delete_data. Value must be boolean true/false."
+    )
 
     @field_validator("app_id")
     @classmethod
@@ -173,6 +183,7 @@ class AddUserToAppRequest(BaseWorkplaceRequest):
         if not re.match(r"^[A-Z0-9]+$", v.strip()):
             raise ValueError("App ID must contain only uppercase letters and numbers")
         return v.strip()
+
 
 class GetWorkplaceAppsRequest(BaseModel):
     """Request model for getting workplace apps"""

@@ -444,11 +444,11 @@ class WorkplaceClient(BaseClappiaClient):
         )
 
     def add_user_to_app(
-    self,
-    app_id: str,
-    permissions: Dict[str, bool],
-    email_address: Optional[str] = None,
-    phone_number: Optional[str] = None,
+        self,
+        app_id: str,
+        permissions: Dict[str, bool],
+        email_address: Optional[str] = None,
+        phone_number: Optional[str] = None,
     ) -> AppUserResponse:
         """Add a user to an app."""
         try:
@@ -566,15 +566,16 @@ class WorkplaceClient(BaseClappiaClient):
         apps = []
         if response_data and isinstance(response_data, list):
             for app_data in response_data:
-                    try:    
-                        from clappia_api_tools.models.response.workplace_responses import (
-                            AppMetaData,
-                        )
-                        print(app_data)
-                        app = AppMetaData.from_json(app_data)   
-                        apps.append(app)
-                    except Exception as e:
-                        logger.warning(f"Failed to parse app data: {e}")
+                try:
+                    from clappia_api_tools.models.response.workplace_responses import (
+                        AppMetaData,
+                    )
+
+                    print(app_data)
+                    app = AppMetaData.from_json(app_data)
+                    apps.append(app)
+                except Exception as e:
+                    logger.warning(f"Failed to parse app data: {e}")
 
         return WorkplaceAppResponse(
             success=True,
@@ -650,15 +651,15 @@ class WorkplaceClient(BaseClappiaClient):
         apps = []
         if response_data and isinstance(response_data, list):
             for app_data in response_data:
-                    try:
-                        from clappia_api_tools.models.response.workplace_responses import (
-                            AppUserMetaData,
-                        )
+                try:
+                    from clappia_api_tools.models.response.workplace_responses import (
+                        AppUserMetaData,
+                    )
 
-                        app = AppUserMetaData.from_json(app_data)
-                        apps.append(app)
-                    except Exception as e:
-                        logger.warning(f"Failed to parse app data: {e}")
+                    app = AppUserMetaData.from_json(app_data)
+                    apps.append(app)
+                except Exception as e:
+                    logger.warning(f"Failed to parse app data: {e}")
 
         return WorkplaceUserAppsResponse(
             success=True,
@@ -738,7 +739,7 @@ class WorkplaceClient(BaseClappiaClient):
             if isinstance(users_data, list):
                 for user_data in users_data:
                     try:
-                        user = WorkplaceUser(**user_data)   
+                        user = WorkplaceUser(**user_data)
                         users.append(user)
                     except Exception as e:
                         logger.warning(f"Failed to parse user data: {e}")

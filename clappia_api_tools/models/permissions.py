@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Dict, Any
 
+
 class Permission(BaseModel):
     can_submit_data: bool = Field(default=False, description="Can submit data")
     can_edit_data: bool = Field(default=False, description="Can edit data")
@@ -24,8 +25,5 @@ class Permission(BaseModel):
             "canEditApp": self.can_edit_app,
             "canBulkUpload": self.can_bulk_upload,
             "canViewAnalytics": self.can_view_analytics,
-            "canDeleteData": self.can_delete_data
+            "canDeleteData": self.can_delete_data,
         }
-
-
-

@@ -61,10 +61,11 @@ from clappia_api_tools.models.response import (
     FieldOperationResponse,
     UpsertSectionOperationResponse,
     AppCreationResponse,
-    ReorderSectionOperationResponse
+    ReorderSectionOperationResponse,
 )
 
 from clappia_api_tools.enums import FieldType
+
 logger = get_logger(__name__)
 
 
@@ -80,22 +81,24 @@ class AppDefinitionClient(BaseClappiaClient):
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
             return AppCreationResponse(success=False, message=env_error)
-        
+
         payload = request.to_json()
 
         logger.info(f"Creating app with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/createApp",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return AppCreationResponse(success=False, message=error_message)
-        
-        return AppCreationResponse(success=True, message="Successfully created app", data=response_data)    
+
+        return AppCreationResponse(
+            success=True, message="Successfully created app", data=response_data
+        )
 
     def get_definition(self, app_id: str) -> AppDefinitionResponse:
         """Retrieve the complete definition for a specific app."""
@@ -112,9 +115,12 @@ class AppDefinitionClient(BaseClappiaClient):
         if not success:
             logger.error(f"Error: {error_message}")
             return AppDefinitionResponse(
-                success=False, message=error_message, app_id=app_id, operation="get_definition"
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                operation="get_definition",
             )
-        
+
         return AppDefinitionResponse(
             success=True,
             message="Successfully retrieved app definition",
@@ -122,7 +128,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
             operation="get_definition",
         )
-    
+
     def add_text_field(
         self,
         app_id: str,
@@ -142,7 +148,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_text_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -152,9 +158,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding text field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -168,7 +174,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_text_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -179,7 +185,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_text_field(
         self,
         app_id: str,
@@ -196,21 +202,21 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_text_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Updating text field in app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -220,7 +226,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_text_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated text field",
@@ -250,7 +256,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_textarea_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -260,9 +266,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding textarea field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding textarea field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -276,7 +284,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_textarea_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -287,7 +295,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_textarea_field(
         self,
         app_id: str,
@@ -304,21 +312,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_textarea_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating textarea field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating textarea field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -328,7 +338,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_textarea_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated textarea field",
@@ -358,7 +368,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_dependency_app_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -368,9 +378,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding dependency app field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding dependency app field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -384,7 +396,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_dependency_app_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -395,7 +407,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_dependency_app_field(
         self,
         app_id: str,
@@ -412,21 +424,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_dependency_app_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating dependency app field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating dependency app field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -436,7 +450,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_dependency_app_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated dependency app field",
@@ -466,7 +480,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_rest_api_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -476,9 +490,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding REST API field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding REST API field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -492,7 +508,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_rest_api_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -503,7 +519,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_rest_api_field(
         self,
         app_id: str,
@@ -520,21 +536,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_rest_api_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating REST API field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating REST API field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -544,7 +562,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_rest_api_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated REST API field",
@@ -574,7 +592,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_address_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -584,9 +602,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding address field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -600,7 +618,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_address_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -611,7 +629,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_address_field(
         self,
         app_id: str,
@@ -628,21 +646,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_address_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating address field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating address field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -652,7 +672,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_address_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated address field",
@@ -663,7 +683,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Database Field Methods
-    def add_database_field( 
+    def add_database_field(
         self,
         app_id: str,
         section_index: int,
@@ -682,7 +702,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_database_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -692,9 +712,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding database field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding database field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -708,7 +730,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_database_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -719,7 +741,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_database_field(
         self,
         app_id: str,
@@ -736,21 +758,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_database_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating database field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating database field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -760,7 +784,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_database_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated database field",
@@ -771,7 +795,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Date Field Methods
-    def add_date_field( 
+    def add_date_field(
         self,
         app_id: str,
         section_index: int,
@@ -790,7 +814,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_date_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -800,9 +824,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding date field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -816,7 +840,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_date_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -827,7 +851,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_date_field(
         self,
         app_id: str,
@@ -844,21 +868,21 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_date_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Updating date field in app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -868,7 +892,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_date_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated date field",
@@ -898,7 +922,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_ai_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -908,9 +932,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding AI field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -924,7 +948,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_ai_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -935,7 +959,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_ai_field(
         self,
         app_id: str,
@@ -952,21 +976,21 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_ai_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Updating AI field in app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -976,7 +1000,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_ai_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated AI field",
@@ -1006,7 +1030,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_code_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -1016,9 +1040,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding code field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -1032,7 +1056,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_code_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -1043,7 +1067,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_code_field(
         self,
         app_id: str,
@@ -1060,21 +1084,21 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_code_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Updating code field in app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -1084,7 +1108,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_code_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated code field",
@@ -1114,7 +1138,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_code_reader_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -1124,9 +1148,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding code reader field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding code reader field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -1140,7 +1166,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_code_reader_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -1151,7 +1177,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_code_reader_field(
         self,
         app_id: str,
@@ -1168,21 +1194,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_code_reader_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating code reader field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating code reader field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -1192,7 +1220,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_code_reader_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated code reader field",
@@ -1203,7 +1231,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Email Input Field Methods
-    def add_email_input_field(  
+    def add_email_input_field(
         self,
         app_id: str,
         section_index: int,
@@ -1222,7 +1250,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_email_input_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -1232,9 +1260,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding email input field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding email input field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -1248,7 +1278,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_email_input_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -1259,7 +1289,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_email_input_field(
         self,
         app_id: str,
@@ -1276,21 +1306,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_email_input_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating email input field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating email input field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -1300,7 +1332,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_email_input_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated email input field",
@@ -1330,7 +1362,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_emoji_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -1340,9 +1372,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding emoji field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -1356,7 +1388,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_emoji_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -1367,7 +1399,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_emoji_field(
         self,
         app_id: str,
@@ -1384,21 +1416,21 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_emoji_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Updating emoji field in app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -1408,7 +1440,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_emoji_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated emoji field",
@@ -1438,7 +1470,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_file_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -1448,9 +1480,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding file field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -1464,7 +1496,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_file_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -1475,7 +1507,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_file_field(
         self,
         app_id: str,
@@ -1492,21 +1524,21 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_file_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Updating file field in app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -1516,7 +1548,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_file_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated file field",
@@ -1546,7 +1578,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_gps_location_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -1556,9 +1588,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding GPS location field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding GPS location field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -1572,7 +1606,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_gps_location_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -1583,7 +1617,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_gps_location_field(
         self,
         app_id: str,
@@ -1600,21 +1634,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_gps_location_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating GPS location field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating GPS location field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -1624,7 +1660,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_gps_location_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated GPS location field",
@@ -1654,7 +1690,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_live_tracking_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -1664,9 +1700,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding live tracking field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding live tracking field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -1680,7 +1718,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_live_tracking_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -1691,7 +1729,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_live_tracking_field(
         self,
         app_id: str,
@@ -1708,21 +1746,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_live_tracking_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating live tracking field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating live tracking field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -1732,7 +1772,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_live_tracking_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated live tracking field",
@@ -1762,7 +1802,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_manual_address_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -1772,9 +1812,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding manual address field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding manual address field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -1788,7 +1830,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_manual_address_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -1799,7 +1841,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_manual_address_field(
         self,
         app_id: str,
@@ -1816,21 +1858,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_manual_address_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating manual address field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating manual address field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -1840,7 +1884,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_manual_address_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated manual address field",
@@ -1870,7 +1914,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_phone_number_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -1880,9 +1924,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding phone number field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding phone number field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -1896,7 +1942,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_phone_number_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -1907,7 +1953,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_phone_number_field(
         self,
         app_id: str,
@@ -1924,21 +1970,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_phone_number_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating phone number field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating phone number field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -1948,7 +1996,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_phone_number_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated phone number field",
@@ -1978,7 +2026,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_progress_bar_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -1988,9 +2036,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding progress bar field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding progress bar field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -2004,7 +2054,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_progress_bar_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -2015,7 +2065,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_progress_bar_field(
         self,
         app_id: str,
@@ -2032,21 +2082,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_progress_bar_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating progress bar field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating progress bar field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -2056,7 +2108,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_progress_bar_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated progress bar field",
@@ -2086,7 +2138,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_signature_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -2096,9 +2148,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding signature field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding signature field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -2112,7 +2166,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_signature_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -2123,7 +2177,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_signature_field(
         self,
         app_id: str,
@@ -2140,21 +2194,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_signature_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating signature field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating signature field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -2164,7 +2220,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_signature_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated signature field",
@@ -2194,7 +2250,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_counter_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -2204,9 +2260,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding counter field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -2220,7 +2276,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_counter_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -2231,7 +2287,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_counter_field(
         self,
         app_id: str,
@@ -2248,21 +2304,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_counter_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating counter field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating counter field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -2272,7 +2330,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_counter_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated counter field",
@@ -2302,7 +2360,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_slider_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -2312,9 +2370,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding slider field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -2328,7 +2386,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_slider_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -2339,7 +2397,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_slider_field(
         self,
         app_id: str,
@@ -2356,21 +2414,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_slider_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating slider field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating slider field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -2380,7 +2440,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_slider_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated slider field",
@@ -2410,7 +2470,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_time_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -2420,9 +2480,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding time field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -2436,7 +2496,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_time_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -2447,7 +2507,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_time_field(
         self,
         app_id: str,
@@ -2464,21 +2524,21 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_time_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Updating time field in app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -2488,7 +2548,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_time_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated time field",
@@ -2518,7 +2578,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_toggle_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -2528,9 +2588,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding toggle field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -2544,7 +2604,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_toggle_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -2555,7 +2615,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_toggle_field(
         self,
         app_id: str,
@@ -2572,21 +2632,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_toggle_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating toggle field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating toggle field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -2596,7 +2658,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_toggle_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated toggle field",
@@ -2626,7 +2688,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_validation_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -2636,9 +2698,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding validation field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding validation field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -2652,7 +2716,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_validation_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -2663,7 +2727,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_validation_field(
         self,
         app_id: str,
@@ -2680,21 +2744,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_validation_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating validation field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating validation field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -2704,7 +2770,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_validation_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated validation field",
@@ -2734,7 +2800,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_video_viewer_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -2744,9 +2810,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding video viewer field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding video viewer field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -2760,7 +2828,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_video_viewer_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -2771,7 +2839,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_video_viewer_field(
         self,
         app_id: str,
@@ -2788,21 +2856,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_video_viewer_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating video viewer field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating video viewer field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -2812,7 +2882,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_video_viewer_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated video viewer field",
@@ -2842,7 +2912,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_voice_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -2852,9 +2922,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding voice field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -2868,7 +2938,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_voice_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -2879,7 +2949,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_voice_field(
         self,
         app_id: str,
@@ -2896,21 +2966,21 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_voice_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Updating voice field in app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -2920,7 +2990,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_voice_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated voice field",
@@ -2950,7 +3020,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_formula_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -2960,9 +3030,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding formula field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -2976,7 +3046,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_formula_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -2987,7 +3057,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_formula_field(
         self,
         app_id: str,
@@ -3004,21 +3074,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_formula_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating formula field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating formula field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -3028,7 +3100,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_formula_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated formula field",
@@ -3057,7 +3129,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 operation="add_image_field",
                 field_name=field_name,
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -3067,15 +3139,15 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding image field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -3085,7 +3157,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 operation="add_image_field",
                 field_name=field_name,
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully added image field",
@@ -3094,7 +3166,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_image_field(
         self,
         app_id: str,
@@ -3111,21 +3183,21 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_image_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Updating image field in app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -3135,7 +3207,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_image_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated image field",
@@ -3144,7 +3216,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def add_rich_text_editor_field(
         self,
         app_id: str,
@@ -3164,7 +3236,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_rich_text_editor_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -3174,15 +3246,17 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding rich text editor field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding rich text editor field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -3190,7 +3264,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_rich_text_editor_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -3201,7 +3275,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_rich_text_editor_field(
         self,
         app_id: str,
@@ -3218,21 +3292,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_rich_text_editor_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating rich text editor field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating rich text editor field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -3242,7 +3318,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_rich_text_editor_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated rich text editor field",
@@ -3251,9 +3327,9 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def add_nfc_reader_field(
-        self,   
+        self,
         app_id: str,
         section_index: int,
         field_index: int,
@@ -3271,7 +3347,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_nfc_reader_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -3281,9 +3357,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding NFC reader field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding NFC reader field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -3297,7 +3375,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_nfc_reader_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -3325,21 +3403,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_nfc_reader_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating NFC reader field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating NFC reader field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -3347,7 +3427,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_nfc_reader_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -3358,7 +3438,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def add_number_field(
         self,
         app_id: str,
@@ -3378,7 +3458,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_number_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -3388,9 +3468,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding number field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -3404,7 +3484,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_number_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -3417,7 +3497,6 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     def update_number_field(
-
         self,
         app_id: str,
         field_name: str,
@@ -3433,15 +3512,17 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_number_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating number field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating number field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
@@ -3455,7 +3536,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_number_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -3465,8 +3546,8 @@ class AppDefinitionClient(BaseClappiaClient):
             operation="update_number_field",
             field_name=field_name,
             data=response_data,
-        )   
-    
+        )
+
     def add_pdf_viewer_field(
         self,
         app_id: str,
@@ -3486,7 +3567,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_pdf_viewer_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -3496,9 +3577,11 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding PDF viewer field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding PDF viewer field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
@@ -3512,7 +3595,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_pdf_viewer_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -3523,7 +3606,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_pdf_viewer_field(
         self,
         app_id: str,
@@ -3540,21 +3623,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_pdf_viewer_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating PDF viewer field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating PDF viewer field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -3564,7 +3649,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_pdf_viewer_field",
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated PDF viewer field",
@@ -3573,7 +3658,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def add_read_only_field(
         self,
         app_id: str,
@@ -3593,7 +3678,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_read_only_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -3603,15 +3688,17 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding read only field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding read only field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -3619,9 +3706,9 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_read_only_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully added read only field",
@@ -3630,7 +3717,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_read_only_field(
         self,
         app_id: str,
@@ -3639,7 +3726,7 @@ class AppDefinitionClient(BaseClappiaClient):
     ) -> FieldOperationResponse:
         """Update a read only field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
-        if not env_valid:   
+        if not env_valid:
             return FieldOperationResponse(
                 success=False,
                 message=env_error,
@@ -3653,15 +3740,17 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating read only field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating read only field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -3669,7 +3758,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_read_only_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -3680,9 +3769,9 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def add_read_only_text_field(
-        self,   
+        self,
         app_id: str,
         section_index: int,
         field_index: int,
@@ -3700,7 +3789,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_read_only_text_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -3710,8 +3799,10 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding read only text field to app_id: {app_id} with payload: {payload}")
+
+        logger.info(
+            f"Adding read only text field to app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -3726,7 +3817,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_read_only_text_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -3737,7 +3828,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_read_only_text_field(
         self,
         app_id: str,
@@ -3760,15 +3851,17 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating read only text field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating read only text field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -3776,7 +3869,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_read_only_text_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -3787,7 +3880,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def add_tag_field(
         self,
         app_id: str,
@@ -3807,7 +3900,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_tag_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -3817,15 +3910,15 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding tag field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -3833,7 +3926,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_tag_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -3844,7 +3937,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_tag_field(
         self,
         app_id: str,
@@ -3852,7 +3945,7 @@ class AppDefinitionClient(BaseClappiaClient):
         request: UpsertFieldTagsRequest,
     ) -> FieldOperationResponse:
         """Update a tag field in an app."""
-    
+
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
             return FieldOperationResponse(
@@ -3862,21 +3955,21 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_tag_field",
             )
-    
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Updating tag field in app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -3884,7 +3977,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_tag_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -3895,7 +3988,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def add_unique_sequential_field(
         self,
         app_id: str,
@@ -3915,7 +4008,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_unique_sequential_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -3925,15 +4018,17 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding unique sequential field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding unique sequential field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -3941,9 +4036,9 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_unique_sequential_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully added unique sequential field",
@@ -3952,7 +4047,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_unique_sequential_field(
         self,
         app_id: str,
@@ -3969,21 +4064,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_unique_sequential_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating unique sequential field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating unique sequential field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -3991,9 +4088,9 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_unique_sequential_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated unique sequential field",
@@ -4002,7 +4099,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def add_drop_down_field(
         self,
         app_id: str,
@@ -4022,7 +4119,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_drop_down_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -4032,15 +4129,17 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding drop down field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding drop down field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4048,7 +4147,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_drop_down_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -4059,7 +4158,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_drop_down_field(
         self,
         app_id: str,
@@ -4076,21 +4175,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_drop_down_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating drop down field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating drop down field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4098,7 +4199,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_drop_down_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -4109,7 +4210,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def add_radio_field(
         self,
         app_id: str,
@@ -4129,7 +4230,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_radio_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -4139,15 +4240,15 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding radio field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4155,7 +4256,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_radio_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -4166,7 +4267,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_radio_field(
         self,
         app_id: str,
@@ -4183,21 +4284,21 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_radio_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
-        }   
-        
+        }
+
         logger.info(f"Updating radio field in app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4205,7 +4306,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_radio_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -4216,7 +4317,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def add_url_input_field(
         self,
         app_id: str,
@@ -4236,7 +4337,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_url_input_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -4246,15 +4347,17 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding URL input field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding URL input field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4262,7 +4365,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_url_input_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -4273,7 +4376,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_url_input_field(
         self,
         app_id: str,
@@ -4290,21 +4393,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_url_input_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating URL input field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating URL input field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4312,7 +4417,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_url_input_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -4323,7 +4428,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def add_checkbox_field(
         self,
         app_id: str,
@@ -4343,7 +4448,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_checkbox_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -4353,15 +4458,17 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding checkbox field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding checkbox field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4369,7 +4476,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_checkbox_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -4380,8 +4487,8 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
-    def update_checkbox_field(  
+
+    def update_checkbox_field(
         self,
         app_id: str,
         field_name: str,
@@ -4397,21 +4504,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_checkbox_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating checkbox field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating checkbox field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4419,7 +4528,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_checkbox_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -4430,7 +4539,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def add_razorpay_payment_gateway_field(
         self,
         app_id: str,
@@ -4450,7 +4559,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_razorpay_payment_gateway_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -4460,15 +4569,17 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding razorpay payment gateway field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding razorpay payment gateway field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4476,9 +4587,9 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_razorpay_payment_gateway_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully added razorpay payment gateway field",
@@ -4487,7 +4598,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_razorpay_payment_gateway_field(
         self,
         app_id: str,
@@ -4504,21 +4615,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_razorpay_payment_gateway_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating razorpay payment gateway field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating razorpay payment gateway field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4526,7 +4639,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_razorpay_payment_gateway_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
 
         return FieldOperationResponse(
@@ -4557,7 +4670,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_eazypay_payment_gateway_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -4567,15 +4680,17 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding eazypay payment gateway field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding eazypay payment gateway field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4583,9 +4698,9 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_eazypay_payment_gateway_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully added eazypay payment gateway field",
@@ -4594,8 +4709,8 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
-    def update_eazypay_payment_gateway_field(   
+
+    def update_eazypay_payment_gateway_field(
         self,
         app_id: str,
         field_name: str,
@@ -4611,21 +4726,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_eazypay_payment_gateway_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating eazypay payment gateway field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating eazypay payment gateway field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4633,9 +4750,9 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_eazypay_payment_gateway_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated eazypay payment gateway field",
@@ -4644,8 +4761,8 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
-    def add_paypal_payment_gateway_field(   
+
+    def add_paypal_payment_gateway_field(
         self,
         app_id: str,
         section_index: int,
@@ -4664,7 +4781,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_paypal_payment_gateway_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -4674,15 +4791,17 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding paypal payment gateway field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding paypal payment gateway field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4690,9 +4809,9 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_paypal_payment_gateway_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully added paypal payment gateway field",
@@ -4701,7 +4820,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_paypal_payment_gateway_field(
         self,
         app_id: str,
@@ -4718,21 +4837,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_paypal_payment_gateway_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating paypal payment gateway field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating paypal payment gateway field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4740,9 +4861,9 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_paypal_payment_gateway_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated paypal payment gateway field",
@@ -4751,7 +4872,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def add_stripe_payment_gateway_field(
         self,
         app_id: str,
@@ -4771,7 +4892,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_stripe_payment_gateway_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -4781,15 +4902,17 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Adding stripe payment gateway field to app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Adding stripe payment gateway field to app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4797,9 +4920,9 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_stripe_payment_gateway_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully added stripe payment gateway field",
@@ -4808,7 +4931,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_stripe_payment_gateway_field(
         self,
         app_id: str,
@@ -4825,21 +4948,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_stripe_payment_gateway_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating stripe payment gateway field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating stripe payment gateway field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-            
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4847,9 +4972,9 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_stripe_payment_gateway_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated stripe payment gateway field",
@@ -4858,7 +4983,7 @@ class AppDefinitionClient(BaseClappiaClient):
             field_name=field_name,
             data=response_data,
         )
-    
+
     def add_button_field(
         self,
         app_id: str,
@@ -4878,7 +5003,7 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="add_button_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -4887,15 +5012,15 @@ class AppDefinitionClient(BaseClappiaClient):
             "fieldName": field_name,
             **request.to_json(),
         }
-        
+
         logger.info(f"Adding button field to app_id: {app_id} with payload: {payload}")
-        
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/addField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4903,18 +5028,18 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="add_button_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
-            
+
         return FieldOperationResponse(
-            success=True,       
+            success=True,
             message="Successfully added button field",
             app_id=app_id,
             operation="add_button_field",
             field_name=field_name,
             data=response_data,
         )
-    
+
     def update_button_field(
         self,
         app_id: str,
@@ -4931,21 +5056,23 @@ class AppDefinitionClient(BaseClappiaClient):
                 field_name=field_name,
                 operation="update_button_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
             **request.to_json(),
         }
-        
-        logger.info(f"Updating button field in app_id: {app_id} with payload: {payload}")
-        
+
+        logger.info(
+            f"Updating button field in app_id: {app_id} with payload: {payload}"
+        )
+
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateField",
             data=payload,
         )
-        
+
         if not success:
             logger.error(f"Error: {error_message}")
             return FieldOperationResponse(
@@ -4953,9 +5080,9 @@ class AppDefinitionClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_button_field",
-                field_name=field_name,  
+                field_name=field_name,
             )
-            
+
         return FieldOperationResponse(
             success=True,
             message="Successfully updated button field",
@@ -4963,9 +5090,11 @@ class AppDefinitionClient(BaseClappiaClient):
             operation="update_button_field",
             field_name=field_name,
             data=response_data,
-        )   
-    
-    def add_page_break(self, request: AddPageBreakRequest) -> PageBreakOperationResponse:
+        )
+
+    def add_page_break(
+        self, request: AddPageBreakRequest
+    ) -> PageBreakOperationResponse:
         """Add a page break to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
@@ -4984,7 +5113,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "pageMetadata": request.page_metadata.to_json(),
         }
 
-        logger.info(f"Adding page break to app_id: {request.app_id} with payload: {payload}")
+        logger.info(
+            f"Adding page break to app_id: {request.app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -5012,7 +5143,9 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_page(self, request: UpdatePageBreakRequest) -> PageBreakOperationResponse:
+    def update_page(
+        self, request: UpdatePageBreakRequest
+    ) -> PageBreakOperationResponse:
         """Update page break settings in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
@@ -5030,8 +5163,9 @@ class AppDefinitionClient(BaseClappiaClient):
             "pageMetadata": request.page_metadata.to_json(),
         }
 
-
-        logger.info(f"Updating page '{request.page_index}' in app_id: {request.app_id} with payload: {payload}")
+        logger.info(
+            f"Updating page '{request.page_index}' in app_id: {request.app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -5059,7 +5193,9 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def reorder_section(self, request: ReorderSectionRequest) -> ReorderSectionOperationResponse:
+    def reorder_section(
+        self, request: ReorderSectionRequest
+    ) -> ReorderSectionOperationResponse:
         """Reorder a section within an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
@@ -5085,7 +5221,9 @@ class AppDefinitionClient(BaseClappiaClient):
         if request.target_page_index is not None:
             payload["targetPageIndex"] = request.target_page_index
 
-        logger.info(f"Reordering section in app_id: {request.app_id} with payload: {payload}")
+        logger.info(
+            f"Reordering section in app_id: {request.app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -5119,7 +5257,9 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_section(self, request: UpsertSectionRequest) -> UpsertSectionOperationResponse:
+    def add_section(
+        self, request: UpsertSectionRequest
+    ) -> UpsertSectionOperationResponse:
         """Add a section to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
@@ -5134,7 +5274,9 @@ class AppDefinitionClient(BaseClappiaClient):
 
         payload = request.to_json()
 
-        logger.info(f"Adding section to app_id: {request.app_id} with payload: {payload}")
+        logger.info(
+            f"Adding section to app_id: {request.app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -5144,7 +5286,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         if not success:
             logger.error(f"Error: {error_message}")
-            return UpsertSectionOperationResponse(    
+            return UpsertSectionOperationResponse(
                 success=False,
                 message=error_message,
                 app_id=request.app_id,
@@ -5163,14 +5305,16 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_section(self, request: UpsertSectionRequest) -> UpsertSectionOperationResponse:
+    def update_section(
+        self, request: UpsertSectionRequest
+    ) -> UpsertSectionOperationResponse:
         """Update a section in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
             return UpsertSectionOperationResponse(
                 success=False,
                 message=env_error,
-                app_id=request.app_id,  
+                app_id=request.app_id,
                 section_index=request.section_index,
                 page_index=request.page_index,
                 operation="update_section",
@@ -5178,9 +5322,11 @@ class AppDefinitionClient(BaseClappiaClient):
 
         payload = request.to_json()
 
-        logger.info(f"Updating section in app_id: {request.app_id} with payload: {payload}")
+        logger.info(
+            f"Updating section in app_id: {request.app_id} with payload: {payload}"
+        )
 
-        success, error_message, response_data = self.api_utils.make_request(    
+        success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="appdefinitionv2/updateSection",
             data=payload,
@@ -5190,7 +5336,7 @@ class AppDefinitionClient(BaseClappiaClient):
             logger.error(f"Error: {error_message}")
             return UpsertSectionOperationResponse(
                 success=False,
-                message=error_message,  
+                message=error_message,
                 app_id=request.app_id,
                 section_index=request.section_index,
                 page_index=request.page_index,
@@ -5201,7 +5347,7 @@ class AppDefinitionClient(BaseClappiaClient):
         return UpsertSectionOperationResponse(
             success=True,
             message="Section updated successfully",
-            app_id=request.app_id,  
+            app_id=request.app_id,
             section_index=request.section_index,
             page_index=request.page_index,
             operation="update_section",

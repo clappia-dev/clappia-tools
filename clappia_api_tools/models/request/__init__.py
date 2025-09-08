@@ -1,10 +1,8 @@
 from .app_definition import (
     ReorderSectionRequest,
     UpsertSectionRequest,
-
     AddPageBreakRequest,
     UpdatePageBreakRequest,
-
     UpsertFieldTextRequest,
     UpsertFieldTextAreaRequest,
     UpsertFieldDependencyAppRequest,
@@ -51,9 +49,7 @@ from .app_definition import (
     UpsertFieldPaypalPaymentGatewayRequest,
     UpsertFieldStripePaymentGatewayRequest,
     UpsertFieldButtonRequest,
-
     CreateAppRequest,
-    
 )
 
 from .workflow_definition import (
@@ -102,21 +98,23 @@ from .submission_requests import (
 )
 
 
-from .analytics_requests import (
-    AddChartRequest,
-    UpdateChartRequest,
-    ReorderChartRequest,
-    GetAppChartsRequest
+from .analytics import (
+    UpsertBarChartDefinitionRequest,
+    UpsertDataTableChartDefinitionRequest,
+    UpsertDoughnutChartDefinitionRequest,
+    UpsertGanttChartDefinitionRequest,
+    UpsertLineChartDefinitionRequest,
+    UpsertMapChartDefinitionRequest,
+    UpsertPieChartDefinitionRequest,
+    UpsertSummaryChartDefinitionRequest,
 )
 
 
 __all__ = [
     "ReorderSectionRequest",
     "UpsertSectionRequest",
-
     "AddPageBreakRequest",
     "UpdatePageBreakRequest",
-
     "UpsertFieldTextRequest",
     "UpsertFieldTextAreaRequest",
     "UpsertFieldDependencyAppRequest",
@@ -163,9 +161,7 @@ __all__ = [
     "UpsertFieldPaypalPaymentGatewayRequest",
     "UpsertFieldStripePaymentGatewayRequest",
     "UpsertFieldButtonRequest",
-    
     "CreateAppRequest",
-
     "AddUserToWorkplaceRequest",
     "UpdateWorkplaceUserDetailsRequest",
     "UpdateWorkplaceUserAttributesRequest",
@@ -175,8 +171,6 @@ __all__ = [
     "GetWorkplaceAppsRequest",
     "GetWorkplaceUserAppsRequest",
     "GetWorkplaceUsersRequest",
-
-
     "GetSubmissionsRequest",
     "GetSubmissionsAggregationRequest",
     "CreateSubmissionRequest",
@@ -185,9 +179,6 @@ __all__ = [
     "UpdateSubmissionOwnersRequest",
     "GetSubmissionsInExcelRequest",
     "GetSubmissionsCountRequest",
-
-
-
     "UpsertAiWorkflowStepRequest",
     "UpsertApprovalWorkflowStepRequest",
     "UpsertCodeWorkflowStepRequest",
@@ -205,9 +196,12 @@ __all__ = [
     "UpsertDeleteSubmissionWorkflowStepRequest",
     "UpsertFindSubmissionWorkflowStepRequest",
     "UpsertEditSubmissionWorkflowStepRequest",
-
-    "AddChartRequest",
-    "UpdateChartRequest",
-    "ReorderChartRequest",
-    "GetAppChartsRequest",
+    "UpsertBarChartDefinitionRequest",
+    "UpsertDataTableChartDefinitionRequest",
+    "UpsertDoughnutChartDefinitionRequest",
+    "UpsertGanttChartDefinitionRequest",
+    "UpsertLineChartDefinitionRequest",
+    "UpsertMapChartDefinitionRequest",
+    "UpsertPieChartDefinitionRequest",
+    "UpsertSummaryChartDefinitionRequest",
 ]

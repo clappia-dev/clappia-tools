@@ -23,9 +23,10 @@ class AppMetaData(BaseModel):
             "created_at": json_data.get("createdAt"),
             "created_by": json_data.get("createdBy"),
             "updated_at": json_data.get("lastUpdatedAt"),
-            "updated_by": json_data.get("lastUpdatedBy")
+            "updated_by": json_data.get("lastUpdatedBy"),
         }
         return cls(**mapped_data)
+
 
 # For get workplace user apps
 class AppUserMetaData(BaseModel):
@@ -39,7 +40,7 @@ class AppUserMetaData(BaseModel):
         """Create AppUserMetaData instance from JSON data with proper field mapping"""
         mapped_data = {
             "app_id": json_data.get("appId"),
-            "name": json_data.get("name", None)
+            "name": json_data.get("name", None),
         }
         return cls(**mapped_data)
 
@@ -96,8 +97,8 @@ class AppUserResponse(BaseResponse):
 
 class WorkplaceAppResponse(BaseResponse):
     """Response model for workplace app operations"""
-    pass 
 
+    pass
 
 
 class WorkplaceUserAppsResponse(BaseResponse):

@@ -117,7 +117,9 @@ class UpdateSubmissionOwnersRequest(BaseSubmissionRequest):
 
 class GetSubmissionsInExcelRequest(BaseSubmissionRequest):
     filters: Optional[SubmissionFilters] = Field(None, description="Optional filters")
-    requesting_user_email_address: EmailStr = Field(description="Email of requesting user")
+    requesting_user_email_address: EmailStr = Field(
+        description="Email of requesting user"
+    )
     field_names: Optional[List[str]] = Field(
         None,
         description="List of field names to include in export, both standard and custom fields",

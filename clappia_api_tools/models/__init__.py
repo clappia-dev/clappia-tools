@@ -23,10 +23,6 @@ from .request import (
     UpdateSubmissionOwnersRequest,
     GetSubmissionsInExcelRequest,
     GetSubmissionsCountRequest,
-    AddChartRequest,
-    UpdateChartRequest,
-    ReorderChartRequest,
-    GetAppChartsRequest,
     AddUserToWorkplaceRequest,
     UpdateWorkplaceUserDetailsRequest,
     UpdateWorkplaceUserAttributesRequest,
@@ -36,13 +32,10 @@ from .request import (
     GetWorkplaceAppsRequest,
     GetWorkplaceUserAppsRequest,
     GetWorkplaceUsersRequest,
-
     ReorderSectionRequest,
     UpsertSectionRequest,
-
     AddPageBreakRequest,
     UpdatePageBreakRequest,
-
     UpsertFieldTextRequest,
     UpsertFieldTextAreaRequest,
     UpsertFieldDependencyAppRequest,
@@ -89,7 +82,6 @@ from .request import (
     UpsertFieldPaypalPaymentGatewayRequest,
     UpsertFieldStripePaymentGatewayRequest,
     UpsertFieldButtonRequest,
-
     UpsertAiWorkflowStepRequest,
     UpsertApprovalWorkflowStepRequest,
     UpsertCodeWorkflowStepRequest,
@@ -107,6 +99,14 @@ from .request import (
     UpsertDeleteSubmissionWorkflowStepRequest,
     UpsertFindSubmissionWorkflowStepRequest,
     UpsertEditSubmissionWorkflowStepRequest,
+    UpsertBarChartDefinitionRequest,
+    UpsertDataTableChartDefinitionRequest,
+    UpsertDoughnutChartDefinitionRequest,
+    UpsertGanttChartDefinitionRequest,
+    UpsertLineChartDefinitionRequest,
+    UpsertMapChartDefinitionRequest,
+    UpsertPieChartDefinitionRequest,
+    UpsertSummaryChartDefinitionRequest,
 )
 from .response import (
     BaseResponse,
@@ -117,7 +117,6 @@ from .response import (
     WorkflowResponse,
     WorkflowStepResponse,
     ChartResponse,
-    GetAppChartsResponse,
     SubmissionsCountResponse,
     WorkplaceUserResponse,
     WorkplaceUserDetailsResponse,
@@ -128,13 +127,10 @@ from .response import (
     WorkplaceAppResponse,
     WorkplaceUserAppsResponse,
     WorkplaceUsersResponse,
-
     AppDefinitionResponse,
     AppCreationResponse,
-
     FieldOperationResponse,
     PageBreakOperationResponse,
-
     UpsertSectionOperationResponse,
     ReorderSectionOperationResponse,
 )
@@ -143,7 +139,6 @@ __all__ = [
     # ===== Core Models =====
     "WorkplaceUser",
     "Permission",
-
     # ===== Submission Models =====
     "FilterCondition",
     "SubmissionQuery",
@@ -152,7 +147,6 @@ __all__ = [
     "AggregationOperand",
     "AggregationDimension",
     "AggregationMetric",
-
     # ===== Request Models =====
     "CreateAppRequest",
     "GetSubmissionsRequest",
@@ -163,8 +157,6 @@ __all__ = [
     "UpdateSubmissionOwnersRequest",
     "GetSubmissionsInExcelRequest",
     "GetSubmissionsCountRequest",
-   
-
     "UpsertAiWorkflowStepRequest",
     "UpsertApprovalWorkflowStepRequest",
     "UpsertCodeWorkflowStepRequest",
@@ -182,12 +174,14 @@ __all__ = [
     "UpsertDeleteSubmissionWorkflowStepRequest",
     "UpsertFindSubmissionWorkflowStepRequest",
     "UpsertEditSubmissionWorkflowStepRequest",
-
-    "AddChartRequest",
-    "UpdateChartRequest",
-    "ReorderChartRequest",
-    "GetAppChartsRequest",
-
+    "UpsertBarChartDefinitionRequest",
+    "UpsertDataTableChartDefinitionRequest",
+    "UpsertDoughnutChartDefinitionRequest",
+    "UpsertGanttChartDefinitionRequest",
+    "UpsertLineChartDefinitionRequest",
+    "UpsertMapChartDefinitionRequest",
+    "UpsertPieChartDefinitionRequest",
+    "UpsertSummaryChartDefinitionRequest",
     "AddUserToWorkplaceRequest",
     "UpdateWorkplaceUserDetailsRequest",
     "UpdateWorkplaceUserAttributesRequest",
@@ -197,13 +191,10 @@ __all__ = [
     "GetWorkplaceAppsRequest",
     "GetWorkplaceUserAppsRequest",
     "GetWorkplaceUsersRequest",
-
     "ReorderSectionRequest",
     "UpsertSectionRequest",
-
     "AddPageBreakRequest",
     "UpdatePageBreakRequest",
-
     # Field Upserts
     "UpsertFieldTextRequest",
     "UpsertFieldTextAreaRequest",
@@ -251,7 +242,6 @@ __all__ = [
     "UpsertFieldPaypalPaymentGatewayRequest",
     "UpsertFieldStripePaymentGatewayRequest",
     "UpsertFieldButtonRequest",
-
     # ===== Response Models =====
     "BaseResponse",
     "AppDefinitionResponse",
@@ -263,7 +253,6 @@ __all__ = [
     "WorkflowResponse",
     "WorkflowStepResponse",
     "ChartResponse",
-    "GetAppChartsResponse",
     "SubmissionsCountResponse",
     "WorkplaceUserResponse",
     "WorkplaceUserDetailsResponse",
@@ -274,7 +263,6 @@ __all__ = [
     "WorkplaceAppResponse",
     "WorkplaceUserAppsResponse",
     "WorkplaceUsersResponse",
-
     "FieldOperationResponse",
     "PageBreakOperationResponse",
     "UpsertSectionOperationResponse",
