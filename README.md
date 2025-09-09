@@ -120,7 +120,7 @@ result = client.get_workflow(
 print(result)
 
 # Add a workflow step
-add_result = client.add_workflow_step(
+add_result = client.add_step(
     app_id="MFX093412",
     trigger_type="submissionCreated",
     node_type="Email",

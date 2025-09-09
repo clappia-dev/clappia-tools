@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Literal
 from pydantic import Field
 from ..base import BaseUpsertSectionRequest
 from .....enums import SectionType
@@ -17,20 +17,21 @@ class UpsertSectionRequest(BaseUpsertSectionRequest):
     add_section_text: str = Field(
         "Add another Section", description="Text to display for add section button"
     )
-    add_section_text_position: str = Field(
+    add_section_text_position: Literal["right", "left", "center"] = Field(
         "right",
         description="Position of the add section button, allowed values: right, left, center",
     )
     display_condition: Optional[str] = Field(
         None,
-        description="Display condition for the section, Example: {field_name} == 'value'",
+        description="Display condition for the section, supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: {field_name} <> 'value' or {field_name} > 10",
     )
     allow_copy: bool = Field(False, description="Allow copying of the section")
     allow_edit_copy_after_submission: bool = Field(
         True, description="Allow editing and copying of the section after submission"
     )
     allow_edit_copy_after_submission_condition: Optional[str] = Field(
-        None, description="Display condition for the allow edit copy after submission"
+        None,
+        description="Display condition for the allow edit copy after submission, supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: {field_name} <> 'value' or {field_name} > 10",
     )
     max_number_of_copies: Optional[str] = Field(
         None,

@@ -101,7 +101,7 @@ class UpsertApprovalWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
         description="Array of email addresses of approvers. Can include actual emails or field references. Example: ['manager@company.com', '{supervisorField}', 'finance@company.com']"
     )
     allowed_approval_statuses: List[str] = Field(
-        description="Array of allowed approval statuses. Example: ['approved', 'rejected', 'pending']. This should be as same as the status present the definition of the app."
+        description="Array of allowed approval statuses. Example: ['approved', 'rejected', 'pending']. This should be as same as the status present the definition of the app. Hence before using this field, you should check the statuses present in the app definition."
     )
     subject: str = Field(
         description="Subject line for the approval email. Can include field references. Example: 'Approval required for {requestType}'"
@@ -157,8 +157,8 @@ class UpsertCodeWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     output = {};
     var num1 = Math.round(Math.random()*10);
     var num2 = Math.round(Math.random()*10);
-    output['sum'] = num1 + num2;
-    output['prod'] = num1 * num2;
+    output['sum'] = num1 + num2 ; // You can also use {field_name} to reference fields
+    output['prod'] = num1 * num2; // You can also use {field_name} to reference fields
     return output;
 }""",
         description="JavaScript code to execute. Should return an object with keys matching the output fields.",
@@ -177,7 +177,7 @@ class UpsertConditionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for condition workflow step configuration"""
 
     condition: str = Field(
-        description="Condition expression to evaluate. Can include field references, logical operators, and comparison operators. Example: '{field1} > 10 AND {field2} == \"active\"' or '{statusField} == \"approved\"'"
+        description="Condition expression to evaluate, supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: {field_name} <> 'value' or {field_name} > 10"
     )
 
 
@@ -207,7 +207,7 @@ class UpsertDatabaseWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     )
     database_output_fields: Optional[List[str]] = Field(
         None,
-        description="Array of field names where query results will be stored. Can include field references. Example: ['resultField', '{dynamicField}']",
+        description="Array of field names where query results will be stored. Can include field references. Example: ['resultField']",
     )
 
     @field_validator("database_port")
@@ -310,7 +310,7 @@ class UpsertEmailWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     )
     dynamic_attachments: Optional[List[str]] = Field(
         None,
-        description="Array of field names that contain file attachments to include. Only works when app has file fields. Example: ['documentField', 'imageField']",
+        description="Array of file field names that contain file attachments to include. Only works when app has file fields. Example: ['documentField', 'imageField']",
     )
     reply_to: Optional[str] = Field(
         None,
@@ -447,10 +447,10 @@ class UpsertLoopWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for loop workflow step configuration"""
 
     no_of_times: Union[int, str] = Field(
-        description="Number of times to execute the loop or field reference containing the count. Can be a number or field name. Example: 5 or '{loopCountField}'"
+        description="Number of times to execute the loop or field reference containing the count. Can be a number or field name. Example: 5 or {loopCountField}"
     )
     break_condition: str = Field(
-        description="Condition to break the loop early. Can include field references and logical expressions. Example: 'iteration > 3' or '{breakConditionField}'"
+        description="Condition to break the loop early, supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: {field_name} <> 'value' or {field_name} > 10"
     )
     allow_system_workflow_triggered_execution: bool = Field(
         False,
@@ -574,7 +574,7 @@ class UpsertRestApiWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for REST API workflow step configuration"""
 
     server_url: str = Field(
-        description="URL of the REST API endpoint. Example: 'https://api.example.com/data' or 'https://api.example.com/data/{id}'"
+        description="URL of the REST API endpoint. Example: 'https://api.example.com/data' or 'https://api.example.com/data/{id}' or {server_url}"
     )
     method_type: Literal["GET", "POST", "PATCH", "DELETE"] = Field(
         description="HTTP method type"
@@ -582,13 +582,23 @@ class UpsertRestApiWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     body_type: Optional[Literal["JSON", "XML", "FORM-DATA"]] = Field(
         None, description="Type of request body"
     )
-    headers: Optional[str] = Field("{}", description="HTTP headers as JSON string")
+    headers: Optional[str] = Field(
+        "{}",
+        description=(
+            "HTTP headers as a JSON-formatted string. "
+            "Keys are header names and values can be static strings or dynamic field references. "
+            "Examples:\n"
+            '- \'{"Content-Type": "application/json"}\'\n'
+            '- \'{"Authorization": "{apiKey}"}\''
+        ),
+    )
     body: Optional[str] = Field(
         "{}",
-        description='Request body as JSON string. Example: \'{"field_name": "value"}\'',
+        description='Request body as JSON string. Example: \'{"field_name": "value"}\' or \'{"field_name": "{field_name}"}\'',
     )
     query_string: Optional[str] = Field(
-        None, description="URL query parameters. Example: '?field_name=value'"
+        None,
+        description="URL query parameters. Example: '?field_name=value' or ?field_name={query_string}",
     )
     response_mapping: List[RestApiOutputField] = Field(
         description="Array of output field mappings for API response"
@@ -789,7 +799,7 @@ class UpsertWaitWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     )
     wait_for: Optional[str] = Field(
         None,
-        description="Duration to wait for. Can include field references. Example: '5 minutes', '2 hours', '1 day' or '{durationField}'",
+        description="Duration to wait for in seconds. Can include field references. Example: '5000', '7200', '86400' or '{no_of_seconds}'",
     )
     wait_till_time: Optional[str] = Field(
         None,
@@ -809,7 +819,7 @@ class UpsertWhatsAppWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for WhatsApp workflow step configuration"""
 
     phone_numbers: List[str] = Field(
-        description="Array of phone numbers to send WhatsApp messages to. Can include actual phone numbers or field references. Example: ['+91 1234567890', '{phoneField}']"
+        description="Array of phone numbers to send WhatsApp messages to. Can include actual phone numbers or field references. Example: ['+91 1234567890', '{phoneField}', '+911234567890', '{phoneField}']"
     )
     whatsapp_template_variables: Optional[List[Dict[str, str]]] = Field(
         None, description="Array of template variables for WhatsApp template"
@@ -834,7 +844,7 @@ class UpsertWhatsAppWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     )
     dynamic_image_field: Optional[str] = Field(
         None,
-        description="Field name for dynamic image attachment. Example: 'imageField'",
+        description="Field name for file field used for dynamic image attachment. Example: 'imageField'",
     )
 
     @field_validator("phone_numbers")
@@ -1273,7 +1283,7 @@ class UpsertEditSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     )
     submission_owners: Optional[List[str]] = Field(
         None,
-        description="Array of email addresses or phone numbers for new submission owners. Can include field references. Example: ['manager@company.com', '{ownerField}']",
+        description="Array of email addresses or phone numbers for new submission owners. Can include field references. Example: ['manager@company.com', '{ownerField}', '+911234567890', '{phoneField}']",
     )
     keep_existing_owners: bool = Field(
         True,

@@ -14,6 +14,6 @@ class WorkflowStepResponse(BaseResponse):
     step_variable_name: Optional[str] = Field(
         None, description="Variable name of the affected step"
     )
-    parent_variable_name: Optional[str] = Field(
+    parent_step_variable_name: Optional[str] = Field(
         None, description="Parent step variable name"
     )

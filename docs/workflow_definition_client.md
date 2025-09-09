@@ -81,11 +81,11 @@ else:
 Add a new workflow step to an existing workflow.
 
 ```python
-result = client.add_workflow_step(
+result = client.add_step(
     app_id="MFX093412",
     trigger_type="submissionCreated",
     node_type="Email",
-    parent_variable_name="Start"  # Optional, defaults to "Start"
+    parent_step_variable_name="Start"  # Optional, defaults to "Start"
 )
 
 if result.success:
@@ -99,7 +99,7 @@ else:
 -  `app_id` (str): App Id
 -  `trigger_type` (str): The trigger type for the workflow
 -  `node_type` (str): Type of workflow node to add
--  `parent_variable_name` (str, optional): Parent workflow step variable name (default: "Start")
+-  `parent_step_variable_name` (str, optional): Parent workflow step variable name (default: "Start")
 
 **Valid Node Types:**
 
@@ -115,7 +115,7 @@ else:
 -  `FindClappiaAppSubmission` - Find submissions in other apps
 -  `DeleteClappiaAppSubmission` - Delete submissions in other apps
 
-```
+````
 
 **Parameters:**
 
@@ -134,7 +134,7 @@ update_data = {
     "email_body": "Updated email body content"
 }
 
-result = client.update_workflow_step(
+result = client.update_step(
     app_id="MFX093412",
     trigger_type="submissionCreated",
     step_variable_name="email_notification",
@@ -145,7 +145,7 @@ if result.success:
     print(f"Step updated: {result.message}")
 else:
     print(f"Error: {result.message}")
-```
+````
 
 **Parameters:**
 
@@ -159,11 +159,11 @@ else:
 Move a workflow step to a different position in the workflow by changing its parent.
 
 ```python
-result = client.reorder_workflow_step(
+result = client.reorder_step(
     app_id="MFX093412",
     trigger_type="submissionCreated",
     step_variable_name="email_notification",
-    parent_variable_name="validation_step",
+    parent_step_variable_name="validation_step",
 )
 
 if result.success:
@@ -177,7 +177,7 @@ else:
 -  `app_id` (str): App Id
 -  `trigger_type` (str): The trigger type for the workflow
 -  `step_variable_name` (str): Variable name of the workflow step to move
--  `parent_variable_name` (str): Variable name of the new parent workflow step
+-  `parent_step_variable_name` (str): Variable name of the new parent workflow step
 
 ## Response Models
 
@@ -204,7 +204,7 @@ class WorkflowStepResponse(BaseResponse):
     trigger_type: str
     step_variable_name: Optional[str]
     operation: str
-    parent_variable_name: Optional[str]
+    parent_step_variable_name: Optional[str]
 ```
 
 ## Error Handling
@@ -245,7 +245,7 @@ if workflow.success:
     print(f"Found workflow with {len(workflow.data.get('steps', []))} steps")
 
     # Add an email notification step
-    add_result = client.add_workflow_step(
+    add_result = client.add_step(
         app_id="MFX093412",
         trigger_type="submissionCreated",
         node_type="Email",
@@ -260,7 +260,7 @@ if workflow.success:
             "email_body": "A new submission has been created in the system."
         }
 
-        update_result = client.update_workflow_step(
+        update_result = client.update_step(
             app_id="MFX093412",
             trigger_type="submissionCreated",
             step_variable_name="email_notification",  # Generated variable name

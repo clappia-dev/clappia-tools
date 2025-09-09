@@ -17,7 +17,8 @@ from .....enums import (
 class UpsertFieldTextRequest(BaseUpsertFieldRequest):
     validation: Optional[ValidationType] = Field(None, description="Validation type")
     custom_validation_condition: Optional[str] = Field(
-        None, description="Custom validation condition, Example: {field_name} <> 'value'"
+        None,
+        description="Custom validation condition, supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: {field_name} <> 'value' or {field_name} > 10",
     )
     custom_validation_error_message: Optional[str] = Field(
         None, description="Custom validation error message"
@@ -107,7 +108,7 @@ class UpsertFieldDependencyAppRequest(BaseUpsertFieldRequest):
 class UpsertFieldRestApiRequest(BaseUpsertFieldRequest):
     server_url: str = Field(
         min_length=1,
-        description="URL of the REST API endpoint, mandatory. Example: 'https://api.example.com/data' or 'https://api.example.com/data/{id}'",
+        description="URL of the REST API endpoint, mandatory. Example: 'https://api.example.com/data' or 'https://api.example.com/data/{id} or {server_url}'",
     )
     method_type: Literal["GET", "POST", "PATCH", "DELETE"] = Field(
         description="HTTP method type"
@@ -115,13 +116,17 @@ class UpsertFieldRestApiRequest(BaseUpsertFieldRequest):
     body_type: Optional[Literal["JSON", "XML", "FORM-DATA"]] = Field(
         None, description="Type of request body"
     )
-    headers: Optional[str] = Field("{}", description="HTTP headers as JSON string")
+    headers: Optional[str] = Field(
+        "{}",
+        description="HTTP headers as JSON string, Example: {'Content-Type': 'application/json'}",
+    )
     body: Optional[str] = Field(
         "{}",
-        description="Request body as JSON string, Example: {'{field_name}': 'value'}",
+        description="Request body as JSON string, Example: {'{field_name}': 'value'} or {'{field_name}': '{field_name}'}",
     )
     query_string: Optional[str] = Field(
-        None, description="URL query parameters, Example: '?field_name=value'"
+        None,
+        description="URL query parameters, Example: '?field_name=value' or '?field_name={field_name}'",
     )
     response_mapping: List[RestApiOutputField] = Field(
         min_length=1, description="Array of output field mappings for API response"
@@ -255,17 +260,18 @@ class UpsertFieldDateRequest(BaseUpsertFieldRequest):
     )
     start_date: Optional[str] = Field(
         None,
-        description="Start date for date range restriction (YYYY-MM-DD format) or {start_date}",
+        description="Start date for date range restriction (YYYY-MM-DD format) or {start_date}, Example: '2021-01-01' or {start_date}",
     )
     end_date: Optional[str] = Field(
         None,
-        description="End date for date range restriction (YYYY-MM-DD format) or {end_date}",
+        description="End date for date range restriction (YYYY-MM-DD format) or {end_date}, Example: '2021-01-01' or {end_date}",
     )
 
 
 class UpsertFieldAIRequest(BaseUpsertFieldRequest):
     instructions: Optional[str] = Field(
-        None, description="Instructions for the AI model"
+        None,
+        description="Instructions for the AI model, Example: 'Analyze the sentiment of {customerFeedback} and provide a summary'",
     )
     model: Optional[str] = Field(None, description="Specific AI model to use")
     llm: Optional[Literal["OpenAI", "Claude", "Gemini"]] = Field(
@@ -351,7 +357,7 @@ class UpsertFieldGpsLocationRequest(BaseUpsertFieldRequest):
     )
     target_locations: List[str] = Field(
         default_factory=list,
-        description="Array of target location coordinates for geofencing",
+        description="Array of target location coordinates for geofencing, Example: ['22.66, 77.5946', {target_location}]",
     )
     radius: float = Field(
         1.0, description="Geofencing radius in kilometers (also called boundary)"
@@ -456,10 +462,11 @@ class UpsertFieldPhoneNumberRequest(BaseUpsertFieldRequest):
 
 class UpsertFieldProgressBarRequest(BaseUpsertFieldRequest):
     progress_formula: Optional[str] = Field(
-        None, description="Formula to calculate progress percentage"
+        None,
+        description="Formula to calculate progress percentage, Example: {progress_field_name} / {total_field_name} * 100",
     )
     progress_text: Optional[str] = Field(
-        None, description="Text to display with progress"
+        None, description="Text to display with progress, Example: 'Progress'"
     )
 
 
@@ -468,7 +475,8 @@ class UpsertFieldSignatureRequest(BaseUpsertFieldRequest):
         True, description="Whether to allow manual signature input"
     )
     file_display_name: str = Field(
-        "", description="Display name for the signature file"
+        "",
+        description="Display name for the signature file, Example: 'Signature' or {field_name}",
     )
 
 
@@ -543,10 +551,12 @@ class UpsertFieldTimeRequest(BaseUpsertFieldRequest):
         False, description="Whether to default to current time"
     )
     start_time: Optional[str] = Field(
-        None, description="Minimum allowed time (HH:mm format) or {start_time}"
+        None,
+        description="Minimum allowed time (HH:mm format) or {start_time} Example: '09:00' or {start_time}",
     )
     end_time: Optional[str] = Field(
-        None, description="Maximum allowed time (HH:mm format) or {end_time}"
+        None,
+        description="Maximum allowed time (HH:mm format) or {end_time} Example: '18:00' or {end_time}",
     )
 
 
@@ -571,7 +581,8 @@ class UpsertFieldValidationRequest(BaseUpsertFieldRequest):
         None, description="Array of field names to check for duplicates"
     )
     validation_condition: Optional[str] = Field(
-        None, description="Custom validation condition"
+        None,
+        description="Custom validation condition, supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: {field_name} <> 'value' or {field_name} > 10",
     )
     validation_level: Literal["success", "warning", "error"] = Field(
         "success", description="Level of validation result"
@@ -644,7 +655,10 @@ class UpsertFieldVoiceRequest(BaseUpsertFieldRequest):
     file_upload_limit: int = Field(
         10, description="Maximum number of voice files that can be uploaded (1-10)"
     )
-    file_display_name: str = Field("", description="Display name for the voice file")
+    file_display_name: str = Field(
+        "",
+        description="Display name for the voice file, Example: 'Voice' or {field_name}",
+    )
 
     @field_validator("max_length")
     @classmethod
@@ -662,7 +676,10 @@ class UpsertFieldVoiceRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldFormulaRequest(BaseUpsertFieldRequest):
-    formula: str = Field("", description="Formula expression with field references. Clappia supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: '=SUM({field_name1,field_name2}) + IF({field_name3}>10, 'Yes', 'No')'")
+    formula: str = Field(
+        "",
+        description="Formula expression with field references. Clappia supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: '=SUM({field_name1,field_name2}) + IF({field_name3}>10, 'Yes', 'No')'",
+    )
 
     @field_validator("formula")
     @classmethod
@@ -757,7 +774,7 @@ class UpsertFieldNumberInputRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldReadOnlyTextRequest(BaseUpsertFieldRequest):
-    rich_text: Optional[str] = Field(None, description="Rich text content for display")
+    rich_text: Optional[str] = Field(None, description="Rich text content for display, can include field references. Example: 'Hello {field_name}'")
 
 
 class UpsertFieldTagsRequest(BaseUpsertFieldRequest):
@@ -774,11 +791,31 @@ class UpsertFieldTagsRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldDropdownRequest(BaseUpsertFieldRequest):
-    dependency_field_names: Optional[List[str]] = Field(
-        None, description="Array of field names this select field depends on"
-    )
     options: List[str] = Field(
-        default_factory=list, description="Array of select options"
+        default_factory=list,
+        description=(
+            "List of dropdown options. For dependent dropdowns, use '||' to separate hierarchy levels.\n\n"
+            "Examples:\n"
+            "• Simple dropdown: ['Red', 'Blue', 'Green']\n"
+            "• Dependent dropdown: ['Shirt||Formal', 'Shirt||Casual', 'T-Shirt||Round Neck']\n"
+            "• Three-level: ['Shirt||Formal||S', 'Shirt||Formal||M', 'T-Shirt||V-Neck||L']"
+        ),
+    )
+
+    dependency_field_names: Optional[List[str]] = Field(
+        None,
+        description=(
+            "Names of parent dropdown fields that control which options are shown in this dropdown.\n"
+            "Must be listed in dependency order (root parent first).\n\n"
+            "How filtering works:\n"
+            "• User selects 'Shirt' in Category field\n"
+            "• Only options starting with 'Shirt||' are shown in dependent Type field\n"
+            "• User selects 'Formal' in Type field\n"
+            "• Only options starting with 'Shirt||Formal||' are shown in dependent Size field\n\n"
+            "Examples:\n"
+            "• Two-level: ['category_field'] - depends on one parent\n"
+            "• Three-level: ['category_field', 'type_field'] - depends on two parents in order"
+        ),
     )
     selecting_multiple_options_allowed: bool = Field(
         False, description="Whether multiple selections are allowed"
@@ -805,16 +842,46 @@ class UpsertFieldDropdownRequest(BaseUpsertFieldRequest):
 class UpsertFieldRadioRequest(BaseUpsertFieldRequest):
     options: List[str] = Field(
         default_factory=lambda: ["value one", "value two"],
-        description="Array of radio button options",
+        description=(
+            "List of radio button options. For dependent radio buttons, use '||' to separate hierarchy levels.\n\n"
+            "Examples:\n"
+            "• Simple radio: ['Yes', 'No', 'Maybe']\n"
+            "• Dependent radio: ['Shirt||Small', 'Shirt||Medium', 'T-Shirt||Large']\n"
+            "• Three-level: ['Clothing||Shirt||Cotton', 'Clothing||Pants||Denim']"
+        ),
     )
+
     number_of_cols: Optional[int] = Field(
-        None, description="Number of columns for radio button layout (1-3)"
+        None,
+        description=(
+            "Number of columns to display radio buttons in (1-3).\n"
+            "Controls the grid layout of radio button options.\n\n"
+            "Examples:\n"
+            "• 1 = Vertical single column\n"
+            "• 2 = Two-column grid\n"
+            "• 3 = Three-column grid"
+        ),
     )
+
     style: ChipType = Field(
-        ChipType.CHIPS, description="Display style for radio buttons"
+        ChipType.CHIPS,
+        description="Visual style for radio buttons (CHIPS for modern chip-style, or other ChipType values)",
     )
+
     dependency_field_names: Optional[List[str]] = Field(
-        None, description="Array of field names this radio field depends on"
+        None,
+        description=(
+            "Names of parent fields that control which radio options are shown.\n"
+            "Must be listed in dependency order (root parent first).\n\n"
+            "How filtering works:\n"
+            "• User selects 'Clothing' in Category field\n"
+            "• Only radio options starting with 'Clothing||' become available\n"
+            "• User selects 'Shirt' in Type field\n"
+            "• Only options starting with 'Clothing||Shirt||' are shown\n\n"
+            "Examples:\n"
+            "• Single dependency: ['category_field']\n"
+            "• Multi-level: ['category_field', 'subcategory_field']"
+        ),
     )
 
     @field_validator("options")
@@ -851,13 +918,13 @@ class UpsertFieldUrlInputRequest(BaseUpsertFieldRequest):
 class UpsertFieldCheckboxRequest(BaseUpsertFieldRequest):
     options: List[str] = Field(
         default_factory=lambda: ["value one", "value two"],
-        description="Array of checkbox options",
+        description="Array of checkbox options, Example: ['value one', 'value two']",
     )
     number_of_cols: Optional[int] = Field(
-        None, description="Number of columns for checkbox layout (1-3)"
+        None, description="Number of columns for checkbox layout (1-3), Example: 1 or 2 or 3"
     )
-    style: Literal["standard", "chips"] = Field(
-        "chips", description="Display style for checkboxes"
+    style: Literal["Standard", "Chips"] = Field(
+        "Chips", description="Display style for checkboxes, Example: 'Standard' or 'Chips'"
     )
     show_not_applicable_option: bool = Field(
         True, description="Whether to show 'Not Applicable' option"
@@ -887,8 +954,12 @@ class UpsertFieldPaymentGatewayRequest(BaseUpsertFieldRequest):
     payment_gateway: Literal["Razorpay", "Stripe", "Paypal", "Eazypay"] = Field(
         description="Payment gateway provider"
     )
-    currency: str = Field(description="Currency code")
-    amount: str = Field(description="Payment amount. Can include field references")
+    currency: str = Field(
+        description="Currency code, Example: 'INR' or 'USD' or {currency}"
+    )
+    amount: str = Field(
+        description="Payment amount. Can include field references, Example: '100' or {amount}"
+    )
 
     @field_validator("currency")
     @classmethod
@@ -957,8 +1028,12 @@ class UpsertFieldEazypayPaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
     reference_no: str = Field(
         description="Reference number for payment. Can include field references"
     )
-    optional_fields: List[str] = Field(description="Array of optional field names")
-    mandatory_fields: List[str] = Field(description="Array of mandatory field names")
+    optional_fields: List[str] = Field(
+        description="Array of optional field names, Example: ['{field_name1}', '{field_name2}']"
+    )
+    mandatory_fields: List[str] = Field(
+        description="Array of mandatory field names, Example: ['{field_name1}', '{field_name2}']"
+    )
     encryption_key: str = Field(description="Encryption key for secure payments")
 
     @field_validator("merchant_id")
@@ -1143,7 +1218,7 @@ class UpsertFieldButtonRequest(BaseUpsertFieldRequest):
 class UpsertFieldUniqueSequentialRequest(BaseUpsertFieldRequest):
     prefix: Optional[str] = Field(
         None,
-        description="Prefix for the sequential number. Can include field references",
+        description="Prefix for the sequential number. Can include field references, Example: 'INV' or {prefix}",
     )
     minimum_length: int = Field(
         1, description="Minimum length of the sequential number part"
@@ -1300,7 +1375,8 @@ class UpsertFieldFileRequest(BaseUpsertFieldRequest):
         ImageQuality.MEDIUM, description="Image quality for camera captures"
     )
     image_text: Optional[str] = Field(
-        None, description="Text watermark on captured images"
+        None,
+        description="Text watermark on captured images, Example: 'Watermark' or {field_name}",
     )
     image_text_position: Optional[WatermarkPosition] = Field(
         None, description="Position of text watermark"
@@ -1309,7 +1385,9 @@ class UpsertFieldFileRequest(BaseUpsertFieldRequest):
     logo_position: Optional[WatermarkPosition] = Field(
         None, description="Position of logo watermark"
     )
-    file_name_prefix: str = Field("", description="Prefix for uploaded file names")
+    file_name_prefix: str = Field(
+        "", description="Prefix for uploaded file names, Example: 'IMG' or {prefix}"
+    )
     save_to_gallery: bool = Field(
         False, description="Whether to save captured images to device gallery"
     )

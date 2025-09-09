@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Literal
 from pydantic import (
     BaseModel,
     Field,
@@ -8,7 +8,6 @@ from pydantic import (
     model_validator,
 )
 import re
-from clappia_api_tools.enums import WorkplaceUserRole
 from clappia_api_tools.models.permissions import Permission
 from clappia_api_tools.utils.utils import Utils
 
@@ -134,15 +133,9 @@ class UpdateWorkplaceUserAttributesRequest(BaseWorkplaceRequest):
 class UpdateWorkplaceUserRoleRequest(BaseWorkplaceRequest):
     """Request model for updating workplace user role"""
 
-    role: WorkplaceUserRole = Field(description="The new role for the user")
-
-    @field_validator("role")
-    @classmethod
-    def validate_role(cls, v: WorkplaceUserRole) -> WorkplaceUserRole:
-        if v not in WorkplaceUserRole:
-            allowed_values = ", ".join([role.value for role in WorkplaceUserRole])
-            raise ValueError(f"Parameter 'role' must be one of: {allowed_values}")
-        return v
+    role: Literal["Workplace Manager", "App Builder", "User"] = Field(
+        default="User", description="The new role for the user"
+    )
 
 
 class UpdateWorkplaceUserGroupsRequest(BaseWorkplaceRequest):

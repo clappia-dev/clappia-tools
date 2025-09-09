@@ -175,11 +175,6 @@ class WatermarkPosition(Enum):
     TOP_LEFT = "TL"
 
 
-class ExcelFormat(Enum):
-    EXCEL = "excel"
-    CSV = "csv"
-
-
 class TriggerType(Enum):
     SUBMISSION_CREATED = "newSubmission"
     SUBMISSION_EDITED = "editSubmission"
@@ -228,12 +223,6 @@ class ChartType(Enum):
     SUMMARY_CARD = "summary"
     MAP_CHART = "maps"
     GANTT_CHART = "gantt"
-
-
-class WorkplaceUserRole(Enum):
-    ADMIN = "Workplace Manager"
-    DEVELOPER = "App Builder"
-    USER = "User"
 
 
 class AppUserRole(Enum):

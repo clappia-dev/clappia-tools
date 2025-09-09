@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Literal
 from pydantic import BaseModel, Field, EmailStr, field_validator
 import re
 from ..submission import (
@@ -7,7 +7,6 @@ from ..submission import (
     AggregationMetric,
     SubmissionQuery,
 )
-from ...enums import ExcelFormat
 
 
 class BaseSubmissionRequest(BaseModel):
@@ -124,7 +123,9 @@ class GetSubmissionsInExcelRequest(BaseSubmissionRequest):
         None,
         description="List of field names to include in export, both standard and custom fields",
     )
-    format: ExcelFormat = Field(default=ExcelFormat.EXCEL, description="Export format")
+    format: Literal["Excel", "Csv"] = Field(
+        default="Excel", description="Export format, Example: 'Excel' or 'Csv'"
+    )
 
 
 class GetSubmissionsCountRequest(BaseSubmissionRequest):
