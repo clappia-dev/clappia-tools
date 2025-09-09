@@ -9,11 +9,15 @@ from ....enums import (
     ChartDimensionInterval,
     AggregationType,
 )
-
+from datetime import datetime, date
+from enum import Enum
+from typing import Dict, Any
 from pydantic import Field, BaseModel, ConfigDict
+from ...json_serialized import JsonSerializableMixin
 
 
-class ExternalCondition(BaseModel):
+
+class ExternalCondition(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
     """
     Represents a filter condition for external filter validation and conversion.
@@ -99,7 +103,7 @@ class ExternalCondition(BaseModel):
     )
 
 
-class ExternalFilter(BaseModel):
+class ExternalFilter(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
     """
     Represents an external filter for Clappia app submissions with comprehensive validation.
@@ -187,68 +191,7 @@ class ExternalFilter(BaseModel):
         "Example: 'AND', 'OR'",
     )
 
-
-class ChartDimension(BaseModel):
-    model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
-    """
-    Represents a chart dimension for analytics and data visualization.
-
-    This class defines the structure for chart dimensions that determine how data
-    is grouped and displayed in charts. It supports both standard and custom field
-    dimensions with various sorting and interval options.
-
-    Attributes:
-        field_id: The ID of the field to use as dimension
-        label: Display label for the dimension
-        data_type: The data type of the field
-        dimension_type: Whether this is a standard or custom field dimension
-        interval: Time interval for date-based dimensions (day, week, month, year)
-        missing_value: Value to use when dimension field data is missing
-        sort_direction: Sort direction for dimension values (asc/desc)
-        sort_type: Type of sorting to apply (string/number)
-
-    Examples:
-        # Basic dimension
-        dimension = ChartDimension(
-            field_id="category",
-            label="Product Category",
-            data_type="text",
-            dimension_type=DimensionType.CUSTOM
-        )
-
-        # Date dimension with interval
-        date_dimension = ChartDimension(
-            field_id="order_date",
-            label="Order Date",
-            data_type="date",
-            dimension_type=DimensionType.CUSTOM,
-            interval=ChartDimensionInterval.MONTH,
-            sort_direction=SortDirection.ASC
-        )
-    """
-
-    field_id: str = Field(description="The ID of the field to use as dimension")
-    label: str = Field(description="Display label for the dimension")
-    data_type: str = Field(description="The data type of the field")
-    dimension_type: DimensionType = Field(
-        description="Whether this is a standard or custom field dimension"
-    )
-    interval: Optional[ChartDimensionInterval] = Field(
-        default=None,
-        description="Time interval for date-based dimensions (day, week, month, year). Only applicable for date fields.",
-    )
-    missing_value: Optional[str] = Field(
-        default=None, description="Value to use when dimension field data is missing"
-    )
-    sort_direction: Optional[SortDirection] = Field(
-        default=None, description="Sort direction for dimension values (asc/desc)"
-    )
-    sort_type: Optional[SortType] = Field(
-        default=None, description="Type of sorting to apply (string/number)"
-    )
-
-
-class ExternalChartDimension(BaseModel):
+class ExternalChartDimension(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
     """
     Represents an external chart dimension for analytics with comprehensive validation.
@@ -307,11 +250,11 @@ class ExternalChartDimension(BaseModel):
         "Example: 'day', 'week', 'month', 'year'",
     )
     dimension_sort_direction: Optional[SortDirection] = Field(
-        default=None,
+        default=SortDirection.ASC,
         description="Sort direction for the dimension values. Example: 'asc', 'desc'",
     )
     dimension_sort_type: Optional[SortType] = Field(
-        default=None,
+        default=SortType.STRING,
         description="Type of sorting to apply to dimension values. Example: 'number', 'string'",
     )
     dimension_missing_value: Optional[str] = Field(
@@ -320,52 +263,7 @@ class ExternalChartDimension(BaseModel):
     )
 
 
-class Aggregation(BaseModel):
-    model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
-    """
-    Represents an aggregation operation for analytics and data visualization.
-
-    This class defines the structure for aggregation operations that can be performed
-    on data fields in charts. It supports various aggregation types including count,
-    sum, average, minimum, maximum, and unique operations.
-
-    Attributes:
-        type: The type of aggregation to perform
-        operand: The field dimension to aggregate on
-
-    Supported Aggregation Types:
-    - COUNT: Count the number of records
-    - SUM: Sum numeric values
-    - AVERAGE: Calculate average of numeric values
-    - MINIMUM: Find minimum value
-    - MAXIMUM: Find maximum value
-    - UNIQUE: Count unique values
-
-    Examples:
-        # Count aggregation
-        count_agg = Aggregation(
-            type=AggregationType.COUNT,
-            operand=ChartDimension(field_id="id", label="Count", data_type="text", dimension_type=DimensionType.STANDARD)
-        )
-
-        # Sum aggregation
-        sum_agg = Aggregation(
-            type=AggregationType.SUM,
-            operand=ChartDimension(field_id="amount", label="Total Amount", data_type="number", dimension_type=DimensionType.CUSTOM)
-        )
-
-        # Average aggregation
-        avg_agg = Aggregation(
-            type=AggregationType.AVERAGE,
-            operand=ChartDimension(field_id="rating", label="Average Rating", data_type="number", dimension_type=DimensionType.CUSTOM)
-        )
-    """
-
-    type: AggregationType = Field(description="The type of aggregation to perform")
-    operand: ChartDimension = Field(description="The field dimension to aggregate on")
-
-
-class ExternalAggregation(BaseModel):
+class ExternalAggregation(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
     """
     Represents an external aggregation for analytics with comprehensive validation.

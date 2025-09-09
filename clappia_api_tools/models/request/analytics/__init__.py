@@ -5,9 +5,7 @@ Analytics request models for Clappia API.
 from .model import (
     ExternalCondition,
     ExternalFilter,
-    ChartDimension,
     ExternalChartDimension,
-    Aggregation,
     ExternalAggregation,
 )
 
@@ -25,9 +23,7 @@ from .chart import (
 __all__ = [
     "ExternalCondition",
     "ExternalFilter",
-    "ChartDimension",
     "ExternalChartDimension",
-    "Aggregation",
     "ExternalAggregation",
     "UpsertBarChartDefinitionRequest",
     "UpsertDataTableChartDefinitionRequest",

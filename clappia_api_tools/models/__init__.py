@@ -1,6 +1,7 @@
 """
 Models for the Clappia API.
 """
+from .json_serialized import JsonSerializableMixin
 
 from .workplace_user import WorkplaceUser
 from .permissions import Permission
@@ -136,6 +137,7 @@ from .response import (
 )
 
 __all__ = [
+    "JsonSerializableMixin",
     # ===== Core Models =====
     "WorkplaceUser",
     "Permission",
