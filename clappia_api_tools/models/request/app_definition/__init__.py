@@ -57,6 +57,11 @@ from .field import (
     UpsertFieldButtonRequest,
 )
 
+from .app_metadata import (
+    UpdateAppMetadataRequest,
+)
+
+
 from .definition import (
     CreateAppRequest,
 )
@@ -114,4 +119,6 @@ __all__ = [
     "UpsertFieldStripePaymentGatewayRequest",
     "UpsertFieldButtonRequest",
     "CreateAppRequest",
+    
+    "UpdateAppMetadataRequest",
 ]

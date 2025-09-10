@@ -148,3 +148,4 @@ class BaseUpsertSectionRequest(BaseModel, JsonSerializableMixin):
     @classmethod
     def validate_app_id(cls, v: str) -> str:
         return ValidatedString.non_empty_string_validator(v, "App ID")
+    

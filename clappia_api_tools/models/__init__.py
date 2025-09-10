@@ -108,6 +108,8 @@ from .request import (
     UpsertMapChartDefinitionRequest,
     UpsertPieChartDefinitionRequest,
     UpsertSummaryChartDefinitionRequest,
+
+    UpdateAppMetadataRequest,
 )
 from .response import (
     BaseResponse,
@@ -244,6 +246,8 @@ __all__ = [
     "UpsertFieldPaypalPaymentGatewayRequest",
     "UpsertFieldStripePaymentGatewayRequest",
     "UpsertFieldButtonRequest",
+
+    "UpdateAppMetadataRequest",
     # ===== Response Models =====
     "BaseResponse",
     "AppDefinitionResponse",

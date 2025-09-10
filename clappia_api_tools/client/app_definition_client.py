@@ -53,6 +53,8 @@ from clappia_api_tools.models.request import (
     UpsertFieldPaypalPaymentGatewayRequest,
     UpsertFieldStripePaymentGatewayRequest,
     UpsertFieldButtonRequest,
+
+    UpdateAppMetadataRequest,
 )
 
 from clappia_api_tools.models.response import (
@@ -5353,3 +5355,175 @@ class AppDefinitionClient(BaseClappiaClient):
             operation="update_section",
             data=response_data,
         )
+    def get_app_versions(
+        self, app_id: str
+    ) -> AppDefinitionResponse:
+        """Get an app version."""
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return AppDefinitionResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                operation="get_app_versions",
+            )
+
+        params = {
+            "appId": app_id,
+        }
+
+        logger.info(f"Getting app versions in app_id: {app_id} with params: {params}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="GET",
+            endpoint="appdefinitionv2/getAppVersions",
+            params=params,
+        )   
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return AppDefinitionResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                operation="get_app_versions",
+            )
+
+        return AppDefinitionResponse(
+            success=True,
+            message="Successfully retrieved app versions",
+            app_id=app_id,
+            operation="get_app_versions",
+            data=response_data,
+        )
+
+    def create_new_app_version(
+        self, app_id: str, version_name: str
+    ) -> AppDefinitionResponse:
+        """Create a new app version."""
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return AppDefinitionResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                operation="create_new_app_version",
+            )
+
+        payload = {
+            "appId": app_id,
+            "versionName": version_name,
+        }
+
+        logger.info(f"Creating new app version in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/createNewAppVersion",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return AppDefinitionResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                operation="create_new_app_version",
+            )
+
+        return AppDefinitionResponse(
+            success=True,
+            message="Successfully created new app version",
+            app_id=app_id,
+            operation="create_new_app_version",
+            data=response_data,
+        )
+
+    def update_app_version(
+        self, app_id: str, initial_version_name: str, new_version_name: str
+    ) -> AppDefinitionResponse:
+        """Update an app version."""
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return AppDefinitionResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                operation="update_app_version",
+            )
+
+        payload = {
+            "appId": app_id,
+            "initialVersionName": initial_version_name, 
+            "newVersionName": new_version_name,
+        }
+
+        logger.info(f"Updating app version in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(
+            method="POST",
+            endpoint="appdefinitionv2/updateAppVersion",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return AppDefinitionResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                operation="update_app_version",
+            )
+
+        return AppDefinitionResponse(
+            success=True,
+            message="Successfully updated app version",
+            app_id=app_id,
+            operation="update_app_version",
+            data=response_data,
+        )
+    
+    def update_app_metadata(
+        self, app_id: str, request: UpdateAppMetadataRequest
+    ) -> AppDefinitionResponse:
+        """Update app metadata."""
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return AppDefinitionResponse(
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                operation="update_app_metadata",
+            )
+
+        payload = {
+            "appId": app_id,
+            **request.to_json(),
+        }
+
+        logger.info(f"Updating app metadata in app_id: {app_id} with payload: {payload}")
+
+        success, error_message, response_data = self.api_utils.make_request(    
+            method="POST",
+            endpoint="appdefinitionv2/updateAppMetadata",
+            data=payload,
+        )
+
+        if not success:
+            logger.error(f"Error: {error_message}")
+            return AppDefinitionResponse(
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                operation="update_app_metadata",
+            )
+
+        return AppDefinitionResponse(
+            success=True,
+            message="Successfully updated app metadata",
+            app_id=app_id,
+            operation="update_app_metadata",
+            data=response_data,
+        )
+    

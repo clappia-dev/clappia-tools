@@ -50,6 +50,8 @@ from .app_definition import (
     UpsertFieldStripePaymentGatewayRequest,
     UpsertFieldButtonRequest,
     CreateAppRequest,
+
+    UpdateAppMetadataRequest,
 )
 
 from .workflow_definition import (
@@ -204,4 +206,6 @@ __all__ = [
     "UpsertMapChartDefinitionRequest",
     "UpsertPieChartDefinitionRequest",
     "UpsertSummaryChartDefinitionRequest",
+
+    "UpdateAppMetadataRequest",
 ]
