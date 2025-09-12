@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
 from pydantic import EmailStr
 from ..base import JsonSerializableMixin
-from .....enums import SectionType
 
 
 class ExternalSectionDetails(BaseModel, JsonSerializableMixin):
@@ -40,8 +39,8 @@ class ExternalSectionDetails(BaseModel, JsonSerializableMixin):
     )
     retain_values: bool = Field(False, description="Retain values when hidden")
     keep_section_collapsed: bool = Field(False, description="Keep section collapsed")
-    section_type: SectionType = Field(
-        SectionType.SECTION, description="Type of the section"
+    section_type: Literal["Section", "Table"] = Field(
+        "Section", description="Type of the section"
     )
     initial_rows: int = Field(5, description="Initial number of rows")
 

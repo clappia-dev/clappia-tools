@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from typing import Optional, Union
 from .base_client import BaseClappiaClient
 from clappia_api_tools.utils.logging_utils import get_logger
 
@@ -24,9 +24,28 @@ from clappia_api_tools.models.request import (
 from clappia_api_tools.models.response import (
     WorkflowResponse,
     WorkflowStepResponse,
-    BaseResponse,
 )
 from clappia_api_tools.enums import TriggerType, NodeType
+
+WorkflowStepRequestUnion = Union[
+    UpsertAiWorkflowStepRequest,
+    UpsertApprovalWorkflowStepRequest,
+    UpsertCodeWorkflowStepRequest,
+    UpsertConditionWorkflowStepRequest,
+    UpsertDatabaseWorkflowStepRequest,
+    UpsertEmailWorkflowStepRequest,
+    UpsertLoopWorkflowStepRequest,
+    UpsertMobileNotificationWorkflowStepRequest,
+    UpsertRestApiWorkflowStepRequest,
+    UpsertSlackWorkflowStepRequest,
+    UpsertSmsWorkflowStepRequest,
+    UpsertWaitWorkflowStepRequest,
+    UpsertWhatsAppWorkflowStepRequest,
+    UpsertCreateSubmissionWorkflowStepRequest,
+    UpsertDeleteSubmissionWorkflowStepRequest,
+    UpsertFindSubmissionWorkflowStepRequest,
+    UpsertEditSubmissionWorkflowStepRequest,
+]
 
 logger = get_logger(__name__)
 
@@ -89,7 +108,119 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             operation="get_workflow",
         )
 
-    def add_ai_step(
+    def add(
+        self,
+        app_id: str,
+        trigger_type: str,
+        request: WorkflowStepRequestUnion,
+        step_variable_name: Optional[str] = None,
+        parent_step_variable_name: Optional[str] = None,
+    ) -> WorkflowStepResponse:
+        """Add a workflow step to a Clappia app.
+
+        Args:
+            app_id: The ID of the app to add the step to
+            trigger_type: The trigger type of the workflow
+            request: The request object containing the step configuration
+            step_variable_name: The variable name of the step, if not provided, a random variable name will be generated
+            parent_step_variable_name: The variable name of the parent step, below which the new step will be added
+
+        Returns:
+            WorkflowStepResponse: Response containing the result of the operation
+        """
+        if isinstance(request, UpsertAiWorkflowStepRequest):
+            return self._add_ai_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertApprovalWorkflowStepRequest):
+            return self._add_approval_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertCodeWorkflowStepRequest):
+            return self._add_code_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertConditionWorkflowStepRequest):
+            return self._add_condition_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertDatabaseWorkflowStepRequest):
+            return self._add_database_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertEmailWorkflowStepRequest):
+            return self._add_email_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertLoopWorkflowStepRequest):
+            return self._add_loop_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertMobileNotificationWorkflowStepRequest):
+            return self._add_mobile_notification_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertRestApiWorkflowStepRequest):
+            return self._add_rest_api_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertSlackWorkflowStepRequest):
+            return self._add_slack_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertSmsWorkflowStepRequest):
+            return self._add_sms_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertWaitWorkflowStepRequest):
+            return self._add_wait_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertWhatsAppWorkflowStepRequest):
+            return self._add_whatsapp_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertCreateSubmissionWorkflowStepRequest):
+            return self._add_create_submission_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertDeleteSubmissionWorkflowStepRequest):
+            return self._add_delete_submission_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertFindSubmissionWorkflowStepRequest):
+            return self._add_find_submission_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        elif isinstance(request, UpsertEditSubmissionWorkflowStepRequest):
+            return self._add_edit_submission_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name)
+        else:
+            raise ValueError(f"Unsupported workflow step request type: {type(request)}")
+
+    def update(
+        self,
+        app_id: str,
+        trigger_type: str,
+        step_variable_name: str,
+        request: WorkflowStepRequestUnion,
+    ) -> WorkflowStepResponse:
+        """Update a workflow step in a Clappia app.
+
+        Args:
+            app_id: The ID of the app containing the step
+            trigger_type: The trigger type of the workflow
+            step_variable_name: The variable name of the step to update
+            request: The request object containing the updated step configuration
+
+        Returns:
+            WorkflowStepResponse: Response containing the result of the operation
+        """
+        if isinstance(request, UpsertAiWorkflowStepRequest):
+            return self._update_ai_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertApprovalWorkflowStepRequest):
+            return self._update_approval_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertCodeWorkflowStepRequest):
+            return self._update_code_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertConditionWorkflowStepRequest):
+            return self._update_condition_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertDatabaseWorkflowStepRequest):
+            return self._update_database_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertEmailWorkflowStepRequest):
+            return self._update_email_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertLoopWorkflowStepRequest):
+            return self._update_loop_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertMobileNotificationWorkflowStepRequest):
+            return self._update_mobile_notification_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertRestApiWorkflowStepRequest):
+            return self._update_rest_api_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertSlackWorkflowStepRequest):
+            return self._update_slack_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertSmsWorkflowStepRequest):
+            return self._update_sms_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertWaitWorkflowStepRequest):
+            return self._update_wait_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertWhatsAppWorkflowStepRequest):
+            return self._update_whatsapp_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertCreateSubmissionWorkflowStepRequest):
+            return self._update_create_submission_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertDeleteSubmissionWorkflowStepRequest):
+            return self._update_delete_submission_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertFindSubmissionWorkflowStepRequest):
+            return self._update_find_submission_step(app_id, trigger_type, step_variable_name, request)
+        elif isinstance(request, UpsertEditSubmissionWorkflowStepRequest):
+            return self._update_edit_submission_step(app_id, trigger_type, step_variable_name, request)
+        else:
+            raise ValueError(f"Unsupported workflow step request type: {type(request)}")
+
+    def _add_ai_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -160,7 +291,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_ai_step(
+    def _update_ai_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -291,8 +422,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    # Approval Workflow Step Methods
-    def add_approval_step(
+    def _add_approval_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -363,7 +493,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_approval_step(
+    def _update_approval_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -429,7 +559,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         )
 
     # Code Workflow Step Methods
-    def add_code_step(
+    def _add_code_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -500,7 +630,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_code_step(
+    def _update_code_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -566,7 +696,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         )
 
     # Condition Workflow Step Methods
-    def add_condition_step(
+    def _add_condition_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -637,7 +767,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_condition_step(
+    def _update_condition_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -703,7 +833,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         )
 
     # Database Workflow Step Methods
-    def add_database_step(
+    def _add_database_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -774,7 +904,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_database_step(
+    def _update_database_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -840,7 +970,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         )
 
     # Email Workflow Step Methods
-    def add_email_step(
+    def _add_email_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -911,7 +1041,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_email_step(
+    def _update_email_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -977,7 +1107,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         )
 
     # Loop Workflow Step Methods
-    def add_loop_step(
+    def _add_loop_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1048,7 +1178,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_loop_step(
+    def _update_loop_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1114,7 +1244,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         )
 
     # Mobile Notification Workflow Step Methods
-    def add_mobile_notification_step(
+    def _add_mobile_notification_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1185,7 +1315,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_mobile_notification_step(
+    def _update_mobile_notification_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1251,7 +1381,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         )
 
     # REST API Workflow Step Methods
-    def add_rest_api_step(
+    def _add_rest_api_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1322,7 +1452,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_rest_api_step(
+    def _update_rest_api_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1388,7 +1518,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         )
 
     # Slack Workflow Step Methods
-    def add_slack_step(
+    def _add_slack_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1459,7 +1589,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_slack_step(
+    def _update_slack_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1525,7 +1655,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         )
 
     # SMS Workflow Step Methods
-    def add_sms_step(
+    def _add_sms_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1596,7 +1726,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_sms_step(
+    def _update_sms_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1662,7 +1792,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         )
 
     # Wait Workflow Step Methods
-    def add_wait_step(
+    def _add_wait_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1733,7 +1863,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_wait_step(
+    def _update_wait_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1799,7 +1929,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         )
 
     # WhatsApp Workflow Step Methods
-    def add_whatsapp_step(
+    def _add_whatsapp_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1870,7 +2000,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_whatsapp_step(
+    def _update_whatsapp_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1936,7 +2066,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         )
 
     # Create Submission Workflow Step Methods
-    def add_create_submission_step(
+    def _add_create_submission_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -2007,7 +2137,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_create_submission_step(
+    def _update_create_submission_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -2073,7 +2203,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         )
 
     # Delete Submission Workflow Step Methods
-    def add_delete_submission_step(
+    def _add_delete_submission_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -2144,7 +2274,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_delete_submission_step(
+    def _update_delete_submission_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -2210,7 +2340,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         )
 
     # Find Submission Workflow Step Methods
-    def add_find_submission_step(
+    def _add_find_submission_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -2281,7 +2411,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_find_submission_step(
+    def _update_find_submission_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -2347,7 +2477,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
         )
 
     # Edit Submission Workflow Step Methods
-    def add_edit_submission_step(
+    def _add_edit_submission_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -2418,7 +2548,7 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_edit_submission_step(
+    def _update_edit_submission_step(
         self,
         app_id: str,
         trigger_type: str,

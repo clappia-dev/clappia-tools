@@ -1,7 +1,7 @@
 import json
 from .base_client import BaseClappiaClient
 from clappia_api_tools.utils.logging_utils import get_logger
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 from clappia_api_tools.models.request import (
     CreateAppRequest,
     AddPageBreakRequest,
@@ -68,6 +68,55 @@ from clappia_api_tools.models.response import (
 
 from clappia_api_tools.enums import FieldType
 
+# Union type for all field request types
+FieldRequestUnion = Union[
+    UpsertFieldTextRequest,
+    UpsertFieldTextAreaRequest,
+    UpsertFieldDependencyAppRequest,
+    UpsertFieldRestApiRequest,
+    UpsertFieldAddressRequest,
+    UpsertFieldDatabaseRequest,
+    UpsertFieldDateRequest,
+    UpsertFieldAIRequest,
+    UpsertFieldCodeRequest,
+    UpsertFieldCodeReaderRequest,
+    UpsertFieldEmailInputRequest,
+    UpsertFieldEmojiRequest,
+    UpsertFieldFileRequest,
+    UpsertFieldGpsLocationRequest,
+    UpsertFieldLiveTrackingRequest,
+    UpsertFieldManualAddressRequest,
+    UpsertFieldPhoneNumberRequest,
+    UpsertFieldProgressBarRequest,
+    UpsertFieldSignatureRequest,
+    UpsertFieldCounterRequest,
+    UpsertFieldSliderRequest,
+    UpsertFieldTimeRequest,
+    UpsertFieldToggleRequest,
+    UpsertFieldValidationRequest,
+    UpsertFieldVideoViewerRequest,
+    UpsertFieldVoiceRequest,
+    UpsertFieldFormulaRequest,
+    UpsertFieldImageViewerRequest,
+    UpsertFieldRichTextEditorRequest,
+    UpsertFieldNfcReaderRequest,
+    UpsertFieldNumberInputRequest,
+    UpsertFieldPdfViewerRequest,
+    UpsertFieldReadOnlyFileRequest,
+    UpsertFieldReadOnlyTextRequest,
+    UpsertFieldTagsRequest,
+    UpsertFieldUniqueSequentialRequest,
+    UpsertFieldDropdownRequest,
+    UpsertFieldRadioRequest,
+    UpsertFieldUrlInputRequest,
+    UpsertFieldCheckboxRequest,
+    UpsertFieldRazorpayPaymentGatewayRequest,
+    UpsertFieldEazypayPaymentGatewayRequest,
+    UpsertFieldPaypalPaymentGatewayRequest,
+    UpsertFieldStripePaymentGatewayRequest,
+    UpsertFieldButtonRequest,
+]
+
 logger = get_logger(__name__)
 
 
@@ -131,7 +180,231 @@ class AppDefinitionClient(BaseClappiaClient):
             operation="get_definition",
         )
 
-    def add_text_field(
+    def add_field(
+        self,
+        app_id: str,
+        section_index: int,
+        field_index: int,
+        page_index: int,
+        field_name: str,
+        request: FieldRequestUnion,
+    ) -> FieldOperationResponse:
+        """Add a field to a Clappia app.
+
+        Args:
+            app_id: The ID of the app to add the field to
+            section_index: The index of the section
+            field_index: The index of the field
+            page_index: The index of the page
+            field_name: The name of the field
+            request: The request object containing the field configuration
+
+        Returns:
+            FieldOperationResponse: Response containing the result of the operation
+        """
+        if isinstance(request, UpsertFieldTextRequest):
+            return self._add_text_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldTextAreaRequest):
+            return self._add_textarea_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldDependencyAppRequest):
+            return self._add_dependency_app_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldRestApiRequest):
+            return self._add_rest_api_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldAddressRequest):
+            return self._add_address_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldDatabaseRequest):
+            return self._add_database_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldDateRequest):
+            return self._add_date_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldAIRequest):
+            return self._add_ai_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldCodeRequest):
+            return self._add_code_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldCodeReaderRequest):
+            return self._add_code_reader_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldEmailInputRequest):
+            return self._add_email_input_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldEmojiRequest):
+            return self._add_emoji_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldFileRequest):
+            return self._add_file_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldGpsLocationRequest):
+            return self._add_gps_location_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldLiveTrackingRequest):
+            return self._add_live_tracking_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldManualAddressRequest):
+            return self._add_manual_address_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldPhoneNumberRequest):
+            return self._add_phone_number_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldProgressBarRequest):
+            return self._add_progress_bar_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldSignatureRequest):
+            return self._add_signature_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldCounterRequest):
+            return self._add_counter_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldSliderRequest):
+            return self._add_slider_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldTimeRequest):
+            return self._add_time_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldToggleRequest):
+            return self._add_toggle_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldValidationRequest):
+            return self._add_validation_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldVideoViewerRequest):
+            return self._add_video_viewer_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldVoiceRequest):
+            return self._add_voice_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldFormulaRequest):
+            return self._add_formula_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldImageViewerRequest):
+            return self._add_image_viewer_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldRichTextEditorRequest):
+            return self._add_rich_text_editor_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldNfcReaderRequest):
+            return self._add_nfc_reader_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldNumberInputRequest):
+            return self._add_number_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldPdfViewerRequest):
+            return self._add_pdf_viewer_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldReadOnlyFileRequest):
+            return self._add_read_only_file_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldReadOnlyTextRequest):
+            return self._add_read_only_text_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldTagsRequest):
+            return self._add_tag_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldUniqueSequentialRequest):
+            return self._add_unique_sequential_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldDropdownRequest):
+            return self._add_drop_down_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldRadioRequest):
+            return self._add_radio_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldUrlInputRequest):
+            return self._add_url_input_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldCheckboxRequest):
+            return self._add_checkbox_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldRazorpayPaymentGatewayRequest):
+            return self._add_razorpay_payment_gateway_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldEazypayPaymentGatewayRequest):
+            return self._add_eazypay_payment_gateway_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldPaypalPaymentGatewayRequest):
+            return self._add_paypal_payment_gateway_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldStripePaymentGatewayRequest):
+            return self._add_stripe_payment_gateway_field(app_id, section_index, field_index, page_index, field_name, request)
+        elif isinstance(request, UpsertFieldButtonRequest):
+            return self._add_button_field(app_id, section_index, field_index, page_index, field_name, request)
+        else:
+            raise ValueError(f"Unsupported field request type: {type(request)}")
+
+    def update_field(
+        self,
+        app_id: str,
+        field_name: str,
+        request: FieldRequestUnion,
+    ) -> FieldOperationResponse:
+        """Update a field in a Clappia app.
+
+        Args:
+            app_id: The ID of the app containing the field
+            field_name: The name of the field
+            request: The request object containing the updated field configuration
+
+        Returns:
+            FieldOperationResponse: Response containing the result of the operation
+        """
+        if isinstance(request, UpsertFieldTextRequest):
+            return self._update_text_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldTextAreaRequest):
+            return self._update_textarea_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldDependencyAppRequest):
+            return self._update_dependency_app_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldRestApiRequest):
+            return self._update_rest_api_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldAddressRequest):
+            return self._update_address_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldDatabaseRequest):
+            return self._update_database_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldDateRequest):
+            return self._update_date_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldAIRequest):
+            return self._update_ai_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldCodeRequest):
+            return self._update_code_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldCodeReaderRequest):
+            return self._update_code_reader_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldEmailInputRequest):
+            return self._update_email_input_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldEmojiRequest):
+            return self._update_emoji_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldFileRequest):
+            return self._update_file_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldGpsLocationRequest):
+            return self._update_gps_location_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldLiveTrackingRequest):
+            return self._update_live_tracking_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldManualAddressRequest):
+            return self._update_manual_address_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldPhoneNumberRequest):
+            return self._update_phone_number_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldProgressBarRequest):
+            return self._update_progress_bar_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldSignatureRequest):
+            return self._update_signature_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldCounterRequest):
+            return self._update_counter_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldSliderRequest):
+            return self._update_slider_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldTimeRequest):
+            return self._update_time_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldToggleRequest):
+            return self._update_toggle_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldValidationRequest):
+            return self._update_validation_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldVideoViewerRequest):
+            return self._update_video_viewer_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldVoiceRequest):
+            return self._update_voice_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldFormulaRequest):
+            return self._update_formula_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldImageViewerRequest):
+            return self._update_image_viewer_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldRichTextEditorRequest):
+            return self._update_rich_text_editor_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldNfcReaderRequest):
+            return self._update_nfc_reader_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldNumberInputRequest):
+            return self._update_number_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldPdfViewerRequest):
+            return self._update_pdf_viewer_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldReadOnlyFileRequest):
+            return self._update_read_only_file_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldReadOnlyTextRequest):
+            return self._update_read_only_text_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldTagsRequest):
+            return self._update_tag_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldUniqueSequentialRequest):
+            return self._update_unique_sequential_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldDropdownRequest):
+            return self._update_drop_down_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldRadioRequest):
+            return self._update_radio_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldUrlInputRequest):
+            return self._update_url_input_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldCheckboxRequest):
+            return self._update_checkbox_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldRazorpayPaymentGatewayRequest):
+            return self._update_razorpay_payment_gateway_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldEazypayPaymentGatewayRequest):
+            return self._update_eazypay_payment_gateway_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldPaypalPaymentGatewayRequest):
+            return self._update_paypal_payment_gateway_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldStripePaymentGatewayRequest):
+            return self._update_stripe_payment_gateway_field(app_id, field_name, request)
+        elif isinstance(request, UpsertFieldButtonRequest):
+            return self._update_button_field(app_id, field_name, request)
+        else:
+            raise ValueError(f"Unsupported field request type: {type(request)}")
+
+    def _add_text_field(
         self,
         app_id: str,
         section_index: int,
@@ -188,7 +461,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_text_field(
+    def _update_text_field(
         self,
         app_id: str,
         field_name: str,
@@ -239,7 +512,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # TextArea Field Methods
-    def add_textarea_field(
+    def _add_textarea_field(
         self,
         app_id: str,
         section_index: int,
@@ -298,7 +571,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_textarea_field(
+    def _update_textarea_field( 
         self,
         app_id: str,
         field_name: str,
@@ -351,7 +624,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Dependency App Field Methods
-    def add_dependency_app_field(
+    def _add_dependency_app_field(
         self,
         app_id: str,
         section_index: int,
@@ -410,7 +683,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_dependency_app_field(
+    def _update_dependency_app_field(
         self,
         app_id: str,
         field_name: str,
@@ -463,7 +736,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Rest API Field Methods
-    def add_rest_api_field(
+    def _add_rest_api_field(
         self,
         app_id: str,
         section_index: int,
@@ -522,7 +795,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_rest_api_field(
+    def _update_rest_api_field(
         self,
         app_id: str,
         field_name: str,
@@ -575,7 +848,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Address Field Methods
-    def add_address_field(
+    def _add_address_field(
         self,
         app_id: str,
         section_index: int,
@@ -632,7 +905,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_address_field(
+    def _update_address_field(
         self,
         app_id: str,
         field_name: str,
@@ -685,7 +958,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Database Field Methods
-    def add_database_field(
+    def _add_database_field(
         self,
         app_id: str,
         section_index: int,
@@ -744,7 +1017,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_database_field(
+    def _update_database_field(
         self,
         app_id: str,
         field_name: str,
@@ -797,7 +1070,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Date Field Methods
-    def add_date_field(
+    def _add_date_field(
         self,
         app_id: str,
         section_index: int,
@@ -854,7 +1127,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_date_field(
+    def _update_date_field(
         self,
         app_id: str,
         field_name: str,
@@ -905,7 +1178,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # AI Field Methods
-    def add_ai_field(
+    def _add_ai_field(
         self,
         app_id: str,
         section_index: int,
@@ -962,7 +1235,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_ai_field(
+    def _update_ai_field(
         self,
         app_id: str,
         field_name: str,
@@ -1013,7 +1286,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Code Field Methods
-    def add_code_field(
+    def _add_code_field(
         self,
         app_id: str,
         section_index: int,
@@ -1070,7 +1343,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_code_field(
+    def _update_code_field(
         self,
         app_id: str,
         field_name: str,
@@ -1121,7 +1394,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Code Reader Field Methods
-    def add_code_reader_field(
+    def _add_code_reader_field(
         self,
         app_id: str,
         section_index: int,
@@ -1180,7 +1453,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_code_reader_field(
+    def _update_code_reader_field(
         self,
         app_id: str,
         field_name: str,
@@ -1233,7 +1506,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Email Input Field Methods
-    def add_email_input_field(
+    def _add_email_input_field(
         self,
         app_id: str,
         section_index: int,
@@ -1292,7 +1565,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_email_input_field(
+    def _update_email_input_field(
         self,
         app_id: str,
         field_name: str,
@@ -1345,7 +1618,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Emoji Field Methods
-    def add_emoji_field(
+    def _add_emoji_field(
         self,
         app_id: str,
         section_index: int,
@@ -1402,7 +1675,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_emoji_field(
+    def _update_emoji_field(
         self,
         app_id: str,
         field_name: str,
@@ -1453,7 +1726,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # File Field Methods
-    def add_file_field(
+    def _add_file_field(
         self,
         app_id: str,
         section_index: int,
@@ -1510,7 +1783,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_file_field(
+    def _update_file_field(
         self,
         app_id: str,
         field_name: str,
@@ -1561,7 +1834,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # GPS Location Field Methods
-    def add_gps_location_field(
+    def _add_gps_location_field(
         self,
         app_id: str,
         section_index: int,
@@ -1620,7 +1893,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_gps_location_field(
+    def _update_gps_location_field(
         self,
         app_id: str,
         field_name: str,
@@ -1673,7 +1946,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Live Tracking Field Methods
-    def add_live_tracking_field(
+    def _add_live_tracking_field(
         self,
         app_id: str,
         section_index: int,
@@ -1732,7 +2005,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_live_tracking_field(
+    def _update_live_tracking_field(
         self,
         app_id: str,
         field_name: str,
@@ -1785,7 +2058,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Manual Address Field Methods
-    def add_manual_address_field(
+    def _add_manual_address_field(
         self,
         app_id: str,
         section_index: int,
@@ -1844,7 +2117,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_manual_address_field(
+    def _update_manual_address_field(
         self,
         app_id: str,
         field_name: str,
@@ -1897,7 +2170,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Phone Number Field Methods
-    def add_phone_number_field(
+    def _add_phone_number_field(
         self,
         app_id: str,
         section_index: int,
@@ -1956,7 +2229,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_phone_number_field(
+    def _update_phone_number_field(
         self,
         app_id: str,
         field_name: str,
@@ -2009,7 +2282,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Progress Bar Field Methods
-    def add_progress_bar_field(
+    def _add_progress_bar_field(
         self,
         app_id: str,
         section_index: int,
@@ -2068,7 +2341,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_progress_bar_field(
+    def _update_progress_bar_field(
         self,
         app_id: str,
         field_name: str,
@@ -2121,7 +2394,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Signature Field Methods
-    def add_signature_field(
+    def _add_signature_field(
         self,
         app_id: str,
         section_index: int,
@@ -2180,7 +2453,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_signature_field(
+    def _update_signature_field(
         self,
         app_id: str,
         field_name: str,
@@ -2233,7 +2506,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Counter Field Methods
-    def add_counter_field(
+    def _add_counter_field(
         self,
         app_id: str,
         section_index: int,
@@ -2290,7 +2563,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_counter_field(
+    def _update_counter_field(
         self,
         app_id: str,
         field_name: str,
@@ -2343,7 +2616,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Slider Field Methods
-    def add_slider_field(
+    def _add_slider_field(
         self,
         app_id: str,
         section_index: int,
@@ -2400,7 +2673,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_slider_field(
+    def _update_slider_field(
         self,
         app_id: str,
         field_name: str,
@@ -2453,7 +2726,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Time Field Methods
-    def add_time_field(
+    def _add_time_field(
         self,
         app_id: str,
         section_index: int,
@@ -2510,7 +2783,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_time_field(
+    def _update_time_field(
         self,
         app_id: str,
         field_name: str,
@@ -2561,7 +2834,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Toggle Field Methods
-    def add_toggle_field(
+    def _add_toggle_field(
         self,
         app_id: str,
         section_index: int,
@@ -2618,7 +2891,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_toggle_field(
+    def _update_toggle_field(
         self,
         app_id: str,
         field_name: str,
@@ -2671,7 +2944,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Validation Field Methods
-    def add_validation_field(
+    def _add_validation_field(
         self,
         app_id: str,
         section_index: int,
@@ -2730,7 +3003,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_validation_field(
+    def _update_validation_field(
         self,
         app_id: str,
         field_name: str,
@@ -2783,7 +3056,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Video Viewer Field Methods
-    def add_video_viewer_field(
+    def _add_video_viewer_field(
         self,
         app_id: str,
         section_index: int,
@@ -2842,7 +3115,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_video_viewer_field(
+    def _update_video_viewer_field(
         self,
         app_id: str,
         field_name: str,
@@ -2895,7 +3168,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Voice Field Methods
-    def add_voice_field(
+    def _add_voice_field(
         self,
         app_id: str,
         section_index: int,
@@ -2952,7 +3225,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_voice_field(
+    def _update_voice_field(
         self,
         app_id: str,
         field_name: str,
@@ -3003,7 +3276,7 @@ class AppDefinitionClient(BaseClappiaClient):
         )
 
     # Formula Field Methods
-    def add_formula_field(
+    def _add_formula_field(
         self,
         app_id: str,
         section_index: int,
@@ -3060,7 +3333,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_formula_field(
+    def _update_formula_field(
         self,
         app_id: str,
         field_name: str,
@@ -3112,7 +3385,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_image_field(
+    def _add_image_viewer_field(
         self,
         app_id: str,
         section_index: int,
@@ -3169,7 +3442,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_image_field(
+    def _update_image_viewer_field(
         self,
         app_id: str,
         field_name: str,
@@ -3219,7 +3492,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_rich_text_editor_field(
+    def _add_rich_text_editor_field(
         self,
         app_id: str,
         section_index: int,
@@ -3278,7 +3551,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_rich_text_editor_field(
+    def _update_rich_text_editor_field(
         self,
         app_id: str,
         field_name: str,
@@ -3330,7 +3603,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_nfc_reader_field(
+    def _add_nfc_reader_field(
         self,
         app_id: str,
         section_index: int,
@@ -3389,7 +3662,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_nfc_reader_field(
+    def _update_nfc_reader_field(
         self,
         app_id: str,
         field_name: str,
@@ -3441,7 +3714,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_number_field(
+    def _add_number_field(
         self,
         app_id: str,
         section_index: int,
@@ -3498,7 +3771,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_number_field(
+    def _update_number_field(
         self,
         app_id: str,
         field_name: str,
@@ -3550,7 +3823,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_pdf_viewer_field(
+    def _add_pdf_viewer_field(
         self,
         app_id: str,
         section_index: int,
@@ -3609,7 +3882,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_pdf_viewer_field(
+    def _update_pdf_viewer_field(
         self,
         app_id: str,
         field_name: str,
@@ -3661,7 +3934,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_read_only_field(
+    def _add_read_only_file_field(
         self,
         app_id: str,
         section_index: int,
@@ -3720,7 +3993,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_read_only_field(
+    def _update_read_only_file_field(
         self,
         app_id: str,
         field_name: str,
@@ -3772,7 +4045,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_read_only_text_field(
+    def _add_read_only_text_field(
         self,
         app_id: str,
         section_index: int,
@@ -3831,7 +4104,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_read_only_text_field(
+    def _update_read_only_text_field(
         self,
         app_id: str,
         field_name: str,
@@ -3883,7 +4156,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_tag_field(
+    def _add_tag_field(
         self,
         app_id: str,
         section_index: int,
@@ -3940,7 +4213,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_tag_field(
+    def _update_tag_field(
         self,
         app_id: str,
         field_name: str,
@@ -3991,7 +4264,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_unique_sequential_field(
+    def _add_unique_sequential_field(
         self,
         app_id: str,
         section_index: int,
@@ -4050,7 +4323,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_unique_sequential_field(
+    def _update_unique_sequential_field(
         self,
         app_id: str,
         field_name: str,
@@ -4102,7 +4375,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_drop_down_field(
+    def _add_drop_down_field(
         self,
         app_id: str,
         section_index: int,
@@ -4161,7 +4434,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_drop_down_field(
+    def _update_drop_down_field(
         self,
         app_id: str,
         field_name: str,
@@ -4213,7 +4486,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_radio_field(
+    def _add_radio_field(
         self,
         app_id: str,
         section_index: int,
@@ -4270,7 +4543,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_radio_field(
+    def _update_radio_field(
         self,
         app_id: str,
         field_name: str,
@@ -4320,7 +4593,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_url_input_field(
+    def _add_url_input_field(
         self,
         app_id: str,
         section_index: int,
@@ -4379,7 +4652,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_url_input_field(
+    def _update_url_input_field(
         self,
         app_id: str,
         field_name: str,
@@ -4431,7 +4704,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_checkbox_field(
+    def _add_checkbox_field(
         self,
         app_id: str,
         section_index: int,
@@ -4490,7 +4763,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_checkbox_field(
+    def _update_checkbox_field(
         self,
         app_id: str,
         field_name: str,
@@ -4542,7 +4815,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_razorpay_payment_gateway_field(
+    def _add_razorpay_payment_gateway_field(
         self,
         app_id: str,
         section_index: int,
@@ -4601,7 +4874,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_razorpay_payment_gateway_field(
+    def _update_razorpay_payment_gateway_field(
         self,
         app_id: str,
         field_name: str,
@@ -4653,7 +4926,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_eazypay_payment_gateway_field(
+    def _add_eazypay_payment_gateway_field(
         self,
         app_id: str,
         section_index: int,
@@ -4712,7 +4985,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_eazypay_payment_gateway_field(
+    def _update_eazypay_payment_gateway_field(
         self,
         app_id: str,
         field_name: str,
@@ -4764,7 +5037,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_paypal_payment_gateway_field(
+    def _add_paypal_payment_gateway_field(
         self,
         app_id: str,
         section_index: int,
@@ -4823,7 +5096,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_paypal_payment_gateway_field(
+    def _update_paypal_payment_gateway_field(
         self,
         app_id: str,
         field_name: str,
@@ -4875,7 +5148,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_stripe_payment_gateway_field(
+    def _add_stripe_payment_gateway_field(
         self,
         app_id: str,
         section_index: int,
@@ -4934,7 +5207,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_stripe_payment_gateway_field(
+    def _update_stripe_payment_gateway_field(
         self,
         app_id: str,
         field_name: str,
@@ -4986,7 +5259,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_button_field(
+    def _add_button_field(
         self,
         app_id: str,
         section_index: int,
@@ -5042,7 +5315,7 @@ class AppDefinitionClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_button_field(
+    def _update_button_field(
         self,
         app_id: str,
         field_name: str,

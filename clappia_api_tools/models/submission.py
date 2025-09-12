@@ -1,14 +1,5 @@
-from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, EmailStr, field_validator, ValidationInfo
-import re
-from ..enums import (
-    FilterOperator,
-    FilterKeyType,
-    LogicalOperator,
-    DimensionType,
-    SortDirection,
-    AggregationType,
-)
+from typing import Optional, List, Dict, Any, Literal
+from pydantic import BaseModel, Field, field_validator, ValidationInfo
 
 standard_fields = {
     "$submissionId",
@@ -23,10 +14,10 @@ standard_fields = {
 
 
 class FilterCondition(BaseModel):
-    operator: FilterOperator = Field(
-        description="Filter operator to apply, possible values are CONTAINS, NOT_IN, EQ, NEQ, EMPTY, NON_EMPTY, STARTS_WITH, BETWEEN, GT, LT, GTE, LTE",
+    operator: Literal["CONTAINS", "NOT_IN", "EQ", "NEQ", "EMPTY", "NON_EMPTY", "STARTS_WITH", "BETWEEN", "GT", "LT", "GTE", "LTE", "ENDS_WITH"] = Field(
+        description="Filter operator to apply, possible values are CONTAINS, NOT_IN, EQ, NEQ, EMPTY, NON_EMPTY, STARTS_WITH, BETWEEN, GT, LT, GTE, LTE, ENDS_WITH",
     )
-    filter_key_type: FilterKeyType = Field(
+    filter_key_type: Literal["STANDARD", "CUSTOM"] = Field(
         description="Type of field being filtered, possible values are STANDARD, CUSTOM",
     )
     key: str = Field(
@@ -68,7 +59,7 @@ class SubmissionQuery(BaseModel):
     conditions: List[FilterCondition] = Field(
         min_length=1, description="Array of filter conditions"
     )
-    operator: LogicalOperator = Field(
+    operator: Literal["AND", "OR"] = Field(
         default="AND", description="Logical operator, possible values are AND, OR"
     )
 
@@ -103,7 +94,7 @@ class AggregationOperand(BaseModel):
     data_type: str = Field(
         description="Data type of the operand field, use text, number, date, boolean, select for standard fields or the field type for custom fields"
     )
-    dimension_type: DimensionType = Field(
+    dimension_type: Literal["STANDARD", "CUSTOM"] = Field(
         default="CUSTOM",
         description="Type of operand field, possible values are STANDARD, CUSTOM",
     )
@@ -123,20 +114,20 @@ class AggregationDimension(BaseModel):
     data_type: str = Field(
         description="Data type of the field, use text, number, date, boolean, select for standard fields or the field type for custom fields"
     )
-    dimension_type: DimensionType = Field(
+    dimension_type: Literal["STANDARD", "CUSTOM"] = Field(
         default="CUSTOM",
         description="Type of dimension field, possible values are STANDARD, CUSTOM",
     )
-    sort_direction: Optional[SortDirection] = Field(
+    sort_direction: Optional[Literal["asc", "desc"]] = Field(
         None, description="Sort direction, possible values are asc, desc"
     )
-    sort_type: Optional[str] = Field(
+    sort_type: Optional[Literal["number", "string"]] = Field(
         None, description="Type of sorting, possible values are number, string"
     )
     missing_value: Optional[str] = Field(
         None, description="Value when field data is missing"
     )
-    interval: Optional[str] = Field(
+    interval: Optional[Literal["day", "week", "month", "year"]] = Field(
         None, description="Interval for date/time grouping, use day, week, month, year"
     )
 
@@ -159,7 +150,7 @@ class AggregationDimension(BaseModel):
 
 
 class AggregationMetric(BaseModel):
-    type: AggregationType = Field(
+    type: Literal["count", "sum", "average", "minimum", "maximum", "unique"] = Field(default="count",
         description="Type of aggregation, possible values are count, sum, average, minimum, maximum, unique"
     )
     operand: Optional[AggregationOperand] = Field(

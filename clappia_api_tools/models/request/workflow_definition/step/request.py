@@ -1,7 +1,6 @@
 from typing import Optional, Literal, List, Dict, Any, Union
 from ..base import BaseUpsertWorkflowStepRequest
-from pydantic import Field, field_validator, model_validator, EmailStr, BaseModel
-from .....enums import NodeType, DatabaseType
+from pydantic import Field, field_validator, model_validator, BaseModel
 import re
 import json
 from urllib.parse import urlparse
@@ -184,7 +183,7 @@ class UpsertConditionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 class UpsertDatabaseWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for database workflow step configuration"""
 
-    database_type: DatabaseType = Field(
+    database_type: Literal["MySql", "PostgreSql", "AzureSql"] = Field(
         description="Type of database to connect to. Must be one of: MySql, PostgreSql, AzureSql. Example: 'MySql'"
     )
     database_host: str = Field(

@@ -1,17 +1,5 @@
 from typing import List, Any, Optional
-from ....enums import (
-    FilterOperator,
-    LogicalOperator,
-    DateToken,
-    DimensionType,
-    SortDirection,
-    SortType,
-    ChartDimensionInterval,
-    AggregationType,
-)
-from datetime import datetime, date
-from enum import Enum
-from typing import Dict, Any
+from typing import Any, Literal
 from pydantic import Field, BaseModel, ConfigDict
 from ...json_serialized import JsonSerializableMixin
 
@@ -55,22 +43,22 @@ class ExternalCondition(BaseModel, JsonSerializableMixin):
         # Text field filter
         condition = ExternalCondition(
             condition_field_name="customerName",
-            condition_field_operator=FilterOperator.CONTAINS,
+            condition_field_operator="CONTAINS",
             condition_field_values=["John"]
         )
 
         # Date field filter with token
         date_condition = ExternalCondition(
             condition_field_name="orderDate",
-            condition_field_operator=FilterOperator.BETWEEN,
+            condition_field_operator="BETWEEN",
             condition_field_values=["2024-01-01", "2024-12-31"],
-            condition_field_date_token=DateToken.CUSTOM
+            condition_field_date_token="CUS"
         )
 
         # Numeric field filter
         numeric_condition = ExternalCondition(
             condition_field_name="salary",
-            condition_field_operator=FilterOperator.GT,
+            condition_field_operator="GT",
             condition_field_values=[50000]
         )
     """
@@ -80,7 +68,7 @@ class ExternalCondition(BaseModel, JsonSerializableMixin):
         "Reserved fields: $submissionId, $status, $createdAt, $updatedAt, $owners, $all_fields. "
         "Example: 'customerName', '$status', '$createdAt'"
     )
-    condition_field_operator: FilterOperator = Field(
+    condition_field_operator: Literal["CONTAINS", "NOT_IN", "EQ", "NEQ", "EMPTY", "NON_EMPTY", "STARTS_WITH", "BETWEEN", "GT", "LT", "GTE", "LTE", "ENDS_WITH"] = Field(
         description="Operator to apply to the field. Text fields support: CONTAINS, NOT_IN, STARTS_WITH, "
         "EQ, NEQ, EMPTY, NON_EMPTY. Numeric fields support: CONTAINS, NOT_IN, EQ, NEQ, GT, "
         "GTE, LT, LTE, EMPTY, NON_EMPTY, STARTS_WITH. Date fields support: BETWEEN, EMPTY, "
@@ -95,7 +83,7 @@ class ExternalCondition(BaseModel, JsonSerializableMixin):
         "For app-related fields, values must be string IDs. "
         "Example: ['John', 'Jane'], [100, 200], ['2024-01-01', '2024-12-31']"
     )
-    condition_field_date_token: Optional[DateToken] = Field(
+    condition_field_date_token: Optional[Literal["CUS", "TOD", "YES", "TOM", "L_W", "L_M", "L_Y", "L_7", "L30", "L90", "C_W", "C_M", "C_Y", "N_W", "N_M", "N_Y", "N_7", "N30", "N90"]] = Field(
         default=None,
         description="Date token for date field filtering. Only valid for date fields with BETWEEN operator. "
         "Required for date BETWEEN operations. CUS = Custom date range, TOD = Today, YES = Yesterday. "
@@ -148,19 +136,19 @@ class ExternalFilter(BaseModel, JsonSerializableMixin):
         filter = ExternalFilter(
             condition=ExternalCondition(
                 condition_field_name="customerName",
-                condition_field_operator=FilterOperator.CONTAINS,
+                condition_field_operator="CONTAINS",
                 condition_field_values=["John"]
             ),
-            logical_operator=LogicalOperator.AND
+            logical_operator="AND"
         )
 
         # Date filter with token
         date_filter = ExternalFilter(
             condition=ExternalCondition(
                 condition_field_name="orderDate",
-                condition_field_operator=FilterOperator.BETWEEN,
+                condition_field_operator="BETWEEN",
                 condition_field_values=["2024-01-01", "2024-12-31"],
-                condition_field_date_token=DateToken.CUSTOM
+                condition_field_date_token="CUS"
             )
         )
 
@@ -168,10 +156,10 @@ class ExternalFilter(BaseModel, JsonSerializableMixin):
         numeric_filter = ExternalFilter(
             condition=ExternalCondition(
                 condition_field_name="salary",
-                condition_field_operator=FilterOperator.BETWEEN,
+                condition_field_operator="BETWEEN",
                 condition_field_values=[30000, 80000]
             ),
-            logical_operator=LogicalOperator.OR
+            logical_operator="OR"
         )
     """
 
@@ -184,8 +172,8 @@ class ExternalFilter(BaseModel, JsonSerializableMixin):
         "Text field values must be non-empty strings. App-related field values must be string IDs. "
         "Reserved fields ($submissionId, $status, $createdAt, $updatedAt) have specific validation rules."
     )
-    logical_operator: LogicalOperator = Field(
-        default=LogicalOperator.AND,
+    logical_operator: Literal["AND", "OR"] = Field(
+        default="AND",
         description="Logical operator to combine with other filters. Default: 'AND'. "
         "Used when multiple filters are applied to the same chart. "
         "Example: 'AND', 'OR'",
@@ -218,17 +206,17 @@ class ExternalChartDimension(BaseModel, JsonSerializableMixin):
         external_dim = ExternalChartDimension(
             dimension_field_name="category",
             dimension_label="Product Category",
-            dimension_type=DimensionType.CUSTOM
+            dimension_type="CUSTOM"
         )
 
         # Date dimension with interval and sorting
         date_external_dim = ExternalChartDimension(
             dimension_field_name="order_date",
             dimension_label="Order Date",
-            dimension_type=DimensionType.CUSTOM,
-            dimension_interval=ChartDimensionInterval.MONTH,
-            dimension_sort_direction=SortDirection.ASC,
-            dimension_sort_type=SortType.STRING
+            dimension_type="CUSTOM",    
+            dimension_interval="month",
+            dimension_sort_direction="asc",
+            dimension_sort_type="string"
         )
     """
 
@@ -240,21 +228,21 @@ class ExternalChartDimension(BaseModel, JsonSerializableMixin):
         default=None,
         description="Display label for the dimension. Example: 'Category', 'Region', 'Date Range'",
     )
-    dimension_type: Optional[DimensionType] = Field(
-        default=DimensionType.CUSTOM,
+    dimension_type: Optional[Literal["STANDARD", "CUSTOM"]] = Field(
+        default="CUSTOM",
         description="Type of dimension field. Example: 'STANDARD', 'CUSTOM'",
     )
-    dimension_interval: Optional[ChartDimensionInterval] = Field(
+    dimension_interval: Optional[Literal["day", "week", "month", "year"]] = Field(
         default=None,
         description="Interval for date-based dimensions. Only applicable for date fields. "
         "Example: 'day', 'week', 'month', 'year'",
     )
-    dimension_sort_direction: Optional[SortDirection] = Field(
-        default=SortDirection.ASC,
+    dimension_sort_direction: Optional[Literal["asc", "desc"]] = Field(
+        default="asc",
         description="Sort direction for the dimension values. Example: 'asc', 'desc'",
     )
-    dimension_sort_type: Optional[SortType] = Field(
-        default=SortType.STRING,
+    dimension_sort_type: Optional[Literal["number", "string"]] = Field(
+        default="string",
         description="Type of sorting to apply to dimension values. Example: 'number', 'string'",
     )
     dimension_missing_value: Optional[str] = Field(
@@ -288,37 +276,38 @@ class ExternalAggregation(BaseModel, JsonSerializableMixin):
     Examples:
         # Count aggregation
         count_external_agg = ExternalAggregation(
-            aggregation_type=AggregationType.COUNT,
+            aggregation_type="count",
             aggregation_field=ExternalChartDimension(
                 dimension_field_name="id",
                 dimension_label="Count",
-                dimension_type=DimensionType.STANDARD
+                dimension_type="STANDARD"
             )
         )
 
         # Sum aggregation on custom field
         sum_external_agg = ExternalAggregation(
-            aggregation_type=AggregationType.SUM,
+            aggregation_type="sum",
             aggregation_field=ExternalChartDimension(
                 dimension_field_name="amount",
                 dimension_label="Total Amount",
-                dimension_type=DimensionType.CUSTOM
+                dimension_type="CUSTOM"
             )
         )
 
         # Average aggregation with sorting
         avg_external_agg = ExternalAggregation(
-            aggregation_type=AggregationType.AVERAGE,
+            aggregation_type="average",
             aggregation_field=ExternalChartDimension(
                 dimension_field_name="rating",
                 dimension_label="Average Rating",
-                dimension_type=DimensionType.CUSTOM,
-                dimension_sort_direction=SortDirection.DESC
+                dimension_type="CUSTOM",
+                dimension_sort_direction="desc"
             )
         )
     """
 
-    aggregation_type: AggregationType = Field(
+    aggregation_type: Literal["count", "sum", "average", "minimum", "maximum", "unique"] = Field(
+        default="count",
         description="Type of aggregation to perform on the data. "
         "Example: 'count', 'sum', 'average', 'minimum', 'maximum', 'unique'"
     )

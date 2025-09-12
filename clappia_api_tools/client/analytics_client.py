@@ -13,6 +13,23 @@ from clappia_api_tools.models.request import (
 )
 from clappia_api_tools.models.response import ChartResponse, BaseResponse
 from clappia_api_tools.enums import ChartType
+from typing import Union
+
+ChartDefinitionRequestUnion = Union[
+    UpsertSummaryChartDefinitionRequest,
+    UpsertBarChartDefinitionRequest,
+    UpsertPieChartDefinitionRequest,
+    UpsertDoughnutChartDefinitionRequest,
+    UpsertLineChartDefinitionRequest,
+    UpsertDataTableChartDefinitionRequest,
+    UpsertMapChartDefinitionRequest,
+    UpsertGanttChartDefinitionRequest,
+]
+    
+ChartDefinitionResponseUnion = Union[
+    ChartResponse,
+    BaseResponse,
+]
 
 logger = get_logger(__name__)
 
@@ -24,7 +41,79 @@ class AnalyticsClient(BaseClappiaClient):
     adding charts, removing charts, updating charts, and reordering charts.
     """
 
-    def add_summary_chart(
+    def add(
+        self,
+        app_id: str,
+        chart_index: int,
+        chart_title: str,
+        request: ChartDefinitionRequestUnion,
+    ) -> ChartResponse:
+        """Add a chart to an app.
+
+        Args:
+            app_id: The ID of the app to add the chart to
+            chart_index: The index of the chart to add
+            chart_title: The title of the chart
+            request: The request object containing the chart configuration
+
+        Returns:
+            ChartResponse: Response containing the result of the operation
+        """
+        if isinstance(request, UpsertSummaryChartDefinitionRequest):
+            return self._add_summary_chart(app_id, chart_index, chart_title, request)
+        elif isinstance(request, UpsertBarChartDefinitionRequest):
+            return self._add_bar_chart(app_id, chart_index, chart_title, request)
+        elif isinstance(request, UpsertPieChartDefinitionRequest):
+            return self._add_pie_chart(app_id, chart_index, chart_title, request)
+        elif isinstance(request, UpsertDoughnutChartDefinitionRequest):
+            return self._add_doughnut_chart(app_id, chart_index, chart_title, request)
+        elif isinstance(request, UpsertLineChartDefinitionRequest):
+            return self._add_line_chart(app_id, chart_index, chart_title, request)
+        elif isinstance(request, UpsertDataTableChartDefinitionRequest):
+            return self._add_data_table_chart(app_id, chart_index, chart_title, request)
+        elif isinstance(request, UpsertMapChartDefinitionRequest):
+            return self._add_map_chart(app_id, chart_index, chart_title, request)
+        elif isinstance(request, UpsertGanttChartDefinitionRequest):
+            return self._add_gantt_chart(app_id, chart_index, chart_title, request)
+        else:
+            raise ValueError(f"Unsupported chart definition request type: {type(request)}")
+
+    def update(
+        self,
+        app_id: str,
+        chart_index: int,
+        request: ChartDefinitionRequestUnion,
+    ) -> ChartResponse:
+        """Update a chart in an app.
+
+        Args:
+            app_id: The ID of the app containing the chart
+            chart_index: The index of the chart to update
+            request: The request object containing the updated chart configuration
+
+        Returns:
+            ChartResponse: Response containing the result of the operation
+        """
+        if isinstance(request, UpsertSummaryChartDefinitionRequest):
+            return self._update_summary_chart(app_id, chart_index, request)
+        elif isinstance(request, UpsertBarChartDefinitionRequest):
+            return self._update_bar_chart(app_id, chart_index, request)
+        elif isinstance(request, UpsertPieChartDefinitionRequest):
+            return self._update_pie_chart(app_id, chart_index, request)
+        elif isinstance(request, UpsertDoughnutChartDefinitionRequest):
+            return self._update_doughnut_chart(app_id, chart_index, request)
+        elif isinstance(request, UpsertLineChartDefinitionRequest):
+            return self._update_line_chart(app_id, chart_index, request)
+        elif isinstance(request, UpsertDataTableChartDefinitionRequest):
+            return self._update_data_table_chart(app_id, chart_index, request)
+        elif isinstance(request, UpsertMapChartDefinitionRequest):
+            return self._update_map_chart(app_id, chart_index, request)
+        elif isinstance(request, UpsertGanttChartDefinitionRequest):
+            return self._update_gantt_chart(app_id, chart_index, request)
+        else:
+            raise ValueError(f"Unsupported chart definition request type: {type(request)}")
+
+    def _add_summary_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -40,8 +129,8 @@ class AnalyticsClient(BaseClappiaClient):
             request: The request object containing the chart configuration
 
         Returns:
+            ChartResponse: Response containing the result of the operation
         """
-
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
             return ChartResponse(
@@ -87,19 +176,29 @@ class AnalyticsClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_summary_chart(
+    def _update_summary_chart(
         self,
         app_id: str,
         chart_index: int,
         request: UpsertSummaryChartDefinitionRequest,
     ) -> ChartResponse:
+        """Update a summary chart in an app.
+
+        Args:
+            app_id: The ID of the app containing the chart
+            chart_index: The index of the chart to update
+            request: The request object containing the updated chart configuration
+
+        Returns:
+            ChartResponse: Response containing the result of the operation
+        """
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
             return ChartResponse(
                 success=False,
                 message=env_error,
                 app_id=app_id,
-                operation="add_summary_chart",
+                operation="update_summary_chart",
                 chart_type=ChartType.SUMMARY_CARD.value,
             )
 
@@ -124,6 +223,7 @@ class AnalyticsClient(BaseClappiaClient):
                 message=error_message,
                 app_id=app_id,
                 operation="update_summary_chart",
+                chart_type=ChartType.SUMMARY_CARD.value,
             )
 
         return ChartResponse(
@@ -131,10 +231,11 @@ class AnalyticsClient(BaseClappiaClient):
             message="Successfully updated summary chart",
             app_id=app_id,
             operation="update_summary_chart",
+            chart_type=ChartType.SUMMARY_CARD.value,
             data=response_data,
         )
 
-    def add_bar_chart(
+    def _add_bar_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -198,7 +299,7 @@ class AnalyticsClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_bar_chart(
+    def _update_bar_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -255,7 +356,7 @@ class AnalyticsClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_pie_chart(
+    def _add_pie_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -319,7 +420,7 @@ class AnalyticsClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_pie_chart(
+    def _update_pie_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -376,7 +477,7 @@ class AnalyticsClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_doughnut_chart(
+    def _add_doughnut_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -440,7 +541,7 @@ class AnalyticsClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_doughnut_chart(
+    def _update_doughnut_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -499,7 +600,7 @@ class AnalyticsClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_line_chart(
+    def _add_line_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -563,7 +664,7 @@ class AnalyticsClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_line_chart(
+    def _update_line_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -620,7 +721,7 @@ class AnalyticsClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_data_table_chart(
+    def _add_data_table_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -684,7 +785,7 @@ class AnalyticsClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_data_table_chart(
+    def _update_data_table_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -743,7 +844,7 @@ class AnalyticsClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_map_chart(
+    def _add_map_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -807,7 +908,7 @@ class AnalyticsClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_map_chart(
+    def _update_map_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -864,7 +965,7 @@ class AnalyticsClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def add_gantt_chart(
+    def _add_gantt_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -928,7 +1029,7 @@ class AnalyticsClient(BaseClappiaClient):
             data=response_data,
         )
 
-    def update_gantt_chart(
+    def _update_gantt_chart(
         self,
         app_id: str,
         chart_index: int,

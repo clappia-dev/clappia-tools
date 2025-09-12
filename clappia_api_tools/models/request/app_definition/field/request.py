@@ -4,18 +4,10 @@ import re
 import json
 from ..base import BaseUpsertFieldRequest, ValidatedString, UniqueListValidator
 from ..model import SortField, FilterField, RestApiOutputField
-from .....enums import (
-    DatabaseType,
-    WatermarkPosition,
-    ValidationType,
-    ImageQuality,
-    AllowedFileTypes,
-    ChipType,
-)
 
 
 class UpsertFieldTextRequest(BaseUpsertFieldRequest):
-    validation: Optional[ValidationType] = Field(None, description="Validation type")
+    validation: Optional[Literal["none", "number", "email", "url", "custom"]] = Field(None, description="Validation type")
     custom_validation_condition: Optional[str] = Field(
         None,
         description="Custom validation condition, supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: {field_name} <> 'value' or {field_name} > 10",
@@ -204,7 +196,7 @@ class UpsertFieldAddressRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldDatabaseRequest(BaseUpsertFieldRequest):
-    database_type: DatabaseType = Field(description="Type of database to connect to")
+    database_type: Literal["MySql", "PostgreSql", "AzureSql"] = Field(description="Type of database to connect to")
     database_port: str = Field(min_length=1, description="Database port number")
     database_host: str = Field(min_length=1, description="Database host address")
     database_username: str = Field(
@@ -863,8 +855,8 @@ class UpsertFieldRadioRequest(BaseUpsertFieldRequest):
         ),
     )
 
-    style: ChipType = Field(
-        ChipType.CHIPS,
+    style: Literal["Standard", "Chips"] = Field(
+        "Chips",
         description="Visual style for radio buttons (CHIPS for modern chip-style, or other ChipType values)",
     )
 
@@ -1365,24 +1357,25 @@ class UpsertFieldEmojiRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldFileRequest(BaseUpsertFieldRequest):
-    allowed_file_types: List[str] = Field(
+    
+    allowed_file_types: List[Literal["images_camera_upload", "images_gallery_upload", "videos", "documents"]] = Field(
         default_factory=list, description="Array of allowed file types"
     )
     file_upload_limit: int = Field(
         10, description="Maximum number of files allowed (1-10)"
     )
-    image_quality: ImageQuality = Field(
-        ImageQuality.MEDIUM, description="Image quality for camera captures"
+    image_quality: Literal["high", "medium", "low"] = Field(
+        "medium", description="Image quality for camera captures"
     )
     image_text: Optional[str] = Field(
         None,
         description="Text watermark on captured images, Example: 'Watermark' or {field_name}",
     )
-    image_text_position: Optional[WatermarkPosition] = Field(
+    image_text_position: Optional[Literal["TR", "BR", "BL", "TL"]] = Field(
         None, description="Position of text watermark"
     )
     logo: Optional[str] = Field(None, description="Logo watermark on captured images")
-    logo_position: Optional[WatermarkPosition] = Field(
+    logo_position: Optional[Literal["TR", "BR", "BL", "TL"]] = Field(
         None, description="Position of logo watermark"
     )
     file_name_prefix: str = Field(
@@ -1394,19 +1387,6 @@ class UpsertFieldFileRequest(BaseUpsertFieldRequest):
     allow_editing_camera_image: bool = Field(
         False, description="Whether to allow editing captured images"
     )
-
-    @field_validator("allowed_file_types")
-    @classmethod
-    def validate_allowed_file_types(cls, v: List[str]) -> List[str]:
-        valid_types = [
-            allowed_file_type.value for allowed_file_type in AllowedFileTypes
-        ]
-        for file_type in v:
-            if file_type not in valid_types:
-                raise ValueError(
-                    f"Invalid file type: {file_type}. Allowed types: {', '.join(valid_types)}"
-                )
-        return UniqueListValidator.validate_unique_strings(v, "Allowed file types")
 
     @field_validator("file_upload_limit")
     @classmethod
