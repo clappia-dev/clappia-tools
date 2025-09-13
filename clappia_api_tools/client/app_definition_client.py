@@ -151,7 +151,7 @@ class AppDefinitionClient(BaseClappiaClient):
             success=True, message="Successfully created app", data=response_data
         )
 
-    def get_definition(self, app_id: str) -> AppDefinitionResponse:
+    def get_definition(self, app_id: str, extra_headers: Optional[Dict[str, str]] = None) -> AppDefinitionResponse:
         """Retrieve the complete definition for a specific app."""
         params = {"appId": app_id}
 
@@ -159,8 +159,9 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="GET",
-            endpoint="appdefinitionv2/getAppDefinition",
+            endpoint="appdefinitionv2/internal/getAppDefinition",
             params=params,
+            extra_headers=extra_headers,
         )
 
         if not success:

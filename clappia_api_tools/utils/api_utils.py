@@ -46,7 +46,8 @@ class ClappiaAPIUtils:
         """Get standard headers for API requests"""
         return {
             "x-api-key": self.api_key,
-            "Content-Type": "application/json",
+            "Authorization": self.api_key,
+            "Content-Type": "application/json"
         }
 
     def handle_response(
@@ -85,6 +86,7 @@ class ClappiaAPIUtils:
         endpoint: str,
         data: Optional[Dict[str, Any]] = None,
         params: Optional[Dict[str, Any]] = None,
+        extra_headers: Optional[Dict[str, Any]] = None,
     ) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
         """
         Make HTTP request to Clappia API
@@ -104,6 +106,8 @@ class ClappiaAPIUtils:
 
         url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
         headers = self.get_headers()
+        if extra_headers:
+            headers.update(extra_headers)
 
         try:
             logger.info(f"Making {method} request to {url}")
