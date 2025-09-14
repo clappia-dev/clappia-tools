@@ -47,7 +47,7 @@ class TestDefinitionToolsIntegration:
 
         mock_make_request.assert_called_once_with(
             method="GET",
-            endpoint="appdefinitionv2/getAppDefinition",
+            endpoint="/getAppDefinition",
             params={
                 "appId": "MFX093412",
                 "language": "en",
@@ -85,7 +85,7 @@ class TestDefinitionToolsIntegration:
 
         mock_make_request.assert_called_once_with(
             method="GET",
-            endpoint="appdefinitionv2/getAppDefinition",
+            endpoint="/getAppDefinition",
             params={
                 "appId": "MFX093412",
                 "language": "es",
@@ -124,7 +124,7 @@ class TestDefinitionToolsIntegration:
 
         mock_make_request.assert_called_once_with(
             method="GET",
-            endpoint="appdefinitionv2/getAppDefinition",
+            endpoint="/getAppDefinition",
             params={
                 "appId": "MFX093412",
                 "language": "fr",
@@ -166,7 +166,7 @@ class TestDefinitionToolsIntegration:
         mock_make_request.assert_called_once()
         call_args = mock_make_request.call_args
         assert call_args[1]["method"] == "POST"
-        assert call_args[1]["endpoint"] == "appdefinitionv2/addField"
+        assert call_args[1]["endpoint"] == "/addField"
         assert call_args[1]["data"]["fieldType"] == "singleLineText"
 
     @patch("clappia_api_tools.utils.api_utils.ClappiaAPIUtils.make_request")

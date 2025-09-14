@@ -139,7 +139,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/createApp",
+            endpoint="/createApp",
             data=payload,
         )
 
@@ -159,7 +159,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="GET",
-            endpoint="appdefinitionv2/internal/getAppDefinition",
+            endpoint="/internal/getAppDefinition",
             params=params,
             extra_headers=extra_headers,
         )
@@ -439,7 +439,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -489,7 +489,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -549,7 +549,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -601,7 +601,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -661,7 +661,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -713,7 +713,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -773,7 +773,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -825,7 +825,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -883,7 +883,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -935,7 +935,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -995,7 +995,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -1047,7 +1047,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -1105,7 +1105,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -1155,7 +1155,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -1213,7 +1213,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -1263,7 +1263,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -1321,7 +1321,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -1371,7 +1371,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -1431,7 +1431,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -1483,7 +1483,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -1543,7 +1543,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -1595,7 +1595,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -1653,7 +1653,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -1703,7 +1703,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -1761,7 +1761,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -1811,7 +1811,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -1871,7 +1871,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -1923,7 +1923,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -1983,7 +1983,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -2035,7 +2035,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -2095,7 +2095,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -2147,7 +2147,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -2207,7 +2207,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -2259,7 +2259,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -2319,7 +2319,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -2371,7 +2371,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -2431,7 +2431,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -2483,7 +2483,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -2541,7 +2541,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -2593,7 +2593,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -2651,7 +2651,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -2703,7 +2703,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -2761,7 +2761,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -2811,7 +2811,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -2869,7 +2869,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -2921,7 +2921,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -2981,7 +2981,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -3033,7 +3033,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -3093,7 +3093,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -3145,7 +3145,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -3203,7 +3203,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -3253,7 +3253,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -3311,7 +3311,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -3363,7 +3363,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -3420,7 +3420,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -3470,7 +3470,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -3529,7 +3529,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -3581,7 +3581,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -3640,7 +3640,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -3692,7 +3692,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -3749,7 +3749,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -3801,7 +3801,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -3860,7 +3860,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -3912,7 +3912,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -3971,7 +3971,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -4023,7 +4023,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -4082,7 +4082,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -4134,7 +4134,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -4191,7 +4191,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -4242,7 +4242,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -4301,7 +4301,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -4353,7 +4353,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -4412,7 +4412,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -4464,7 +4464,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -4521,7 +4521,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -4571,7 +4571,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -4630,7 +4630,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -4682,7 +4682,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -4741,7 +4741,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -4793,7 +4793,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -4852,7 +4852,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -4904,7 +4904,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -4963,7 +4963,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -5015,7 +5015,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -5074,7 +5074,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -5126,7 +5126,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -5185,7 +5185,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -5237,7 +5237,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -5293,7 +5293,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addField",
+            endpoint="/addField",
             data=payload,
         )
 
@@ -5345,7 +5345,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateField",
+            endpoint="/updateField",
             data=payload,
         )
 
@@ -5395,7 +5395,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addPageBreak",
+            endpoint="/addPageBreak",
             data=payload,
         )
 
@@ -5445,7 +5445,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updatePageBreak",
+            endpoint="/updatePageBreak",
             data=payload,
         )
 
@@ -5503,7 +5503,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/reorderSection",
+            endpoint="/reorderSection",
             data=payload,
         )
 
@@ -5556,7 +5556,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/addSection",
+            endpoint="/addSection",
             data=payload,
         )
 
@@ -5604,7 +5604,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateSection",
+            endpoint="/updateSection",
             data=payload,
         )
 
@@ -5650,7 +5650,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="GET",
-            endpoint="appdefinitionv2/getAppVersions",
+            endpoint="/getAppVersions",
             params=params,
         )   
 
@@ -5693,7 +5693,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/createNewAppVersion",
+            endpoint="/createNewAppVersion",
             data=payload,
         )
 
@@ -5737,7 +5737,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="appdefinitionv2/updateAppVersion",
+            endpoint="/updateAppVersion",
             data=payload,
         )
 
@@ -5780,7 +5780,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(    
             method="POST",
-            endpoint="appdefinitionv2/updateAppMetadata",
+            endpoint="/updateAppMetadata",
             data=payload,
         )
 
