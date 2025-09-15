@@ -159,7 +159,7 @@ class AppDefinitionClient(BaseClappiaClient):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="GET",
-            endpoint="/internal/getAppDefinition",
+            endpoint="/getAppDefinition",
             params=params,
             extra_headers=extra_headers,
         )
