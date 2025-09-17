@@ -11,6 +11,11 @@ from ..submission import (
 
 class BaseSubmissionRequest(BaseModel):
     app_id: str = Field(description="App Id")
+    # TODO: Remove this field once ClappiaExternalService/v4 is live in all stages
+    requesting_user_email_address: Optional[EmailStr] = Field(
+        None, description="Email of requesting user"
+    )
+
 
     @field_validator("app_id")
     def validate_app_id(cls, v: str) -> str:

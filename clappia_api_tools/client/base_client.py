@@ -12,6 +12,7 @@ class BaseClappiaClient:
     def __init__(
         self,
         api_key: Optional[str] = None,
+        auth_token: Optional[str] = None,
         base_url: Optional[str] = None,
         timeout: int = 30,
     ):
@@ -19,7 +20,8 @@ class BaseClappiaClient:
 
         Args:
             api_key: Clappia API key.
+            auth_token: Clappia Auth token.
             base_url: API base URL.
             timeout: Request timeout in seconds.
         """
-        self.api_utils = ClappiaAPIUtils(api_key, base_url, timeout)
+        self.api_utils = ClappiaAPIUtils(api_key, auth_token, base_url, timeout)

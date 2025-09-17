@@ -34,6 +34,26 @@ class SubmissionClient(BaseClappiaClient):
     getting submissions, getting submissions aggregation, creating submissions,
     editing submissions, updating submission status, updating submission owners.
     """
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        auth_token: Optional[str] = None,
+        # TODO: Remove workplace_id once ClappiaExternalService/v4 is live in all stages
+        workplace_id: Optional[str] = None,
+        base_url: Optional[str] = None,
+        timeout: int = 30,
+    ):
+        """Initialize Clappia Submission client.
+
+        Args:
+            api_key: Clappia API key.
+            workplace_id: Clappia Workplace ID.
+            base_url: API base URL.
+            timeout: Request timeout in seconds.
+        """
+        super().__init__(api_key, auth_token, base_url, timeout)
+        self.workplace_id = workplace_id
+        print(f"SubmissionClient initialized with workplace_id: {workplace_id}, auth_token: {auth_token}, base_url: {base_url}, timeout: {timeout}")
 
     def get_submissions(
         self,
@@ -43,6 +63,7 @@ class SubmissionClient(BaseClappiaClient):
         forward: bool = True,
         filters: Optional[SubmissionFilters] = None,
         last_submission_id: Optional[str] = None,
+        requesting_user_email_address: Optional[str] = None,
     ) -> SubmissionsResponse:
         try:
             request = GetSubmissionsRequest(
@@ -52,6 +73,7 @@ class SubmissionClient(BaseClappiaClient):
                 filters=filters,
                 last_submission_id=last_submission_id,
                 fields=fields,
+                requesting_user_email_address=requesting_user_email_address,
             )
         except Exception as e:
             return SubmissionsResponse(success=False, message=str(e), app_id=app_id)
@@ -61,9 +83,11 @@ class SubmissionClient(BaseClappiaClient):
             return SubmissionsResponse(success=False, message=env_error, app_id=app_id)
 
         payload = {
+            "workplaceId": self.workplace_id,
             "appId": request.app_id,
             "pageSize": request.page_size,
             "forward": request.forward,
+            "requestingUserEmailAddress": request.requesting_user_email_address,
         }
 
         if request.filters:
@@ -104,6 +128,7 @@ class SubmissionClient(BaseClappiaClient):
         forward: bool = True,
         page_size: int = 1000,
         filters: Optional[SubmissionFilters] = None,
+        requesting_user_email_address: Optional[str] = None,
     ) -> SubmissionsAggregationResponse:
         try:
             request = GetSubmissionsAggregationRequest(
@@ -114,6 +139,7 @@ class SubmissionClient(BaseClappiaClient):
                 forward=forward,
                 page_size=page_size,
                 filters=filters,
+                requesting_user_email_address=requesting_user_email_address,
             )
         except Exception as e:
             return SubmissionsAggregationResponse(
@@ -134,10 +160,12 @@ class SubmissionClient(BaseClappiaClient):
             )
 
         payload = {
+            "workplaceId": self.workplace_id,
             "appId": request.app_id,
             "forward": request.forward,
             "pageSize": request.page_size,
             "xAxisLabels": request.x_axis_labels or [],
+            "requestingUserEmailAddress": request.requesting_user_email_address,
         }
 
         if request.dimensions:
@@ -176,11 +204,13 @@ class SubmissionClient(BaseClappiaClient):
         self,
         app_id: str,
         data: Dict[str, Any],
+        requesting_user_email_address: Optional[str] = None,
     ) -> SubmissionResponse:
         try:
             request = CreateSubmissionRequest(
                 app_id=app_id,
                 data=data,
+                requesting_user_email_address=requesting_user_email_address,
             )
         except Exception as e:
             return SubmissionResponse(
@@ -208,8 +238,10 @@ class SubmissionClient(BaseClappiaClient):
             )
 
         payload = {
+            "workplaceId": self.workplace_id,
             "appId": request.app_id,
             "data": request.data,
+            "requestingUserEmailAddress": request.requesting_user_email_address,
         }
 
         logger.info(f"Creating submission for app_id: {app_id} with data: {data}")
@@ -243,12 +275,14 @@ class SubmissionClient(BaseClappiaClient):
         app_id: str,
         submission_id: str,
         data: Dict[str, Any],
+        requesting_user_email_address: Optional[str] = None,
     ) -> SubmissionResponse:
         try:
             request = EditSubmissionRequest(
                 app_id=app_id,
                 submission_id=submission_id,
                 data=data,
+                requesting_user_email_address=requesting_user_email_address,
             )
         except Exception as e:
             return SubmissionResponse(
@@ -279,9 +313,11 @@ class SubmissionClient(BaseClappiaClient):
             )
 
         payload = {
+            "workplaceId": self.workplace_id,
             "appId": request.app_id,
             "submissionId": request.submission_id,
             "data": request.data,
+            "requestingUserEmailAddress": request.requesting_user_email_address,
         }
 
         logger.info(
@@ -317,6 +353,7 @@ class SubmissionClient(BaseClappiaClient):
         submission_id: str,
         status_name: str,
         comments: Optional[str] = None,
+        requesting_user_email_address: Optional[str] = None,
     ) -> SubmissionResponse:
         try:
             request = UpdateSubmissionStatusRequest(
@@ -324,6 +361,7 @@ class SubmissionClient(BaseClappiaClient):
                 submission_id=submission_id,
                 status_name=status_name,
                 comments=comments,
+                requesting_user_email_address=requesting_user_email_address,
             )
         except Exception as e:
             return SubmissionResponse(
@@ -350,9 +388,11 @@ class SubmissionClient(BaseClappiaClient):
         }
 
         payload = {
+            "workplaceId": self.workplace_id,
             "appId": request.app_id,
             "submissionId": request.submission_id,
             "status": status,
+            "requestingUserEmailAddress": request.requesting_user_email_address,
         }
 
         logger.info(f"Updating status for submission {submission_id} to {status_name}")
@@ -386,6 +426,7 @@ class SubmissionClient(BaseClappiaClient):
         submission_id: str,
         email_ids: List[str],
         phone_numbers: Optional[List[str]] = None,
+        requesting_user_email_address: Optional[str] = None,
     ) -> SubmissionResponse:
         try:
             request = UpdateSubmissionOwnersRequest(
@@ -393,6 +434,7 @@ class SubmissionClient(BaseClappiaClient):
                 submission_id=submission_id,
                 email_ids=email_ids,
                 phone_numbers=phone_numbers,
+                requesting_user_email_address=requesting_user_email_address,
             )
         except Exception as e:
             return SubmissionResponse(
@@ -414,9 +456,11 @@ class SubmissionClient(BaseClappiaClient):
             )
 
         payload = {
+            "workplaceId": self.workplace_id,
             "appId": request.app_id,
             "submissionId": request.submission_id,
             "emailIds": [str(email) for email in request.email_ids],
+            "requestingUserEmailAddress": request.requesting_user_email_address,
         }
 
         logger.info(f"Updating owners for submission {submission_id}")
@@ -472,6 +516,7 @@ class SubmissionClient(BaseClappiaClient):
             )
 
         payload = {
+            "workplaceId": self.workplace_id,
             "appId": request.app_id,
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "format": request.format,
@@ -518,11 +563,13 @@ class SubmissionClient(BaseClappiaClient):
         self,
         app_id: str,
         filters: Optional[SubmissionFilters] = None,
+        requesting_user_email_address: Optional[str] = None,
     ) -> SubmissionsCountResponse:
         try:
             request = GetSubmissionsCountRequest(
                 app_id=app_id,
                 filters=filters,
+                requesting_user_email_address=requesting_user_email_address,
             )
         except Exception as e:
             return SubmissionsCountResponse(
@@ -536,7 +583,9 @@ class SubmissionClient(BaseClappiaClient):
             )
 
         payload = {
+            "workplaceId": self.workplace_id,
             "appId": request.app_id,
+            "requestingUserEmailAddress": request.requesting_user_email_address,
         }
 
         if request.filters:

@@ -13,6 +13,7 @@ class ClappiaAPIUtils:
     def __init__(
         self,
         api_key: str,
+        auth_token: str,
         base_url: str,
         timeout: int = 30,
     ):
@@ -21,10 +22,12 @@ class ClappiaAPIUtils:
 
         Args:
             api_key: Clappia API key
+            auth_token: Clappia Auth token
             base_url: API base URL
             timeout: Request timeout in seconds
         """
         self.api_key = api_key
+        self.auth_token = auth_token
         self.base_url = base_url
         self.timeout = timeout
 
@@ -46,7 +49,7 @@ class ClappiaAPIUtils:
         """Get standard headers for API requests"""
         return {
             "x-api-key": self.api_key,
-            "Authorization": self.api_key,
+            "Authorization": self.auth_token,
             "Content-Type": "application/json"
         }
 
@@ -110,7 +113,7 @@ class ClappiaAPIUtils:
             headers.update(extra_headers)
 
         try:
-            logger.info(f"Making {method} request to {url}")
+            logger.info(f"Making {method} request to {url}, headers: {headers}, data: {data}, params: {params}")
             if data:
                 logger.debug(f"Request data: {json.dumps(data, indent=2)}")
 
