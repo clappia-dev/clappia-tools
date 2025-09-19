@@ -35,7 +35,7 @@ class ClappiaAPIUtils(ABC):
             )
         return True, ""
 
-    def get_headers(self, data: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
+    def get_headers(self, data: Optional[Dict[str, Any]] = None, params: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
         """Get standard headers for API requests"""
         return {
             "Content-Type": "application/json"
@@ -95,8 +95,7 @@ class ClappiaAPIUtils(ABC):
             return False, f"Configuration error: {env_error}", None
 
         url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
-        headers = self.get_headers(data)
-
+        headers = self.get_headers(data, params)
         try:
             logger.info(f"Making {method} request to {url}, headers: {headers}, data: {data}, params: {params}")
             if data:
@@ -152,9 +151,9 @@ class ClappiaAPIKeyUtils(ClappiaAPIUtils):
             )
         return super().validate_environment()
 
-    def get_headers(self, data: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
+    def get_headers(self, data: Optional[Dict[str, Any]] = None, params: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
         """Get standard headers for API requests"""
-        headers = super().get_headers(data)
+        headers = super().get_headers(data, params)
         headers["x-api-key"] = self.api_key
         return headers
 
@@ -196,9 +195,9 @@ class ClappiaAuthTokenUtils(ClappiaAPIUtils):
             )
         return super().validate_environment()
 
-    def get_headers(self, data: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
+    def get_headers(self, data: Optional[Dict[str, Any]] = None, params: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
         """Get standard headers for API requests with auth token and optional app_id"""
-        headers = super().get_headers(data)
+        headers = super().get_headers(data, params)
         headers["Authorization"] = self.auth_token
         headers["workplaceId"] = self.workplace_id
         
