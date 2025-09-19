@@ -1,5 +1,6 @@
+from abc import ABC
 from typing import Dict, Any, Optional
-from .base_client import BaseClappiaClient
+from .base_client import BaseClappiaClient, BaseAPIKeyClient, BaseAuthTokenClient
 from clappia_api_tools.utils.logging_utils import get_logger
 from clappia_api_tools.models.request import (
     UpsertSummaryChartDefinitionRequest,
@@ -34,8 +35,8 @@ ChartDefinitionResponseUnion = Union[
 logger = get_logger(__name__)
 
 
-class AnalyticsClient(BaseClappiaClient):
-    """Client for managing Clappia analytics and charts.
+class AnalyticsClient(BaseClappiaClient, ABC):
+    """Abstract client for managing Clappia analytics and charts.
 
     This client handles retrieving and managing analytics configurations, including
     adding charts, removing charts, updating charts, and reordering charts.
@@ -1162,3 +1163,49 @@ class AnalyticsClient(BaseClappiaClient):
             operation="get_charts",
             data=response_data,
         )
+
+
+class AnalyticsAPIKeyClient(BaseAPIKeyClient, AnalyticsClient):
+    """Client for managing Clappia analytics and charts with API key authentication.
+
+    This client combines API key authentication with all analytics business logic.
+    """
+
+    def __init__(
+        self,
+        api_key: str,
+        base_url: Optional[str] = None,
+        timeout: int = 30,
+    ):
+        """Initialize analytics client with API key.
+
+        Args:
+            api_key: Clappia API key.
+            base_url: API base URL.
+            timeout: Request timeout in seconds.
+        """
+        BaseAPIKeyClient.__init__(self, api_key, base_url, timeout)
+
+
+class AnalyticsAuthTokenClient(BaseAuthTokenClient, AnalyticsClient):
+    """Client for managing Clappia analytics and charts with auth token authentication.
+
+    This client combines auth token authentication with all analytics business logic.
+    """
+
+    def __init__(
+        self,
+        auth_token: str,
+        workplace_id: str,
+        base_url: Optional[str] = None,
+        timeout: int = 30,
+    ):
+        """Initialize analytics client with auth token.
+
+        Args:
+            auth_token: Clappia Auth token.
+            workplace_id: Clappia Workplace ID.
+            base_url: API base URL.
+            timeout: Request timeout in seconds.
+        """
+        BaseAuthTokenClient.__init__(self, auth_token, workplace_id, base_url, timeout)

@@ -1,5 +1,6 @@
+from abc import ABC
 from typing import Dict, Any, List, Optional
-from .base_client import BaseClappiaClient
+from .base_client import BaseClappiaClient, BaseAPIKeyClient, BaseAuthTokenClient
 from clappia_api_tools.utils.logging_utils import get_logger
 from clappia_api_tools.models.request import (
     AddUserToWorkplaceRequest,
@@ -29,7 +30,7 @@ from clappia_api_tools.models.permissions import Permission
 logger = get_logger(__name__)
 
 
-class WorkplaceClient(BaseClappiaClient):
+class WorkplaceClient(BaseClappiaClient, ABC):
     """Client for managing Clappia workplace users.
 
     This client handles workplace user management operations including
@@ -752,3 +753,49 @@ class WorkplaceClient(BaseClappiaClient):
             operation="get_workplace_users",
             data=response_data,
         )
+
+
+class WorkplaceAPIKeyClient(BaseAPIKeyClient, WorkplaceClient):
+    """Client for managing Clappia workplace users with API key authentication.
+
+    This client combines API key authentication with all workplace business logic.
+    """
+
+    def __init__(
+        self,
+        api_key: str,
+        base_url: Optional[str] = None,
+        timeout: int = 30,
+    ):
+        """Initialize workplace client with API key.
+
+        Args:
+            api_key: Clappia API key.
+            base_url: API base URL.
+            timeout: Request timeout in seconds.
+        """
+        BaseAPIKeyClient.__init__(self, api_key, base_url, timeout)
+
+
+class WorkplaceAuthTokenClient(BaseAuthTokenClient, WorkplaceClient):
+    """Client for managing Clappia workplace users with auth token authentication.
+
+    This client combines auth token authentication with all workplace business logic.
+    """
+
+    def __init__(
+        self,
+        auth_token: str,
+        workplace_id: str,
+        base_url: Optional[str] = None,
+        timeout: int = 30,
+    ):
+        """Initialize workplace client with auth token.
+
+        Args:
+            auth_token: Clappia Auth token.
+            workplace_id: Clappia Workplace ID.
+            base_url: API base URL.
+            timeout: Request timeout in seconds.
+        """
+        BaseAuthTokenClient.__init__(self, auth_token, workplace_id, base_url, timeout)

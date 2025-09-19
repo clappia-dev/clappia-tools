@@ -1,5 +1,6 @@
+from abc import ABC
 from typing import Dict, Any, List, Optional
-from .base_client import BaseClappiaClient
+from .base_client import BaseClappiaClient, BaseAPIKeyClient, BaseAuthTokenClient
 from clappia_api_tools.utils.logging_utils import get_logger
 from clappia_api_tools.models.request import (
     GetSubmissionsRequest,
@@ -27,33 +28,14 @@ from clappia_api_tools.models.response import (
 logger = get_logger(__name__)
 
 
-class SubmissionClient(BaseClappiaClient):
+class SubmissionClient(BaseClappiaClient, ABC):
     """Client for managing Clappia submissions.
 
     This client handles retrieving and managing submissions, including
     getting submissions, getting submissions aggregation, creating submissions,
     editing submissions, updating submission status, updating submission owners.
     """
-    def __init__(
-        self,
-        api_key: Optional[str] = None,
-        auth_token: Optional[str] = None,
-        # TODO: Remove workplace_id once ClappiaExternalService/v4 is live in all stages
-        workplace_id: Optional[str] = None,
-        base_url: Optional[str] = None,
-        timeout: int = 30,
-    ):
-        """Initialize Clappia Submission client.
 
-        Args:
-            api_key: Clappia API key.
-            workplace_id: Clappia Workplace ID.
-            base_url: API base URL.
-            timeout: Request timeout in seconds.
-        """
-        super().__init__(api_key, auth_token, base_url, timeout)
-        self.workplace_id = workplace_id
-        print(f"SubmissionClient initialized with workplace_id: {workplace_id}, auth_token: {auth_token}, base_url: {base_url}, timeout: {timeout}")
 
     def get_submissions(
         self,
@@ -610,3 +592,53 @@ class SubmissionClient(BaseClappiaClient):
             total_count=response_data.get("totalCount"),
             filtered_count=response_data.get("filteredCount"),
         )
+
+
+class SubmissionAPIKeyClient(BaseAPIKeyClient, SubmissionClient):
+    """Client for managing Clappia submissions with API key authentication.
+
+    This client combines API key authentication with all submission business logic.
+    """
+
+    def __init__(
+        self,
+        api_key: str,
+        workplace_id: str,
+        base_url: Optional[str] = None,
+        timeout: int = 30,
+    ):
+        """Initialize submission client with API key.
+
+        Args:
+            api_key: Clappia API key.
+            workplace_id: Clappia Workplace ID #TODO: remove this parameter once ClappiaExternalService/v4 is live in all stages
+            base_url: API base URL.
+            timeout: Request timeout in seconds.
+        """
+        BaseAPIKeyClient.__init__(self, api_key, base_url, timeout)
+        self.workplace_id = workplace_id
+
+
+class SubmissionAuthTokenClient(BaseAuthTokenClient, SubmissionClient):
+    """Client for managing Clappia submissions with auth token authentication.
+
+    This client combines auth token authentication with all submission business logic.
+    """
+
+    def __init__(
+        self,
+        auth_token: str,
+        workplace_id: str,
+        base_url: Optional[str] = None,
+        timeout: int = 30,
+    ):
+        """Initialize submission client with auth token.
+
+        Args:
+            auth_token: Clappia Auth token.
+            workplace_id: Clappia Workplace ID.
+            base_url: API base URL.
+            timeout: Request timeout in seconds.
+        """
+        BaseAuthTokenClient.__init__(self, auth_token, workplace_id, base_url, timeout)
+        self.workplace_id = workplace_id

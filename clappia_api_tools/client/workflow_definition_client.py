@@ -1,5 +1,6 @@
+from abc import ABC
 from typing import Optional, Union
-from .base_client import BaseClappiaClient
+from .base_client import BaseClappiaClient, BaseAPIKeyClient, BaseAuthTokenClient
 from clappia_api_tools.utils.logging_utils import get_logger
 
 from clappia_api_tools.models.request import (
@@ -50,13 +51,17 @@ WorkflowStepRequestUnion = Union[
 logger = get_logger(__name__)
 
 
-class WorkflowDefinitionClient(BaseClappiaClient):
-    """Client for managing Clappia workflow definitions.
+class WorkflowDefinitionClient(BaseClappiaClient, ABC):
+    """Abstract client for managing Clappia workflow definitions.
 
     This client handles retrieving and managing workflow definitions, including
     getting workflows, adding workflow steps, removing workflow steps,
     updating workflow steps, and reordering workflow steps.
+    
+    Note: This is an abstract base class that contains business logic but no authentication.
+    Use WorkflowDefinitionAPIKeyClient or WorkflowDefinitionAuthTokenClient for actual usage.
     """
+
 
     def get_workflow(self, app_id: str, trigger_type: str) -> WorkflowResponse:
         """Get a workflow definition for a specific app and trigger type"""
@@ -2612,3 +2617,48 @@ class WorkflowDefinitionClient(BaseClappiaClient):
             step_variable_name=step_variable_name,
             data=response_data,
         )
+
+class WorkflowDefinitionAPIKeyClient(BaseAPIKeyClient, WorkflowDefinitionClient):
+    """Client for managing Clappia workflow definitions with API key authentication.
+
+    This client combines API key authentication with all workflow definition business logic.
+    """
+
+    def __init__(
+        self,
+        api_key: str,
+        base_url: Optional[str] = None,
+        timeout: int = 30,
+    ):
+        """Initialize workflow definition client with API key.
+
+        Args:
+            api_key: Clappia API key.
+            base_url: API base URL.
+            timeout: Request timeout in seconds.
+        """
+        BaseAPIKeyClient.__init__(self, api_key, base_url, timeout)
+
+
+class WorkflowDefinitionAuthTokenClient(BaseAuthTokenClient, WorkflowDefinitionClient):
+    """Client for managing Clappia workflow definitions with auth token authentication.
+
+    This client combines auth token authentication with all workflow definition business logic.
+    """
+
+    def __init__(
+        self,
+        auth_token: str,
+        workplace_id: str,
+        base_url: Optional[str] = None,
+        timeout: int = 30,
+    ):
+        """Initialize workflow definition client with auth token.
+
+        Args:
+            auth_token: Clappia Auth token.
+            workplace_id: Clappia Workplace ID.
+            base_url: API base URL.
+            timeout: Request timeout in seconds.
+        """
+        BaseAuthTokenClient.__init__(self, auth_token, workplace_id, base_url, timeout)

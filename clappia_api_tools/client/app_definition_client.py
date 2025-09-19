@@ -1,5 +1,6 @@
 import json
-from .base_client import BaseClappiaClient
+from abc import ABC
+from .base_client import BaseClappiaClient, BaseAPIKeyClient, BaseAuthTokenClient
 from clappia_api_tools.utils.logging_utils import get_logger
 from typing import List, Dict, Any, Optional, Union
 from clappia_api_tools.models.request import (
@@ -120,12 +121,16 @@ FieldRequestUnion = Union[
 logger = get_logger(__name__)
 
 
-class AppDefinitionClient(BaseClappiaClient):
-    """Client for managing Clappia app definitions.
+class AppDefinitionClient(BaseClappiaClient, ABC):
+    """Abstract client for managing Clappia app definitions.
 
     This client handles retrieving and managing app definitions, including
     getting app definitions, creating apps, adding fields, and updating fields.
+    
+    Note: This is an abstract base class that contains business logic but no authentication.
+    Use AppDefinitionAPIKeyClient or AppDefinitionAuthTokenClient for actual usage.
     """
+
 
     def create_app(self, request: CreateAppRequest) -> AppCreationResponse:
         """Create a new app."""
@@ -151,7 +156,7 @@ class AppDefinitionClient(BaseClappiaClient):
             success=True, message="Successfully created app", data=response_data
         )
 
-    def get_definition(self, app_id: str, extra_headers: Optional[Dict[str, str]] = None) -> AppDefinitionResponse:
+    def get_definition(self, app_id: str) -> AppDefinitionResponse:
         """Retrieve the complete definition for a specific app."""
         params = {"appId": app_id}
 
@@ -160,8 +165,7 @@ class AppDefinitionClient(BaseClappiaClient):
         success, error_message, response_data = self.api_utils.make_request(
             method="GET",
             endpoint="/getAppDefinition",
-            params=params,
-            extra_headers=extra_headers,
+            params=params
         )
 
         if not success:
@@ -5800,4 +5804,49 @@ class AppDefinitionClient(BaseClappiaClient):
             operation="update_app_metadata",
             data=response_data,
         )
+
+class AppDefinitionAPIKeyClient(BaseAPIKeyClient, AppDefinitionClient):
+    """Client for managing Clappia app definitions with API key authentication.
+    This client combines API key authentication with all app definition business logic.
+    """
+
+    def __init__(
+        self,
+        api_key: str,
+        base_url: Optional[str] = None,
+        timeout: int = 30,
+    ):
+        """Initialize app definition client with API key.
+
+        Args:
+            api_key: Clappia API key.
+            base_url: API base URL.
+            timeout: Request timeout in seconds.
+        """
+        BaseAPIKeyClient.__init__(self, api_key, base_url, timeout)
+
+class AppDefinitionAuthTokenClient(BaseAuthTokenClient, AppDefinitionClient):
+    """Client for managing Clappia app definitions with auth token authentication.
+
+    This client combines auth token authentication with all app definition business logic.
+    """
+
+    def __init__(
+        self,
+        auth_token: str,
+        workplace_id: str,
+        base_url: Optional[str] = None,
+        timeout: int = 30,
+    ):
+        """Initialize app definition client with auth token.
+
+        Args:
+            auth_token: Clappia Auth token.
+            workplace_id: Clappia Workplace ID.
+            base_url: API base URL.
+            timeout: Request timeout in seconds.
+        """
+        BaseAuthTokenClient.__init__(self, auth_token, workplace_id, base_url, timeout)
+
+
     

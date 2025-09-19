@@ -1,19 +1,18 @@
 import os
 import json
 import requests
+from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any, Tuple
 from clappia_api_tools.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
 
 
-class ClappiaAPIUtils:
-    """Utilities for Clappia API interactions"""
+class ClappiaAPIUtils(ABC):
+    """Abstract base API utilities with common functionality for all Clappia API interactions"""
 
     def __init__(
         self,
-        api_key: str,
-        auth_token: str,
         base_url: str,
         timeout: int = 30,
     ):
@@ -21,23 +20,14 @@ class ClappiaAPIUtils:
         Initialize API utilities with configurable parameters
 
         Args:
-            api_key: Clappia API key
-            auth_token: Clappia Auth token
             base_url: API base URL
             timeout: Request timeout in seconds
         """
-        self.api_key = api_key
-        self.auth_token = auth_token
         self.base_url = base_url
         self.timeout = timeout
 
     def validate_environment(self) -> Tuple[bool, str]:
         """Validate that required configuration is available"""
-        if not self.api_key:
-            return (
-                False,
-                "API key is not configured",
-            )
         if not self.base_url:
             return (
                 False,
@@ -45,11 +35,9 @@ class ClappiaAPIUtils:
             )
         return True, ""
 
-    def get_headers(self) -> Dict[str, str]:
+    def get_headers(self, data: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
         """Get standard headers for API requests"""
         return {
-            "x-api-key": self.api_key,
-            "Authorization": self.auth_token,
             "Content-Type": "application/json"
         }
 
@@ -88,8 +76,7 @@ class ClappiaAPIUtils:
         method: str,
         endpoint: str,
         data: Optional[Dict[str, Any]] = None,
-        params: Optional[Dict[str, Any]] = None,
-        extra_headers: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None
     ) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
         """
         Make HTTP request to Clappia API
@@ -108,9 +95,7 @@ class ClappiaAPIUtils:
             return False, f"Configuration error: {env_error}", None
 
         url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
-        headers = self.get_headers()
-        if extra_headers:
-            headers.update(extra_headers)
+        headers = self.get_headers(data)
 
         try:
             logger.info(f"Making {method} request to {url}, headers: {headers}, data: {data}, params: {params}")
@@ -137,3 +122,90 @@ class ClappiaAPIUtils:
             return False, "Connection error - unable to reach Clappia API", None
         except Exception as e:
             return False, f"Unexpected error: {str(e)}", None
+
+class ClappiaAPIKeyUtils(ClappiaAPIUtils):
+    """API utilities for Clappia API key authentication"""
+
+    def __init__(
+        self,
+        api_key: str,
+        base_url: str,
+        timeout: int = 30,
+    ):
+        """
+        Initialize API utilities with configurable parameters
+
+        Args:
+            api_key: Clappia API key
+            base_url: API base URL
+            timeout: Request timeout in seconds
+        """
+        super().__init__(base_url, timeout)
+        self.api_key = api_key
+
+    def validate_environment(self) -> Tuple[bool, str]:
+        """Validate that required configuration is available"""
+        if not self.api_key:
+            return (
+                False,
+                "API key is not configured",
+            )
+        return super().validate_environment()
+
+    def get_headers(self, data: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
+        """Get standard headers for API requests"""
+        headers = super().get_headers(data)
+        headers["x-api-key"] = self.api_key
+        return headers
+
+
+class ClappiaAuthTokenUtils(ClappiaAPIUtils):
+    """API utilities for Clappia auth token authentication with workplace ID support"""
+
+    def __init__(
+        self,
+        auth_token: str,
+        workplace_id: str,
+        base_url: str,
+        timeout: int = 30,
+    ):
+        """
+        Initialize API utilities with auth token and workplace ID
+
+        Args:
+            auth_token: Clappia Auth token
+            workplace_id: Clappia Workplace ID
+            base_url: API base URL
+            timeout: Request timeout in seconds
+        """
+        super().__init__(base_url, timeout)
+        self.auth_token = auth_token
+        self.workplace_id = workplace_id
+
+    def validate_environment(self) -> Tuple[bool, str]:
+        """Validate that required configuration is available"""
+        if not self.auth_token:
+            return (
+                False,
+                "Auth token is not configured",
+            )
+        if not self.workplace_id:
+            return (
+                False,
+                "Workplace ID is not configured",
+            )
+        return super().validate_environment()
+
+    def get_headers(self, data: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
+        """Get standard headers for API requests with auth token and optional app_id"""
+        headers = super().get_headers(data)
+        headers["Authorization"] = self.auth_token
+        headers["workplaceId"] = self.workplace_id
+        
+        # Add app_id header if present in request data
+        if data and "appId" in data:
+            headers["appId"] = data["appId"]
+            
+        return headers
+
+
