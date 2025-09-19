@@ -202,8 +202,10 @@ class ClappiaAuthTokenUtils(ClappiaAPIUtils):
         headers["Authorization"] = self.auth_token
         headers["workplaceId"] = self.workplace_id
         
-        # Add app_id header if present in request data
-        if data and "appId" in data:
+        # Add appId header if present in request data or params
+        if params and "appId" in params:
+            headers["appId"] = params["appId"]
+        elif data and "appId" in data:
             headers["appId"] = data["appId"]
             
         return headers
