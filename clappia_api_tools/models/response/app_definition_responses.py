@@ -5,6 +5,7 @@ from .base_response import BaseResponse
 
 class AppDefinitionResponse(BaseResponse):
     app_id: str = Field(None, description="App ID")
+    version_variable_name: Optional[str] = Field(None, description="Version variable name")
 
 
 class AppCreationResponse(BaseResponse):
@@ -15,12 +16,12 @@ class AppCreationResponse(BaseResponse):
 class FieldOperationResponse(BaseResponse):
     app_id: str = Field(description="App ID where field was modified")
     field_name: Optional[str] = Field(None, description="Name of the field")
-
+    version_variable_name: Optional[str] = Field(None, description="Version variable name")
 
 class PageBreakOperationResponse(BaseResponse):
     app_id: str = Field(description="App ID where page break was modified")
     page_index: Optional[int] = Field(None, description="Page index")
-
+    version_variable_name: Optional[str] = Field(None, description="Version variable name")
 
 class ReorderSectionOperationResponse(BaseResponse):
     app_id: str = Field(description="App ID where section was modified")
@@ -32,7 +33,7 @@ class ReorderSectionOperationResponse(BaseResponse):
     )
     source_page_index: Optional[int] = Field(None, description="Source page index")
     target_page_index: Optional[int] = Field(None, description="Target page index")
-
+    version_variable_name: Optional[str] = Field(None, description="Version variable name")
 
 class UpsertSectionOperationResponse(BaseResponse):
     app_id: str = Field(description="App ID where section was added")
@@ -42,3 +43,4 @@ class UpsertSectionOperationResponse(BaseResponse):
     page_index: Optional[int] = Field(
         None, description="Page index where section was added"
     )
+    version_variable_name: Optional[str] = Field(None, description="Version variable name")

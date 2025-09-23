@@ -95,6 +95,7 @@ class BaseFieldComponent(BaseModel, JsonSerializableMixin):
 class BaseUpsertFieldRequest(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
     label: str = Field(description="Display label for the field")
+    new_field_name: Optional[str] = Field(None, description="New field variable name for the field, mandatory if field name needs to be changed")
     description: Optional[str] = Field(
         None,
         description="Field description, Example: This is a description for the field",
@@ -118,8 +119,8 @@ class BaseUpsertFieldRequest(BaseModel, JsonSerializableMixin):
     default_value: Optional[str] = Field(
         None, description="Default value, Example: 'value'"
     )
-    width: int = Field(default=100, description="Desktop width")
-    mobile_width: int = Field(default=100, description="Mobile width")
+    block_width_percentage_desktop: int = Field(default=50, description="Desktop width")
+    block_width_percentage_mobile: int = Field(default=100, description="Mobile width")
     retain_values: bool = Field(default=True, description="Retain values when hidden")
 
     @field_validator("label")
@@ -131,6 +132,7 @@ class BaseUpsertFieldRequest(BaseModel, JsonSerializableMixin):
 class BaseUpsertPageRequest(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
     app_id: str = Field(description="App ID")
+    version_variable_name: Optional[str] = Field(None, description="The variable name representing the app version. If not specified, the live version is used")
 
     @field_validator("app_id")
     @classmethod
@@ -141,6 +143,7 @@ class BaseUpsertPageRequest(BaseModel, JsonSerializableMixin):
 class BaseUpsertSectionRequest(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
     app_id: str = Field(description="App ID")
+    version_variable_name: Optional[str] = Field(None, description="The variable name representing the app version. If not specified, the live version is used")
     section_index: int = Field(ge=0, description="Section index")
     page_index: int = Field(ge=0, description="Page index")
 

@@ -6,6 +6,7 @@ from ...enums import TriggerType
 
 class WorkflowResponse(BaseResponse):
     app_id: str = Field(None, description="App ID")
+    version_variable_name: Optional[str] = Field(None, description="Version variable name")
 
 
 class WorkflowStepResponse(BaseResponse):
@@ -17,3 +18,4 @@ class WorkflowStepResponse(BaseResponse):
     parent_step_variable_name: Optional[str] = Field(
         None, description="Parent step variable name"
     )
+    version_variable_name: Optional[str] = Field(None, description="Version variable name")

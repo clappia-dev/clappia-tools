@@ -1,7 +1,105 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Literal
+from typing import List, Optional, Literal, Union
 from pydantic import EmailStr
 from ..base import JsonSerializableMixin
+
+
+from ..field import (
+    UpsertFieldTextRequest,
+    UpsertFieldTextAreaRequest,
+    UpsertFieldDependencyAppRequest,
+    UpsertFieldRestApiRequest,
+    UpsertFieldAddressRequest,
+    UpsertFieldDatabaseRequest,
+    UpsertFieldDateRequest,
+    UpsertFieldAIRequest,
+    UpsertFieldCodeRequest,
+    UpsertFieldCodeReaderRequest,
+    UpsertFieldEmailInputRequest,
+    UpsertFieldEmojiRequest,        
+    UpsertFieldFileRequest,
+    UpsertFieldGpsLocationRequest,
+    UpsertFieldLiveTrackingRequest,
+    UpsertFieldManualAddressRequest,
+    UpsertFieldPhoneNumberRequest,
+    UpsertFieldProgressBarRequest,
+    UpsertFieldSignatureRequest,
+    UpsertFieldCounterRequest,
+    UpsertFieldSliderRequest,
+    UpsertFieldTimeRequest,
+    UpsertFieldToggleRequest,
+    UpsertFieldValidationRequest,
+    UpsertFieldVideoViewerRequest,
+    UpsertFieldVoiceRequest,
+    UpsertFieldFormulaRequest,
+    UpsertFieldImageViewerRequest,
+    UpsertFieldRichTextEditorRequest,
+    UpsertFieldNfcReaderRequest,
+    UpsertFieldNumberInputRequest,
+    UpsertFieldPdfViewerRequest,
+    UpsertFieldReadOnlyFileRequest,
+    UpsertFieldReadOnlyTextRequest,
+    UpsertFieldTagsRequest,
+    UpsertFieldUniqueSequentialRequest,
+    UpsertFieldDropdownRequest,
+    UpsertFieldRadioRequest,
+    UpsertFieldUrlInputRequest,
+    UpsertFieldCheckboxRequest,
+    UpsertFieldRazorpayPaymentGatewayRequest,
+    UpsertFieldEazypayPaymentGatewayRequest,
+    UpsertFieldPaypalPaymentGatewayRequest,
+    UpsertFieldStripePaymentGatewayRequest,
+    UpsertFieldButtonRequest,
+)
+
+
+FieldRequestUnion = Union[
+    UpsertFieldTextRequest,
+    UpsertFieldTextAreaRequest,
+    UpsertFieldDependencyAppRequest,
+    UpsertFieldRestApiRequest,
+    UpsertFieldAddressRequest,
+    UpsertFieldDatabaseRequest,
+    UpsertFieldDateRequest,
+    UpsertFieldAIRequest,
+    UpsertFieldCodeRequest,
+    UpsertFieldCodeReaderRequest,
+    UpsertFieldEmailInputRequest,
+    UpsertFieldEmojiRequest,
+    UpsertFieldFileRequest,
+    UpsertFieldGpsLocationRequest,
+    UpsertFieldLiveTrackingRequest,
+    UpsertFieldManualAddressRequest,
+    UpsertFieldPhoneNumberRequest,
+    UpsertFieldProgressBarRequest,
+    UpsertFieldSignatureRequest,
+    UpsertFieldCounterRequest,
+    UpsertFieldSliderRequest,
+    UpsertFieldTimeRequest,
+    UpsertFieldToggleRequest,
+    UpsertFieldValidationRequest,
+    UpsertFieldVideoViewerRequest,
+    UpsertFieldVoiceRequest,
+    UpsertFieldFormulaRequest,
+    UpsertFieldImageViewerRequest,
+    UpsertFieldRichTextEditorRequest,
+    UpsertFieldNfcReaderRequest,
+    UpsertFieldNumberInputRequest,
+    UpsertFieldPdfViewerRequest,
+    UpsertFieldReadOnlyFileRequest,
+    UpsertFieldReadOnlyTextRequest,
+    UpsertFieldTagsRequest,
+    UpsertFieldUniqueSequentialRequest,
+    UpsertFieldDropdownRequest,
+    UpsertFieldRadioRequest,
+    UpsertFieldUrlInputRequest,
+    UpsertFieldCheckboxRequest,
+    UpsertFieldRazorpayPaymentGatewayRequest,
+    UpsertFieldEazypayPaymentGatewayRequest,
+    UpsertFieldPaypalPaymentGatewayRequest,
+    UpsertFieldStripePaymentGatewayRequest,
+    UpsertFieldButtonRequest,
+]
 
 
 class ExternalSectionDetails(BaseModel, JsonSerializableMixin):
@@ -49,7 +147,7 @@ class ExternalSectionDefinition(BaseModel, JsonSerializableMixin):
     section_details: ExternalSectionDetails = Field(
         description="Section details of the section"
     )
-    # field_definitions: List[Any] = Field([], description="Field definitions of the section") # TODO: Handle the fields adding in the future, current issue is that its client wont able to generated payload for fields
+     # field_definitions: List[Any] = Field([], description="Field definitions of the section") # TODO: Handle the fields adding in the future, current issue is that its client wont able to generated payload for fields
 
 
 class ExternalPageMetadata(BaseModel, JsonSerializableMixin):
