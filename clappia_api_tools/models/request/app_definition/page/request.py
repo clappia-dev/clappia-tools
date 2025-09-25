@@ -1,6 +1,6 @@
-from pydantic import Field, BaseModel
-from ..base import BaseUpsertPageRequest
-from ..base import JsonSerializableMixin
+from pydantic import BaseModel, Field
+
+from ..base import BaseUpsertPageRequest, JsonSerializableMixin
 
 
 class PageMetadata(BaseModel, JsonSerializableMixin):

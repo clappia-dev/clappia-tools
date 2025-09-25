@@ -1,5 +1,7 @@
-from typing import List, Optional, Literal, Any, Dict
+from typing import Literal
+
 from pydantic import Field, field_validator
+
 from ..base import BaseUpsertChartRequest
 from ..model import ExternalAggregation, ExternalChartDimension
 
@@ -14,17 +16,17 @@ class UpsertBarChartDefinitionRequest(BaseUpsertChartRequest):
     - Direction configuration (optional, Horizontal/Vertical)
     """
 
-    aggregation_dimensions: List[ExternalAggregation] = Field(
+    aggregation_dimensions: list[ExternalAggregation] = Field(
         description="Array of aggregation dimensions for the bar chart. Defines what data to aggregate and how to display it."
     )
-    dimensions: List[ExternalChartDimension] = Field(
+    dimensions: list[ExternalChartDimension] = Field(
         description="Array of dimensions for the bar chart. Defines how to group and categorize the data."
     )
-    is_stacked: Optional[bool] = Field(
+    is_stacked: bool | None = Field(
         default=None,
         description="Whether to display bars as stacked or grouped. Default: false. Example: true for stacked bars, false for grouped bars",
     )
-    direction: Optional[Literal["Horizontal", "Vertical"]] = Field(
+    direction: Literal["Horizontal", "Vertical"] | None = Field(
         default=None,
         description="Direction of the bar chart. Example: 'Horizontal' for horizontal bars, 'Vertical' for vertical bars",
     )
@@ -32,8 +34,8 @@ class UpsertBarChartDefinitionRequest(BaseUpsertChartRequest):
     @field_validator("aggregation_dimensions")
     @classmethod
     def validate_aggregation_dimensions(
-        cls, v: List[ExternalAggregation]
-    ) -> List[ExternalAggregation]:
+        cls, v: list[ExternalAggregation]
+    ) -> list[ExternalAggregation]:
         if not v or len(v) == 0:
             raise ValueError(
                 "aggregation_dimensions must contain at least one aggregation"
@@ -43,15 +45,15 @@ class UpsertBarChartDefinitionRequest(BaseUpsertChartRequest):
     @field_validator("dimensions")
     @classmethod
     def validate_dimensions(
-        cls, v: List[ExternalChartDimension]
-    ) -> List[ExternalChartDimension]:
+        cls, v: list[ExternalChartDimension]
+    ) -> list[ExternalChartDimension]:
         if not v or len(v) == 0:
             raise ValueError("dimensions must contain at least one dimension")
         return v
 
     @field_validator("is_stacked")
     @classmethod
-    def validate_is_stacked(cls, v: Optional[bool]) -> Optional[bool]:
+    def validate_is_stacked(cls, v: bool | None) -> bool | None:
         if v is not None and not isinstance(v, bool):
             raise ValueError("is_stacked should be a boolean if provided")
         return v
@@ -65,18 +67,18 @@ class UpsertDataTableChartDefinitionRequest(BaseUpsertChartRequest):
     - Grouping dimensions (required, at least one)
     """
 
-    aggregation_dimensions: List[ExternalAggregation] = Field(
+    aggregation_dimensions: list[ExternalAggregation] = Field(
         description="Array of aggregation dimensions for the data table. Defines what data to aggregate and display in columns. Maximum 4 aggregations allowed."
     )
-    dimensions: List[ExternalChartDimension] = Field(
+    dimensions: list[ExternalChartDimension] = Field(
         description="Array of dimensions for the data table. Defines how to group and categorize the data in rows."
     )
 
     @field_validator("aggregation_dimensions")
     @classmethod
     def validate_aggregation_dimensions_dt(
-        cls, v: List[ExternalAggregation]
-    ) -> List[ExternalAggregation]:
+        cls, v: list[ExternalAggregation]
+    ) -> list[ExternalAggregation]:
         if not v or len(v) == 0:
             raise ValueError(
                 "aggregation_dimensions must contain at least one aggregation"
@@ -97,13 +99,13 @@ class UpsertDoughnutChartDefinitionRequest(BaseUpsertChartRequest):
     - Optional legend visibility flag
     """
 
-    aggregation_dimensions: List[ExternalAggregation] = Field(
+    aggregation_dimensions: list[ExternalAggregation] = Field(
         description="Array of aggregation dimensions for the doughnut chart. Only one aggregation dimension is allowed."
     )
-    dimensions: List[ExternalChartDimension] = Field(
+    dimensions: list[ExternalChartDimension] = Field(
         description="Array of dimensions for the doughnut chart. Only one dimension is allowed."
     )
-    show_legend: Optional[bool] = Field(
+    show_legend: bool | None = Field(
         default=None,
         description="Whether to display the legend for the doughnut chart. Default: true. Example: true to show legend, false to hide legend",
     )
@@ -111,8 +113,8 @@ class UpsertDoughnutChartDefinitionRequest(BaseUpsertChartRequest):
     @field_validator("aggregation_dimensions")
     @classmethod
     def validate_aggregation_dimensions_doughnut(
-        cls, v: List[ExternalAggregation]
-    ) -> List[ExternalAggregation]:
+        cls, v: list[ExternalAggregation]
+    ) -> list[ExternalAggregation]:
         if not v or len(v) == 0:
             raise ValueError(
                 "aggregation_dimensions must contain exactly one aggregation"
@@ -126,8 +128,8 @@ class UpsertDoughnutChartDefinitionRequest(BaseUpsertChartRequest):
     @field_validator("dimensions")
     @classmethod
     def validate_dimensions_doughnut(
-        cls, v: List[ExternalChartDimension]
-    ) -> List[ExternalChartDimension]:
+        cls, v: list[ExternalChartDimension]
+    ) -> list[ExternalChartDimension]:
         if not v or len(v) == 0:
             raise ValueError("dimensions must contain exactly one dimension")
         if len(v) > 1:
@@ -136,7 +138,7 @@ class UpsertDoughnutChartDefinitionRequest(BaseUpsertChartRequest):
 
     @field_validator("show_legend")
     @classmethod
-    def validate_show_legend(cls, v: Optional[bool]) -> Optional[bool]:
+    def validate_show_legend(cls, v: bool | None) -> bool | None:
         if v is not None and not isinstance(v, bool):
             raise ValueError("show_legend should be a boolean if provided")
         return v
@@ -144,8 +146,8 @@ class UpsertDoughnutChartDefinitionRequest(BaseUpsertChartRequest):
     @field_validator("dimensions")
     @classmethod
     def validate_dimensions_dt(
-        cls, v: List[ExternalChartDimension]
-    ) -> List[ExternalChartDimension]:
+        cls, v: list[ExternalChartDimension]
+    ) -> list[ExternalChartDimension]:
         if not v or len(v) == 0:
             raise ValueError("dimensions must contain at least one dimension")
         return v
@@ -160,30 +162,30 @@ class UpsertGanttChartDefinitionRequest(BaseUpsertChartRequest):
     - Optional additional dimensions
     """
 
-    dimensions: List[ExternalChartDimension] = Field(
+    dimensions: list[ExternalChartDimension] = Field(
         description=(
             "Array of 5 dimensions for the gantt chart in order of task Id, "
             "resource, task name, start date and end date."
         )
     )
-    dependencies_dimension: Optional[ExternalChartDimension] = Field(
+    dependencies_dimension: ExternalChartDimension | None = Field(
         default=None, description="Dimension for task dependencies."
     )
-    completion_dimension: Optional[ExternalChartDimension] = Field(
+    completion_dimension: ExternalChartDimension | None = Field(
         default=None, description="Dimension for task completion status."
     )
-    milestone_dimension: Optional[ExternalChartDimension] = Field(
+    milestone_dimension: ExternalChartDimension | None = Field(
         default=None, description="Dimension for milestone information."
     )
-    additional_dimensions: Optional[List[ExternalChartDimension]] = Field(
+    additional_dimensions: list[ExternalChartDimension] | None = Field(
         default=None, description="Additional dimensions for the gantt chart."
     )
 
     @field_validator("dimensions")
     @classmethod
     def validate_gantt_dimensions(
-        cls, v: List[ExternalChartDimension]
-    ) -> List[ExternalChartDimension]:
+        cls, v: list[ExternalChartDimension]
+    ) -> list[ExternalChartDimension]:
         if not v or len(v) != 5:
             raise ValueError(
                 "dimensions must be an array of exactly 5 items: task Id, resource, task name, start date and end date"
@@ -200,13 +202,13 @@ class UpsertLineChartDefinitionRequest(BaseUpsertChartRequest):
     - Optional fill area flag
     """
 
-    aggregation_dimensions: List[ExternalAggregation] = Field(
+    aggregation_dimensions: list[ExternalAggregation] = Field(
         description="Array of aggregation dimensions for the line chart."
     )
-    dimensions: List[ExternalChartDimension] = Field(
+    dimensions: list[ExternalChartDimension] = Field(
         description="Array of dimensions for the line chart."
     )
-    fill: Optional[bool] = Field(
+    fill: bool | None = Field(
         default=None,
         description="Whether to fill the area under the line. Default: false.",
     )
@@ -214,8 +216,8 @@ class UpsertLineChartDefinitionRequest(BaseUpsertChartRequest):
     @field_validator("aggregation_dimensions")
     @classmethod
     def validate_line_aggregation_dimensions(
-        cls, v: List[ExternalAggregation]
-    ) -> List[ExternalAggregation]:
+        cls, v: list[ExternalAggregation]
+    ) -> list[ExternalAggregation]:
         if not v or len(v) == 0:
             raise ValueError(
                 "aggregation_dimensions must contain at least one aggregation"
@@ -230,7 +232,7 @@ class UpsertMapChartDefinitionRequest(BaseUpsertChartRequest):
     - Exactly two dimensions: gps location and label (in this order)
     """
 
-    dimensions: List[ExternalChartDimension] = Field(
+    dimensions: list[ExternalChartDimension] = Field(
         description=(
             "Array of 2 dimensions for the map chart in order of gps location and label."
         )
@@ -239,8 +241,8 @@ class UpsertMapChartDefinitionRequest(BaseUpsertChartRequest):
     @field_validator("dimensions")
     @classmethod
     def validate_map_dimensions(
-        cls, v: List[ExternalChartDimension]
-    ) -> List[ExternalChartDimension]:
+        cls, v: list[ExternalChartDimension]
+    ) -> list[ExternalChartDimension]:
         if not v or len(v) != 2:
             raise ValueError(
                 "dimensions must be an array of exactly 2 items: gps location and label"
@@ -257,13 +259,13 @@ class UpsertPieChartDefinitionRequest(BaseUpsertChartRequest):
     - Optional legend visibility flag
     """
 
-    aggregation_dimensions: List[ExternalAggregation] = Field(
+    aggregation_dimensions: list[ExternalAggregation] = Field(
         description="Array of aggregation dimensions for the pie chart. Only one aggregation dimension is allowed."
     )
-    dimensions: List[ExternalChartDimension] = Field(
+    dimensions: list[ExternalChartDimension] = Field(
         description="Array of dimensions for the pie chart. Only one dimension is allowed."
     )
-    show_legend: Optional[bool] = Field(
+    show_legend: bool | None = Field(
         default=None,
         description="Whether to display the legend for the pie chart. Default: true.",
     )
@@ -271,8 +273,8 @@ class UpsertPieChartDefinitionRequest(BaseUpsertChartRequest):
     @field_validator("aggregation_dimensions")
     @classmethod
     def validate_pie_aggregation_dimensions(
-        cls, v: List[ExternalAggregation]
-    ) -> List[ExternalAggregation]:
+        cls, v: list[ExternalAggregation]
+    ) -> list[ExternalAggregation]:
         if not v or len(v) == 0:
             raise ValueError(
                 "aggregation_dimensions must contain exactly one aggregation"
@@ -284,8 +286,8 @@ class UpsertPieChartDefinitionRequest(BaseUpsertChartRequest):
     @field_validator("dimensions")
     @classmethod
     def validate_pie_dimensions(
-        cls, v: List[ExternalChartDimension]
-    ) -> List[ExternalChartDimension]:
+        cls, v: list[ExternalChartDimension]
+    ) -> list[ExternalChartDimension]:
         if not v or len(v) == 0:
             raise ValueError("dimensions must contain exactly one dimension")
         if len(v) > 1:
@@ -294,7 +296,7 @@ class UpsertPieChartDefinitionRequest(BaseUpsertChartRequest):
 
     @field_validator("show_legend")
     @classmethod
-    def validate_pie_show_legend(cls, v: Optional[bool]) -> Optional[bool]:
+    def validate_pie_show_legend(cls, v: bool | None) -> bool | None:
         if v is not None and not isinstance(v, bool):
             raise ValueError("show_legend should be a boolean if provided")
         return v
@@ -307,15 +309,15 @@ class UpsertSummaryChartDefinitionRequest(BaseUpsertChartRequest):
     - Exactly one aggregation dimension
     """
 
-    aggregation_dimensions: List[ExternalAggregation] = Field(
+    aggregation_dimensions: list[ExternalAggregation] = Field(
         description="Array of aggregation dimensions for the summary chart. Only one aggregation dimension is allowed."
     )
 
     @field_validator("aggregation_dimensions")
     @classmethod
     def validate_summary_aggregation_dimensions(
-        cls, v: List[ExternalAggregation]
-    ) -> List[ExternalAggregation]:
+        cls, v: list[ExternalAggregation]
+    ) -> list[ExternalAggregation]:
         if not v or len(v) == 0:
             raise ValueError(
                 "aggregation_dimensions must contain exactly one aggregation"

@@ -1,23 +1,85 @@
-from typing import Optional, List, Literal, Dict, Any, ClassVar
-from pydantic import EmailStr, Field, field_validator, model_validator
-import re
 import json
-from ..base import BaseUpsertFieldRequest, ValidatedString, UniqueListValidator
-from ..model import SortField, FilterField, RestApiOutputField
+import re
+from typing import Any, Literal
+
+from pydantic import EmailStr, Field, field_validator, model_validator
+
+from ..base import BaseUpsertFieldRequest, UniqueListValidator, ValidatedString
+from ..model import FilterField, RestApiOutputField, SortField
+
+VALID_EMOJIS = [
+    "⭐",
+    "🌟",
+    "😀",
+    "😛",
+    "😡",
+    "☹",
+    "🤐",
+    "🤩",
+    "😐",
+    "👏",
+    "👍",
+    "👎",
+    "🙏",
+    "💥",
+    "🔥",
+    "♥",
+    "💘",
+    "💙",
+    "💚",
+    "💛",
+    "💜",
+    "🧡",
+    "❎",
+    "🆒",
+    "0️⃣",
+    "1️⃣",
+    "2️⃣",
+    "3️⃣",
+    "4️⃣",
+    "5️⃣",
+    "6️⃣",
+    "7️⃣",
+    "8️⃣",
+    "9️⃣",
+    "🔟",
+    "✔",
+    "☑",
+    "✅",
+    "🔵",
+    "🟠",
+    "🟡",
+    "🟢",
+    "◾",
+    "◽",
+    "⬛",
+    "⬜",
+    "🟥",
+    "🟧",
+    "🟨",
+    "🟩",
+    "🟪",
+    "🟦",
+    "🟫",
+    "🔔",
+    "🔕",
+]
 
 
 class UpsertFieldTextRequest(BaseUpsertFieldRequest):
-    validation: Optional[Literal["none", "number", "email", "url", "custom"]] = Field(None, description="Validation type")
-    custom_validation_condition: Optional[str] = Field(
+    validation: Literal["none", "number", "email", "url", "custom"] | None = Field(
+        None, description="Validation type"
+    )
+    custom_validation_condition: str | None = Field(
         None,
         description="Custom validation condition, supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: {field_name} <> 'value' or {field_name} > 10",
     )
-    custom_validation_error_message: Optional[str] = Field(
+    custom_validation_error_message: str | None = Field(
         None, description="Custom validation error message"
     )
 
     @model_validator(mode="after")
-    def validate_custom_validation_requirements(self):
+    def validate_custom_validation_requirements(self) -> "UpsertFieldTextRequest":
         if self.validation == "custom" and (
             not self.custom_validation_condition
             or not self.custom_validation_condition.strip()
@@ -37,59 +99,59 @@ class UpsertFieldDependencyAppRequest(BaseUpsertFieldRequest):
         min_length=1,
         description="ID of the dependency app, the app from which the data will be fetched, mandatory",
     )
-    skip_permission_check: Optional[bool] = Field(
+    skip_permission_check: bool | None = Field(
         False,
         description="Whether to allow users to see all data of the dependency app",
     )
-    key_field_names: List[str] = Field(
+    key_field_names: list[str] = Field(
         min_length=1,
         description="Array of key field names for dependency app, Example: ['field_name'], These are the fields that you need to show to the end users so that they can identify the item to be selected",
     )
-    other_field_names: Optional[List[str]] = Field(
+    other_field_names: list[str] | None = Field(
         None,
         description="Array of other field names for dependency app, Example: ['field_name'], you can select the items that will be pulled against the main selection made by the user. For example, if the user selects a Customer from the dropdown, all the details selected below will be fetched against that customer.",
     )
-    sort_fields: Optional[List[SortField]] = Field(
+    sort_fields: list[SortField] | None = Field(
         None,
         max_length=3,
         description="Array of sort field configurations, Example: [{'sort_by': 'field_name', 'sort_direction': 'asc'}]",
     )
-    no_submission_message: Optional[str] = Field(
+    no_submission_message: str | None = Field(
         "No submissions found.", description="Message when no submissions found"
     )
-    filters: Optional[List[FilterField]] = Field(None, description="Search filters")
-    min_chars_to_query: Optional[int] = Field(
+    filters: list[FilterField] | None = Field(
+        default=None, description="Search filters"
+    )
+    min_chars_to_query: int | None = Field(
         0, ge=0, le=15, description="Minimum characters to trigger query"
     )
-    max_search_options: Optional[int] = Field(
+    max_search_options: int | None = Field(
         10, ge=1, le=50, description="Maximum search options to display"
     )
-    show_create_submission_option: Optional[bool] = Field(
+    show_create_submission_option: bool | None = Field(
         True,
         description="Whether to show create submission option, if no submission exists for the selected item, the user can create a new submission for that item",
     )
-    enable_broad_search: Optional[bool] = Field(
+    enable_broad_search: bool | None = Field(
         False,
         description="Whether to enable broad search, if enabled, the user can search for the item by typing the item name",
     )
 
     @field_validator("key_field_names")
     @classmethod
-    def validate_unique_key_fields(cls, v: List[str]) -> List[str]:
+    def validate_unique_key_fields(cls, v: list[str]) -> list[str] | None:
         return UniqueListValidator.validate_unique_strings(v, "Key field names")
 
     @field_validator("other_field_names")
     @classmethod
-    def validate_unique_other_fields(
-        cls, v: Optional[List[str]]
-    ) -> Optional[List[str]]:
+    def validate_unique_other_fields(cls, v: list[str] | None) -> list[str] | None:
         return UniqueListValidator.validate_unique_strings(v, "Other field names")
 
     @field_validator("sort_fields")
     @classmethod
     def validate_unique_sort_fields(
-        cls, v: Optional[List[SortField]]
-    ) -> Optional[List[SortField]]:
+        cls, v: list[SortField] | None
+    ) -> list[SortField] | None:
         if v is not None:
             sort_by_fields = [field.sort_by for field in v]
             if len(set(sort_by_fields)) != len(sort_by_fields):
@@ -105,40 +167,35 @@ class UpsertFieldRestApiRequest(BaseUpsertFieldRequest):
     method_type: Literal["GET", "POST", "PATCH", "DELETE"] = Field(
         description="HTTP method type"
     )
-    body_type: Optional[Literal["JSON", "XML", "FORM-DATA"]] = Field(
+    body_type: Literal["JSON", "XML", "FORM-DATA"] | None = Field(
         None, description="Type of request body"
     )
-    headers: Optional[str] = Field(
+    headers: str | None = Field(
         "{}",
         description="HTTP headers as JSON string, Example: {'Content-Type': 'application/json'}",
     )
-    body: Optional[str] = Field(
+    body: str | None = Field(
         "{}",
         description="Request body as JSON string, Example: {'{field_name}': 'value'} or {'{field_name}': '{field_name}'}",
     )
-    query_string: Optional[str] = Field(
+    query_string: str | None = Field(
         None,
         description="URL query parameters, Example: '?field_name=value' or '?field_name={field_name}'",
     )
-    response_mapping: List[RestApiOutputField] = Field(
+    response_mapping: list[RestApiOutputField] = Field(
         min_length=1, description="Array of output field mappings for API response"
     )
 
-    @field_validator("server_url")
-    @classmethod
-    def validate_server_url(cls, v: str) -> str:
-        return ValidatedString.url_validator(v)
-
     @field_validator("headers", "body")
     @classmethod
-    def validate_json_strings(cls, v: Optional[str]) -> Optional[str]:
+    def validate_json_strings(cls, v: str | None) -> str | None:
         return ValidatedString.json_string_validator(v)
 
     @field_validator("response_mapping")
     @classmethod
     def validate_unique_response_mapping_names(
-        cls, v: List[RestApiOutputField]
-    ) -> List[RestApiOutputField]:
+        cls, v: list[RestApiOutputField]
+    ) -> list[RestApiOutputField]:
         names = [field.name for field in v]
         if len(set(names)) != len(names):
             raise ValueError("Response mapping field names must be unique")
@@ -146,13 +203,13 @@ class UpsertFieldRestApiRequest(BaseUpsertFieldRequest):
 
     @field_validator("query_string")
     @classmethod
-    def validate_query_string(cls, v: Optional[str]) -> Optional[str]:
+    def validate_query_string(cls, v: str | None) -> str | None:
         if v is not None and not re.match(r"^[\s\w%&.=[\]{}\-]*$", v):
             raise ValueError("Invalid query string format")
         return v
 
     @model_validator(mode="after")
-    def validate_body_requirements(self):
+    def validate_body_requirements(self) -> "UpsertFieldRestApiRequest":
         if self.method_type in ["POST", "PATCH"]:
             if not self.body_type:
                 raise ValueError("Body type is required for POST and PATCH requests")
@@ -162,20 +219,22 @@ class UpsertFieldRestApiRequest(BaseUpsertFieldRequest):
             if self.body_type == "JSON":
                 try:
                     json.loads(self.body)
-                except json.JSONDecodeError:
-                    raise ValueError("Body must be valid JSON when bodyType is JSON")
+                except json.JSONDecodeError as e:
+                    raise ValueError(
+                        "Body must be valid JSON when bodyType is JSON"
+                    ) from e
             elif self.body_type == "FORM-DATA":
                 try:
                     form_data = json.loads(self.body)
                     if not isinstance(form_data, dict) or len(form_data) == 0:
                         raise ValueError("Form data must be a non-empty JSON object")
-                except json.JSONDecodeError:
-                    raise ValueError("Form data must be valid JSON")
+                except json.JSONDecodeError as e:
+                    raise ValueError("Form data must be valid JSON") from e
         return self
 
 
 class UpsertFieldAddressRequest(BaseUpsertFieldRequest):
-    countries_list: Optional[List[str]] = Field(
+    countries_list: list[str] | None = Field(
         None,
         max_length=5,
         description="List of country codes to restrict address selection",
@@ -183,7 +242,7 @@ class UpsertFieldAddressRequest(BaseUpsertFieldRequest):
 
     @field_validator("countries_list")
     @classmethod
-    def validate_countries_list(cls, v: Optional[List[str]]) -> Optional[List[str]]:
+    def validate_countries_list(cls, v: list[str] | None) -> list[str] | None:
         if v is not None:
             if len(set(v)) != len(v):
                 raise ValueError("Countries list must contain unique country codes")
@@ -196,7 +255,9 @@ class UpsertFieldAddressRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldDatabaseRequest(BaseUpsertFieldRequest):
-    database_type: Literal["MySql", "PostgreSql", "AzureSql"] = Field(description="Type of database to connect to")
+    database_type: Literal["MySql", "PostgreSql", "AzureSql"] = Field(
+        description="Type of database to connect to"
+    )
     database_port: str = Field(min_length=1, description="Database port number")
     database_host: str = Field(min_length=1, description="Database host address")
     database_username: str = Field(
@@ -210,7 +271,7 @@ class UpsertFieldDatabaseRequest(BaseUpsertFieldRequest):
         min_length=1,
         description="SQL query to execute, Example: 'SELECT * FROM users' where id = {number_inp}",
     )
-    database_output_fields: List[str] = Field(
+    database_output_fields: list[str] = Field(
         default_factory=list,
         description="Array of output field names from the database query",
     )
@@ -236,7 +297,7 @@ class UpsertFieldDatabaseRequest(BaseUpsertFieldRequest):
 
     @field_validator("database_output_fields")
     @classmethod
-    def validate_unique_output_fields(cls, v: List[str]) -> List[str]:
+    def validate_unique_output_fields(cls, v: list[str]) -> list[str] | None:
         return UniqueListValidator.validate_unique_strings(v, "Database output fields")
 
 
@@ -250,28 +311,27 @@ class UpsertFieldDateRequest(BaseUpsertFieldRequest):
     current_date_button_visible: bool = Field(
         True, description="Whether to show a button to set current date"
     )
-    start_date: Optional[str] = Field(
+    start_date: str | None = Field(
         None,
         description="Start date for date range restriction (YYYY-MM-DD format) or {start_date}, Example: '2021-01-01' or {start_date}",
     )
-    end_date: Optional[str] = Field(
+    end_date: str | None = Field(
         None,
         description="End date for date range restriction (YYYY-MM-DD format) or {end_date}, Example: '2021-01-01' or {end_date}",
     )
 
 
 class UpsertFieldAIRequest(BaseUpsertFieldRequest):
-    instructions: Optional[str] = Field(
-        None,
+    instructions: str = Field(
         description="Instructions for the AI model, Example: 'Analyze the sentiment of {customerFeedback} and provide a summary'",
     )
-    model: Optional[str] = Field(None, description="Specific AI model to use")
-    llm: Optional[Literal["OpenAI", "Claude", "Gemini"]] = Field(
-        None, description="Large Language Model provider"
+    model: str = Field(description="Specific AI model to use")
+    llm: Literal["OpenAI", "Claude", "Gemini"] = Field(
+        description="Large Language Model provider"
     )
 
     @model_validator(mode="after")
-    def validate_ai_configuration(self):
+    def validate_ai_configuration(self) -> "UpsertFieldAIRequest":
         if self.llm and self.model:
             model_options_map = {
                 "OpenAI": [
@@ -329,14 +389,14 @@ class UpsertFieldCodeRequest(BaseUpsertFieldRequest):
 }""",
         description="JavaScript code to execute",
     )
-    output_fields: List[str] = Field(
+    output_fields: list[str] = Field(
         default=["sum", "prod"],
         description="Array of output field names that the code will generate",
     )
 
     @field_validator("output_fields")
     @classmethod
-    def validate_unique_output_fields(cls, v: List[str]) -> List[str]:
+    def validate_unique_output_fields(cls, v: list[str]) -> list[str] | None:
         return UniqueListValidator.validate_unique_strings(v, "Code output fields")
 
 
@@ -347,7 +407,7 @@ class UpsertFieldGpsLocationRequest(BaseUpsertFieldRequest):
     default_to_current_location: bool = Field(
         True, description="Whether to default to current GPS location"
     )
-    target_locations: List[str] = Field(
+    target_locations: list[str] = Field(
         default_factory=list,
         description="Array of target location coordinates for geofencing, Example: ['22.66, 77.5946', {target_location}]",
     )
@@ -357,10 +417,10 @@ class UpsertFieldGpsLocationRequest(BaseUpsertFieldRequest):
     show_map_view: bool = Field(
         True, description="Whether to show map view for location selection"
     )
-    enable_geo_fencing: Optional[bool] = Field(
+    enable_geo_fencing: bool | None = Field(
         None, description="Whether to enable geofencing functionality"
     )
-    enable_reverse_geocoding: Optional[bool] = Field(
+    enable_reverse_geocoding: bool | None = Field(
         None, description="Whether to enable reverse geocoding functionality"
     )
 
@@ -372,7 +432,7 @@ class UpsertFieldGpsLocationRequest(BaseUpsertFieldRequest):
         return v
 
     @model_validator(mode="after")
-    def validate_geo_fencing_requirements(self):
+    def validate_geo_fencing_requirements(self) -> "UpsertFieldGpsLocationRequest":
         if self.enable_geo_fencing:
             if not self.target_locations:
                 raise ValueError(
@@ -395,18 +455,18 @@ class UpsertFieldLiveTrackingRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldManualAddressRequest(BaseUpsertFieldRequest):
-    countries_list: Optional[List[str]] = Field(
+    countries_list: list[str] | None = Field(
         None,
         max_length=5,
         description="Array of country codes to restrict address input",
     )
-    default_country: Optional[str] = Field(
+    default_country: str | None = Field(
         None, description="Default country code for address input"
     )
 
     @field_validator("countries_list")
     @classmethod
-    def validate_countries_list(cls, v: Optional[List[str]]) -> Optional[List[str]]:
+    def validate_countries_list(cls, v: list[str] | None) -> list[str] | None:
         if v is not None:
             if len(set(v)) != len(v):
                 raise ValueError("Countries list must contain unique country codes")
@@ -419,7 +479,7 @@ class UpsertFieldManualAddressRequest(BaseUpsertFieldRequest):
 
     @field_validator("default_country")
     @classmethod
-    def validate_default_country(cls, v: Optional[str]) -> Optional[str]:
+    def validate_default_country(cls, v: str | None) -> str | None:
         if v is not None:
             if not v.strip():
                 raise ValueError("Default country code cannot be empty")
@@ -431,19 +491,19 @@ class UpsertFieldManualAddressRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldPhoneNumberRequest(BaseUpsertFieldRequest):
-    default_country_code: Optional[str] = Field(
+    default_country_code: str | None = Field(
         None, description="Default country code (ISO format)"
     )
-    is_country_code_editable: Optional[bool] = Field(
+    is_country_code_editable: bool | None = Field(
         None, description="Whether the country code can be edited"
     )
-    allow_manual_input: Optional[bool] = Field(
+    allow_manual_input: bool | None = Field(
         None, description="Whether to allow manual phone number input"
     )
 
     @field_validator("default_country_code")
     @classmethod
-    def validate_country_code(cls, v: Optional[str]) -> Optional[str]:
+    def validate_country_code(cls, v: str | None) -> str | None:
         if v is not None:
             if not v.strip():
                 raise ValueError("Country code cannot be empty")
@@ -453,11 +513,11 @@ class UpsertFieldPhoneNumberRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldProgressBarRequest(BaseUpsertFieldRequest):
-    progress_formula: Optional[str] = Field(
+    progress_formula: str | None = Field(
         None,
         description="Formula to calculate progress percentage, Example: {progress_field_name} / {total_field_name} * 100",
     )
-    progress_text: Optional[str] = Field(
+    progress_text: str | None = Field(
         None, description="Text to display with progress, Example: 'Progress'"
     )
 
@@ -509,7 +569,7 @@ class UpsertFieldRangeRequest(BaseUpsertFieldRequest):
         return v
 
     @model_validator(mode="after")
-    def validate_range_consistency(self):
+    def validate_range_consistency(self) -> "UpsertFieldRangeRequest":
         if self.minimum_value >= self.maximum_value:
             raise ValueError("Minimum value must be less than maximum value")
 
@@ -542,11 +602,11 @@ class UpsertFieldTimeRequest(BaseUpsertFieldRequest):
     default_to_current_time: bool = Field(
         False, description="Whether to default to current time"
     )
-    start_time: Optional[str] = Field(
+    start_time: str | None = Field(
         None,
         description="Minimum allowed time (HH:mm format) or {start_time} Example: '09:00' or {start_time}",
     )
-    end_time: Optional[str] = Field(
+    end_time: str | None = Field(
         None,
         description="Maximum allowed time (HH:mm format) or {end_time} Example: '18:00' or {end_time}",
     )
@@ -554,12 +614,8 @@ class UpsertFieldTimeRequest(BaseUpsertFieldRequest):
 
 class UpsertFieldToggleRequest(BaseUpsertFieldRequest):
     default_toggle_value: bool = Field(False, description="Default state of the toggle")
-    true_value: Optional[str] = Field(
-        None, description="Value to store when toggle is ON"
-    )
-    false_value: Optional[str] = Field(
-        None, description="Value to store when toggle is OFF"
-    )
+    true_value: str = Field(description="Value to store when toggle is ON")
+    false_value: str = Field(description="Value to store when toggle is OFF")
 
 
 class UpsertFieldValidationRequest(BaseUpsertFieldRequest):
@@ -569,10 +625,10 @@ class UpsertFieldValidationRequest(BaseUpsertFieldRequest):
     validation_message: str = Field(
         "Validation message", description="Message to display for validation result"
     )
-    unique_field_names: Optional[List[str]] = Field(
+    unique_field_names: list[str] | None = Field(
         None, description="Array of field names to check for duplicates"
     )
-    validation_condition: Optional[str] = Field(
+    validation_condition: str | None = Field(
         None,
         description="Custom validation condition, supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: {field_name} <> 'value' or {field_name} > 10",
     )
@@ -582,13 +638,13 @@ class UpsertFieldValidationRequest(BaseUpsertFieldRequest):
 
     @field_validator("unique_field_names")
     @classmethod
-    def validate_unique_field_names(cls, v: Optional[List[str]]) -> Optional[List[str]]:
+    def validate_unique_field_names(cls, v: list[str] | None) -> list[str] | None:
         if v is not None:
             return UniqueListValidator.validate_unique_strings(v, "Unique field names")
         return v
 
     @model_validator(mode="after")
-    def validate_validation_configuration(self):
+    def validate_validation_configuration(self) -> "UpsertFieldValidationRequest":
         if self.validation_type == "duplicate":
             if not self.unique_field_names or len(self.unique_field_names) == 0:
                 raise ValueError(
@@ -612,13 +668,13 @@ class UpsertFieldValidationRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldReadOnlyFileRequest(BaseUpsertFieldRequest):
-    static_attachment: Dict[str, str] = Field(
+    static_attachment: dict[str, str] = Field(
         description="Static attachment object with base64, contentType and fileName"
     )
 
     @field_validator("static_attachment")
     @classmethod
-    def validate_static_attachment(cls, v: Dict[str, str]) -> Dict[str, str]:
+    def validate_static_attachment(cls, v: dict[str, str]) -> dict[str, str]:
         required_keys = ["base64", "contentType", "fileName"]
         for key in required_keys:
             if key not in v:
@@ -690,11 +746,11 @@ class UpsertFieldCodeReaderRequest(BaseUpsertFieldRequest):
     allow_manual_input: bool = Field(
         False, description="Whether to allow manual input of codes"
     )
-    key_field_name: Optional[str] = Field(
+    key_field_name: str | None = Field(
         None,
         description="Name of the key field for dependency app integration, Example: 'field_name', mandatory if the dependency app ID is provided",
     )
-    other_field_names: Optional[List[str]] = Field(
+    other_field_names: list[str] | None = Field(
         None,
         description="Array of other field names for dependency app integration, Example: ['field_name']",
     )
@@ -705,22 +761,20 @@ class UpsertFieldCodeReaderRequest(BaseUpsertFieldRequest):
         False,
         description="Whether to open camera automatically when app home screen is opened",
     )
-    dependency_app_id: Optional[str] = Field(
+    dependency_app_id: str | None = Field(
         None, description="ID of the dependency app for code scanning integration"
     )
 
     @field_validator("other_field_names")
     @classmethod
-    def validate_unique_other_fields(
-        cls, v: Optional[List[str]]
-    ) -> Optional[List[str]]:
+    def validate_unique_other_fields(cls, v: list[str] | None) -> list[str] | None:
         return UniqueListValidator.validate_unique_strings(v, "Other field names")
 
     @field_validator("other_field_names")
     @classmethod
     def validate_other_field_names_not_empty(
-        cls, v: Optional[List[str]]
-    ) -> Optional[List[str]]:
+        cls, v: list[str] | None
+    ) -> list[str] | None:
         if v and len(v) == 0:
             raise ValueError(
                 "Other field names should be an array of at least one field name"
@@ -728,7 +782,7 @@ class UpsertFieldCodeReaderRequest(BaseUpsertFieldRequest):
         return v
 
     @model_validator(mode="after")
-    def validate_dependency_app_requirements(self):
+    def validate_dependency_app_requirements(self) -> "UpsertFieldCodeReaderRequest":
         if self.dependency_app_id:
             if not self.key_field_name:
                 raise ValueError(
@@ -742,14 +796,14 @@ class UpsertFieldNfcReaderRequest(UpsertFieldCodeReaderRequest):
 
 
 class UpsertFieldNumberInputRequest(BaseUpsertFieldRequest):
-    min_value: Optional[float] = Field(None, description="Minimum allowed value")
-    max_value: Optional[float] = Field(None, description="Maximum allowed value")
-    default_input_value: Optional[float] = Field(
+    min_value: float | None = Field(None, description="Minimum allowed value")
+    max_value: float | None = Field(None, description="Maximum allowed value")
+    default_input_value: float | None = Field(
         None, description="Default value for the number input"
     )
 
     @model_validator(mode="after")
-    def validate_number_range(self):
+    def validate_number_range(self) -> "UpsertFieldNumberInputRequest":
         if self.min_value is not None and self.max_value is not None:
             if self.min_value > self.max_value:
                 raise ValueError("Minimum value cannot be greater than maximum value")
@@ -766,15 +820,18 @@ class UpsertFieldNumberInputRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldReadOnlyTextRequest(BaseUpsertFieldRequest):
-    rich_text: Optional[str] = Field(None, description="Rich text content for display, can include field references. Example: 'Hello {field_name}'")
+    rich_text: str | None = Field(
+        None,
+        description="Rich text content for display, can include field references. Example: 'Hello {field_name}'",
+    )
 
 
 class UpsertFieldTagsRequest(BaseUpsertFieldRequest):
-    tag_names: List[str] = Field(default_factory=list, description="Array of tag names")
+    tag_names: list[str] = Field(default_factory=list, description="Array of tag names")
 
     @field_validator("tag_names")
     @classmethod
-    def validate_tag_names(cls, v: List[str]) -> List[str]:
+    def validate_tag_names(cls, v: list[str]) -> list[str] | None:
         if v:
             for tag in v:
                 if not tag or not str(tag).strip():
@@ -783,7 +840,7 @@ class UpsertFieldTagsRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldDropdownRequest(BaseUpsertFieldRequest):
-    options: List[str] = Field(
+    options: list[str] = Field(
         default_factory=list,
         description=(
             "List of dropdown options. For dependent dropdowns, use '||' to separate hierarchy levels.\n\n"
@@ -794,7 +851,7 @@ class UpsertFieldDropdownRequest(BaseUpsertFieldRequest):
         ),
     )
 
-    dependency_field_names: Optional[List[str]] = Field(
+    dependency_field_names: list[str] | None = Field(
         None,
         description=(
             "Names of parent dropdown fields that control which options are shown in this dropdown.\n"
@@ -815,7 +872,7 @@ class UpsertFieldDropdownRequest(BaseUpsertFieldRequest):
 
     @field_validator("options")
     @classmethod
-    def validate_options(cls, v: List[str]) -> List[str]:
+    def validate_options(cls, v: list[str]) -> list[str]:
         if not v or len(v) == 0:
             raise ValueError("Options are required and should be an array of strings")
         if not all(isinstance(option, str) and option.strip() for option in v):
@@ -824,7 +881,7 @@ class UpsertFieldDropdownRequest(BaseUpsertFieldRequest):
 
     @field_validator("dependency_field_names")
     @classmethod
-    def validate_dependency_fields(cls, v: Optional[List[str]]) -> Optional[List[str]]:
+    def validate_dependency_fields(cls, v: list[str] | None) -> list[str] | None:
         if v:
             if not all(isinstance(field, str) and field.strip() for field in v):
                 raise ValueError("All dependency field names must be non-empty strings")
@@ -832,7 +889,7 @@ class UpsertFieldDropdownRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldRadioRequest(BaseUpsertFieldRequest):
-    options: List[str] = Field(
+    options: list[str] = Field(
         default_factory=lambda: ["value one", "value two"],
         description=(
             "List of radio button options. For dependent radio buttons, use '||' to separate hierarchy levels.\n\n"
@@ -843,7 +900,7 @@ class UpsertFieldRadioRequest(BaseUpsertFieldRequest):
         ),
     )
 
-    number_of_cols: Optional[int] = Field(
+    number_of_cols: int | None = Field(
         None,
         description=(
             "Number of columns to display radio buttons in (1-3).\n"
@@ -860,7 +917,7 @@ class UpsertFieldRadioRequest(BaseUpsertFieldRequest):
         description="Visual style for radio buttons (CHIPS for modern chip-style, or other ChipType values)",
     )
 
-    dependency_field_names: Optional[List[str]] = Field(
+    dependency_field_names: list[str] | None = Field(
         None,
         description=(
             "Names of parent fields that control which radio options are shown.\n"
@@ -878,7 +935,7 @@ class UpsertFieldRadioRequest(BaseUpsertFieldRequest):
 
     @field_validator("options")
     @classmethod
-    def validate_options(cls, v: List[str]) -> List[str]:
+    def validate_options(cls, v: list[str]) -> list[str]:
         if not v or len(v) == 0:
             raise ValueError("Options are required and should be an array of strings")
         if not all(isinstance(option, str) and option.strip() for option in v):
@@ -887,14 +944,14 @@ class UpsertFieldRadioRequest(BaseUpsertFieldRequest):
 
     @field_validator("number_of_cols")
     @classmethod
-    def validate_number_of_cols(cls, v: Optional[int]) -> Optional[int]:
+    def validate_number_of_cols(cls, v: int | None) -> int | None:
         if v is not None and (v < 1 or v > 3):
             raise ValueError("Number of columns must be between 1 and 3")
         return v
 
     @field_validator("dependency_field_names")
     @classmethod
-    def validate_dependency_fields(cls, v: Optional[List[str]]) -> Optional[List[str]]:
+    def validate_dependency_fields(cls, v: list[str] | None) -> list[str] | None:
         if v:
             if not all(isinstance(field, str) and field.strip() for field in v):
                 raise ValueError("All dependency field names must be non-empty strings")
@@ -902,21 +959,23 @@ class UpsertFieldRadioRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldUrlInputRequest(BaseUpsertFieldRequest):
-    default_value: Optional[str] = Field(
+    default_value: str | None = Field(
         None, description="Default URL value. Must be a valid URL format"
     )
 
 
 class UpsertFieldCheckboxRequest(BaseUpsertFieldRequest):
-    options: List[str] = Field(
+    options: list[str] = Field(
         default_factory=lambda: ["value one", "value two"],
         description="Array of checkbox options, Example: ['value one', 'value two']",
     )
-    number_of_cols: Optional[int] = Field(
-        None, description="Number of columns for checkbox layout (1-3), Example: 1 or 2 or 3"
+    number_of_cols: int | None = Field(
+        None,
+        description="Number of columns for checkbox layout (1-3), Example: 1 or 2 or 3",
     )
     style: Literal["Standard", "Chips"] = Field(
-        "Chips", description="Display style for checkboxes, Example: 'Standard' or 'Chips'"
+        "Chips",
+        description="Display style for checkboxes, Example: 'Standard' or 'Chips'",
     )
     show_not_applicable_option: bool = Field(
         True, description="Whether to show 'Not Applicable' option"
@@ -927,7 +986,7 @@ class UpsertFieldCheckboxRequest(BaseUpsertFieldRequest):
 
     @field_validator("options")
     @classmethod
-    def validate_options(cls, v: List[str]) -> List[str]:
+    def validate_options(cls, v: list[str]) -> list[str]:
         if not v or len(v) == 0:
             raise ValueError("Options are required and should be an array of strings")
         if not all(isinstance(option, str) and option.strip() for option in v):
@@ -936,7 +995,7 @@ class UpsertFieldCheckboxRequest(BaseUpsertFieldRequest):
 
     @field_validator("number_of_cols")
     @classmethod
-    def validate_number_of_cols(cls, v: Optional[int]) -> Optional[int]:
+    def validate_number_of_cols(cls, v: int | None) -> int | None:
         if v is not None and (v < 1 or v > 3):
             raise ValueError("Number of columns must be between 1 and 3")
         return v
@@ -971,13 +1030,13 @@ class UpsertFieldPaymentGatewayRequest(BaseUpsertFieldRequest):
 class UpsertFieldRazorpayPaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
     key_id: str = Field(description="Razorpay API key ID")
     key_secret: str = Field(description="Razorpay API key secret")
-    company_name: Optional[str] = Field(
+    company_name: str | None = Field(
         None, description="Company name for payment display"
     )
-    image_link: Optional[str] = Field(
+    image_link: str | None = Field(
         None, description="Company logo image link for payment display"
     )
-    metadata: Optional[List[Dict[str, str]]] = Field(
+    metadata: list[dict[str, str]] | None = Field(
         None, description="Array of key-value pairs for Upsertitional metadata"
     )
 
@@ -998,8 +1057,8 @@ class UpsertFieldRazorpayPaymentGatewayRequest(UpsertFieldPaymentGatewayRequest)
     @field_validator("metadata")
     @classmethod
     def validate_metadata(
-        cls, v: Optional[List[Dict[str, str]]]
-    ) -> Optional[List[Dict[str, str]]]:
+        cls, v: list[dict[str, str]] | None
+    ) -> list[dict[str, str]] | None:
         if v is not None:
             if not isinstance(v, list):
                 raise ValueError("Metadata must be an array")
@@ -1020,10 +1079,10 @@ class UpsertFieldEazypayPaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
     reference_no: str = Field(
         description="Reference number for payment. Can include field references"
     )
-    optional_fields: List[str] = Field(
+    optional_fields: list[str] = Field(
         description="Array of optional field names, Example: ['{field_name1}', '{field_name2}']"
     )
-    mandatory_fields: List[str] = Field(
+    mandatory_fields: list[str] = Field(
         description="Array of mandatory field names, Example: ['{field_name1}', '{field_name2}']"
     )
     encryption_key: str = Field(description="Encryption key for secure payments")
@@ -1060,7 +1119,7 @@ class UpsertFieldEazypayPaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
 
     @field_validator("optional_fields")
     @classmethod
-    def validate_optional_fields(cls, v: List[str]) -> List[str]:
+    def validate_optional_fields(cls, v: list[str]) -> list[str]:
         if not v or len(v) == 0:
             raise ValueError("At least one optional field is required")
         if not all(isinstance(field, str) and field.strip() for field in v):
@@ -1069,7 +1128,7 @@ class UpsertFieldEazypayPaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
 
     @field_validator("mandatory_fields")
     @classmethod
-    def validate_mandatory_fields(cls, v: List[str]) -> List[str]:
+    def validate_mandatory_fields(cls, v: list[str]) -> list[str]:
         if not v or len(v) == 0:
             raise ValueError("At least one mandatory field is required")
         if not all(isinstance(field, str) and field.strip() for field in v):
@@ -1103,7 +1162,7 @@ class UpsertFieldStripePaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
         description="Stripe publishable key for client-side integration"
     )
     secret_key: str = Field(description="Stripe secret key for server-side integration")
-    metadata: Optional[List[Dict[str, str]]] = Field(
+    metadata: list[dict[str, str]] | None = Field(
         None, description="Array of key-value pairs for Upsertitional metadata"
     )
 
@@ -1124,8 +1183,8 @@ class UpsertFieldStripePaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
     @field_validator("metadata")
     @classmethod
     def validate_metadata(
-        cls, v: Optional[List[Dict[str, str]]]
-    ) -> Optional[List[Dict[str, str]]]:
+        cls, v: list[dict[str, str]] | None
+    ) -> list[dict[str, str]] | None:
         if v is not None:
             if not isinstance(v, list):
                 raise ValueError("Metadata must be an array")
@@ -1147,14 +1206,14 @@ class UpsertFieldButtonRequest(BaseUpsertFieldRequest):
     open_link: Literal["sameTab", "newTab", "modalTab"] = Field(
         description="How to open links"
     )
-    placement: Optional[str] = Field(None, description="Button placement on the form")
-    action_details: Dict[str, Any] = Field(
+    placement: str | None = Field(None, description="Button placement on the form")
+    action_details: dict[str, Any] = Field(
         description="Action details for button click behavior"
     )
 
     @field_validator("action_details")
     @classmethod
-    def validate_action_details(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_action_details(cls, v: dict[str, Any]) -> dict[str, Any]:
         if not v:
             raise ValueError("Action details are required")
 
@@ -1208,7 +1267,7 @@ class UpsertFieldButtonRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldUniqueSequentialRequest(BaseUpsertFieldRequest):
-    prefix: Optional[str] = Field(
+    prefix: str | None = Field(
         None,
         description="Prefix for the sequential number. Can include field references, Example: 'INV' or {prefix}",
     )
@@ -1235,13 +1294,13 @@ class UpsertFieldUniqueSequentialRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldEmailInputRequest(BaseUpsertFieldRequest):
-    default_value: Optional[EmailStr] = Field(
+    default_value: EmailStr | None = Field(
         None, description="Default email value for the field"
     )
 
 
 class UpsertFieldEmojiRequest(BaseUpsertFieldRequest):
-    emojis: List[Dict[str, str]] = Field(
+    emojis: list[dict[str, str]] = Field(
         default_factory=lambda: [
             {"value": "⭐", "score": "1"},
             {"value": "⭐", "score": "2"},
@@ -1262,67 +1321,9 @@ class UpsertFieldEmojiRequest(BaseUpsertFieldRequest):
     )
     emoji_size: int = Field(1, description="Size multiplier for emoji display (1-3)")
 
-    VALID_EMOJIS: ClassVar[List[str]] = [
-        "⭐",
-        "🌟",
-        "😀",
-        "😛",
-        "😡",
-        "☹",
-        "🤐",
-        "🤩",
-        "😐",
-        "👏",
-        "👍",
-        "👎",
-        "🙏",
-        "💥",
-        "🔥",
-        "♥",
-        "💘",
-        "💙",
-        "💚",
-        "💛",
-        "💜",
-        "🧡",
-        "❎",
-        "🆒",
-        "0️⃣",
-        "1️⃣",
-        "2️⃣",
-        "3️⃣",
-        "4️⃣",
-        "5️⃣",
-        "6️⃣",
-        "7️⃣",
-        "8️⃣",
-        "9️⃣",
-        "🔟",
-        "✔",
-        "☑",
-        "✅",
-        "🔵",
-        "🟠",
-        "🟡",
-        "🟢",
-        "◾",
-        "◽",
-        "⬛",
-        "⬜",
-        "🟥",
-        "🟧",
-        "🟨",
-        "🟩",
-        "🟪",
-        "🟦",
-        "🟫",
-        "🔔",
-        "🔕",
-    ]
-
     @field_validator("emojis")
     @classmethod
-    def validate_emojis(cls, v: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    def validate_emojis(cls, v: list[dict[str, str]]) -> list[dict[str, str]]:
         if not v:
             raise ValueError("Emojis list cannot be empty")
 
@@ -1332,9 +1333,9 @@ class UpsertFieldEmojiRequest(BaseUpsertFieldRequest):
             if not emoji["value"] or not emoji["score"]:
                 raise ValueError("Emoji value and score cannot be empty")
 
-            if emoji["value"] not in cls.VALID_EMOJIS:
+            if emoji["value"] not in VALID_EMOJIS:
                 raise ValueError(
-                    f"Emoji '{emoji['value']}' is not in the allowed list. Allowed emojis: {', '.join(cls.VALID_EMOJIS)}"
+                    f"Emoji '{emoji['value']}' is not in the allowed list. Allowed emojis: {', '.join(VALID_EMOJIS)}"
                 )
 
             try:
@@ -1343,8 +1344,10 @@ class UpsertFieldEmojiRequest(BaseUpsertFieldRequest):
                     raise ValueError(
                         f"Score '{emoji['score']}' must be a non-negative number"
                     )
-            except ValueError:
-                raise ValueError(f"Score '{emoji['score']}' must be a valid number")
+            except ValueError as err:
+                raise ValueError(
+                    f"Score '{emoji['score']}' must be a valid number"
+                ) from err
 
         return v
 
@@ -1357,25 +1360,24 @@ class UpsertFieldEmojiRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldFileRequest(BaseUpsertFieldRequest):
-    
-    allowed_file_types: List[Literal["images_camera_upload", "images_gallery_upload", "videos", "documents"]] = Field(
-        default_factory=list, description="Array of allowed file types"
-    )
+    allowed_file_types: list[
+        Literal["images_camera_upload", "images_gallery_upload", "videos", "documents"]
+    ] = Field(default_factory=list, description="Array of allowed file types")
     file_upload_limit: int = Field(
         10, description="Maximum number of files allowed (1-10)"
     )
     image_quality: Literal["high", "medium", "low"] = Field(
         "medium", description="Image quality for camera captures"
     )
-    image_text: Optional[str] = Field(
+    image_text: str | None = Field(
         None,
         description="Text watermark on captured images, Example: 'Watermark' or {field_name}",
     )
-    image_text_position: Optional[Literal["TR", "BR", "BL", "TL"]] = Field(
+    image_text_position: Literal["TR", "BR", "BL", "TL"] | None = Field(
         None, description="Position of text watermark"
     )
-    logo: Optional[str] = Field(None, description="Logo watermark on captured images")
-    logo_position: Optional[Literal["TR", "BR", "BL", "TL"]] = Field(
+    logo: str | None = Field(None, description="Logo watermark on captured images")
+    logo_position: Literal["TR", "BR", "BL", "TL"] | None = Field(
         None, description="Position of logo watermark"
     )
     file_name_prefix: str = Field(
@@ -1396,14 +1398,14 @@ class UpsertFieldFileRequest(BaseUpsertFieldRequest):
         return v
 
     @model_validator(mode="after")
-    def validate_watermark_positions(self):
+    def validate_watermark_positions(self) -> "UpsertFieldFileRequest":
         if self.image_text_position and self.logo_position:
             if self.image_text_position == self.logo_position:
                 raise ValueError("Logo and Image text position cannot be the same")
         return self
 
     @model_validator(mode="after")
-    def validate_image_related_fields(self):
+    def validate_image_related_fields(self) -> "UpsertFieldFileRequest":
         has_image_upload = (
             not self.allowed_file_types
             or "images_camera_upload" in self.allowed_file_types

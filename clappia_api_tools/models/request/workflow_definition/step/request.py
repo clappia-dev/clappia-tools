@@ -1,9 +1,124 @@
-from typing import Optional, Literal, List, Dict, Any, Union
-from ..base import BaseUpsertWorkflowStepRequest
-from pydantic import Field, field_validator, model_validator, BaseModel
-import re
 import json
-from urllib.parse import urlparse
+import re
+from typing import Any, Literal
+
+from pydantic import BaseModel, Field, field_validator, model_validator
+
+from ..base import BaseUpsertWorkflowStepRequest
+
+WHATSAPP_LANGUAGE_CODES = [
+    "af",
+    "sq",
+    "ar",
+    "ar_EG",
+    "ar_AE",
+    "ar_LB",
+    "ar_MA",
+    "ar_QA",
+    "az",
+    "be_BY",
+    "bn",
+    "bn_IN",
+    "bg",
+    "ca",
+    "zh_CN",
+    "zh_HK",
+    "zh_TW",
+    "hr",
+    "cs",
+    "da",
+    "prs_AF",
+    "nl",
+    "nl_BE",
+    "en",
+    "en_GB",
+    "en_US",
+    "en_AE",
+    "en_AU",
+    "en_CA",
+    "en_GH",
+    "en_IE",
+    "en_IN",
+    "en_JM",
+    "en_MY",
+    "en_NZ",
+    "en_QA",
+    "en_SG",
+    "en_UG",
+    "en_ZA",
+    "et",
+    "fil",
+    "fi",
+    "fr",
+    "fr_BE",
+    "fr_CA",
+    "fr_CH",
+    "fr_CI",
+    "fr_MA",
+    "ka",
+    "de",
+    "de_AT",
+    "de_CH",
+    "el",
+    "gu",
+    "ha",
+    "he",
+    "hi",
+    "hu",
+    "id",
+    "ga",
+    "it",
+    "ja",
+    "kn",
+    "kk",
+    "rw_RW",
+    "ko",
+    "ky_KG",
+    "lo",
+    "lv",
+    "lt",
+    "mk",
+    "ms",
+    "ml",
+    "mr",
+    "nb",
+    "ps_AF",
+    "fa",
+    "pl",
+    "pt_BR",
+    "pt_PT",
+    "pa",
+    "ro",
+    "ru",
+    "sr",
+    "si_LK",
+    "sk",
+    "sl",
+    "es",
+    "es_AR",
+    "es_CL",
+    "es_CO",
+    "es_CR",
+    "es_DO",
+    "es_EC",
+    "es_HN",
+    "es_MX",
+    "es_PA",
+    "es_PE",
+    "es_ES",
+    "es_UY",
+    "sw",
+    "sv",
+    "ta",
+    "te",
+    "th",
+    "tr",
+    "uk",
+    "ur",
+    "uz",
+    "vi",
+    "zu",
+]
 
 
 class UpsertAiWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
@@ -50,7 +165,7 @@ class UpsertAiWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     )
 
     @model_validator(mode="after")
-    def validate_ai_configuration(self):
+    def validate_ai_configuration(self) -> "UpsertAiWorkflowStepRequest":
         model_options_map = {
             "OpenAI": [
                 "gpt-4",
@@ -96,10 +211,10 @@ class UpsertAiWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 class UpsertApprovalWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for approval workflow step configuration"""
 
-    approvers: List[str] = Field(
+    approvers: list[str] = Field(
         description="Array of email addresses of approvers. Can include actual emails or field references. Example: ['manager@company.com', '{supervisorField}', 'finance@company.com']"
     )
-    allowed_approval_statuses: List[str] = Field(
+    allowed_approval_statuses: list[str] = Field(
         description="Array of allowed approval statuses. Example: ['approved', 'rejected', 'pending']. This should be as same as the status present the definition of the app. Hence before using this field, you should check the statuses present in the app definition."
     )
     subject: str = Field(
@@ -111,14 +226,14 @@ class UpsertApprovalWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     expiry: int = Field(
         ge=1, le=50, description="Expiry time in days (1-50). Example: 7 for 7 days"
     )
-    print_template_indices: Optional[List[int]] = Field(
+    print_template_indices: list[int] | None = Field(
         None,
         description="Array of template indices to include as attachments. Example: [0, 2] for first and third templates",
     )
 
     @field_validator("approvers")
     @classmethod
-    def validate_approvers(cls, v: List[str]) -> List[str]:
+    def validate_approvers(cls, v: list[str]) -> list[str]:
         email_regex = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
         field_name_regex = re.compile(r"^\{[a-zA-Z_][a-zA-Z0-9_]*\}$")
 
@@ -137,7 +252,7 @@ class UpsertApprovalWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("allowed_approval_statuses")
     @classmethod
-    def validate_allowed_approval_statuses(cls, v: List[str]) -> List[str]:
+    def validate_allowed_approval_statuses(cls, v: list[str]) -> list[str]:
         if len(set(v)) != len(v):
             raise ValueError("Allowed approval statuses must be unique")
 
@@ -147,7 +262,7 @@ class UpsertApprovalWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 class UpsertCodeWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for code workflow step configuration"""
 
-    output_fields: List[str] = Field(
+    output_fields: list[str] = Field(
         description="Array of output field names that the code will generate. Example: ['result', 'status', 'message']"
     )
     code: str = Field(
@@ -165,7 +280,7 @@ class UpsertCodeWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("output_fields")
     @classmethod
-    def validate_output_fields(cls, v: List[str]) -> List[str]:
+    def validate_output_fields(cls, v: list[str]) -> list[str]:
         if len(set(v)) != len(v):
             raise ValueError("Output fields must be unique")
 
@@ -204,7 +319,7 @@ class UpsertDatabaseWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     database_query: str = Field(
         description="SQL query to execute. Can include field references for dynamic queries. Example: 'SELECT * FROM users WHERE id = {userIdField}'"
     )
-    database_output_fields: Optional[List[str]] = Field(
+    database_output_fields: list[str] | None = Field(
         None,
         description="Array of field names where query results will be stored. Can include field references. Example: ['resultField']",
     )
@@ -212,15 +327,16 @@ class UpsertDatabaseWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     @field_validator("database_port")
     @classmethod
     def validate_database_port(cls, v: str) -> str:
-        # Check if it's a valid port number
+        v = v.strip()
         try:
-            port_num = int(v.strip())
-            if not (1 <= port_num <= 65535):
-                raise ValueError("Database port must be between 1 and 65535")
-        except ValueError:
-            raise ValueError("Database port must be a valid number")
+            port_num = int(v)
+        except ValueError as err:
+            raise ValueError("Database port must be a valid number") from err
 
-        return v.strip()
+        if not (1 <= port_num <= 65535):
+            raise ValueError("Database port must be between 1 and 65535")
+
+        return v
 
     @field_validator("database_host")
     @classmethod
@@ -234,9 +350,7 @@ class UpsertDatabaseWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("database_output_fields")
     @classmethod
-    def validate_database_output_fields(
-        cls, v: Optional[List[str]]
-    ) -> Optional[List[str]]:
+    def validate_database_output_fields(cls, v: list[str] | None) -> list[str] | None:
         if v is not None:
             # Check for duplicates
             if len(set(v)) != len(v):
@@ -283,14 +397,14 @@ class StaticAttachment(BaseModel):
 class UpsertEmailWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for email workflow step configuration"""
 
-    to_email_addresses: List[str] = Field(
+    to_email_addresses: list[str] = Field(
         description="Array of email addresses to send the email to. Can include actual email addresses or field references. Example: ['user@example.com', '{fieldName}', 'admin@company.com']"
     )
-    cc_email_addresses: Optional[List[str]] = Field(
+    cc_email_addresses: list[str] | None = Field(
         None,
         description="Array of email addresses to CC. Can include actual email addresses or field references. Example: ['manager@example.com', '{supervisorField}']",
     )
-    bcc_email_addresses: Optional[List[str]] = Field(
+    bcc_email_addresses: list[str] | None = Field(
         None,
         description="Array of email addresses to BCC. Can include actual email addresses or field references. Example: ['hr@example.com', '{hrField}']",
     )
@@ -300,25 +414,25 @@ class UpsertEmailWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     body: str = Field(
         description="Email body content. Can include HTML formatting and field references. Example: 'Dear {customerName}, your order {orderId} has been confirmed.'"
     )
-    static_attachments: Optional[List[StaticAttachment]] = Field(
+    static_attachments: list[StaticAttachment] | None = Field(
         None, description="Array of static file attachments. Maximum 10 attachments."
     )
-    print_template_indices: Optional[List[int]] = Field(
+    print_template_indices: list[int] | None = Field(
         None,
         description="Array of template indices to include as attachments. Indices correspond to templates in the app. Example: [0, 2] for first and third templates",
     )
-    dynamic_attachments: Optional[List[str]] = Field(
+    dynamic_attachments: list[str] | None = Field(
         None,
         description="Array of file field names that contain file attachments to include. Only works when app has file fields. Example: ['documentField', 'imageField']",
     )
-    reply_to: Optional[str] = Field(
+    reply_to: str | None = Field(
         None,
         description="Reply-to email address. Can be an actual email or field reference. Example: 'noreply@company.com' or '{supportField}'",
     )
 
     @field_validator("to_email_addresses")
     @classmethod
-    def validate_to_email_addresses(cls, v: List[str]) -> List[str]:
+    def validate_to_email_addresses(cls, v: list[str]) -> list[str]:
         email_regex = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
         field_name_regex = re.compile(r"^\{[a-zA-Z_][a-zA-Z0-9_]*\}$")
 
@@ -337,7 +451,7 @@ class UpsertEmailWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("cc_email_addresses")
     @classmethod
-    def validate_cc_email_addresses(cls, v: Optional[List[str]]) -> Optional[List[str]]:
+    def validate_cc_email_addresses(cls, v: list[str] | None) -> list[str] | None:
         if v is not None:
             email_regex = re.compile(
                 r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
@@ -359,9 +473,7 @@ class UpsertEmailWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("bcc_email_addresses")
     @classmethod
-    def validate_bcc_email_addresses(
-        cls, v: Optional[List[str]]
-    ) -> Optional[List[str]]:
+    def validate_bcc_email_addresses(cls, v: list[str] | None) -> list[str] | None:
         if v is not None:
             email_regex = re.compile(
                 r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
@@ -384,8 +496,8 @@ class UpsertEmailWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     @field_validator("static_attachments")
     @classmethod
     def validate_static_attachments(
-        cls, v: Optional[List[StaticAttachment]]
-    ) -> Optional[List[StaticAttachment]]:
+        cls, v: list[StaticAttachment] | None
+    ) -> list[StaticAttachment] | None:
         if v is not None:
             if len(v) > 10:
                 raise ValueError("Static attachments can have at most 10 attachments")
@@ -394,9 +506,7 @@ class UpsertEmailWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("print_template_indices")
     @classmethod
-    def validate_print_template_indices(
-        cls, v: Optional[List[int]]
-    ) -> Optional[List[int]]:
+    def validate_print_template_indices(cls, v: list[int] | None) -> list[int] | None:
         if v is not None:
             for index in v:
                 if not isinstance(index, int):
@@ -408,9 +518,7 @@ class UpsertEmailWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("dynamic_attachments")
     @classmethod
-    def validate_dynamic_attachments(
-        cls, v: Optional[List[str]]
-    ) -> Optional[List[str]]:
+    def validate_dynamic_attachments(cls, v: list[str] | None) -> list[str] | None:
         if v is not None:
             for attachment in v:
                 if not isinstance(attachment, str) or not attachment.strip():
@@ -422,7 +530,7 @@ class UpsertEmailWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("reply_to")
     @classmethod
-    def validate_reply_to(cls, v: Optional[str]) -> Optional[str]:
+    def validate_reply_to(cls, v: str | None) -> str | None:
         if v is not None:
             email_regex = re.compile(
                 r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
@@ -445,7 +553,7 @@ class UpsertEmailWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 class UpsertLoopWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for loop workflow step configuration"""
 
-    no_of_times: Union[int, str] = Field(
+    no_of_times: int | str = Field(
         description="Number of times to execute the loop or field reference containing the count. Can be a number or field name. Example: 5 or {loopCountField}"
     )
     break_condition: str = Field(
@@ -458,7 +566,7 @@ class UpsertLoopWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("no_of_times")
     @classmethod
-    def validate_no_of_times(cls, v: Union[int, str]) -> Union[int, str]:
+    def validate_no_of_times(cls, v: int | str) -> int | str:
         if isinstance(v, int):
             if v < 1:
                 raise ValueError("Number of times must be at least 1")
@@ -488,7 +596,7 @@ class UpsertLoopWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 class UpsertMobileNotificationWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for mobile notification workflow step configuration"""
 
-    users: List[str] = Field(
+    users: list[str] = Field(
         description="Array of users to send mobile notifications to. Can include phone numbers, email addresses, or field references. Example: ['+91 1234567890', '{userField}', 'user@example.com', '{$allUsers}']"
     )
     subject: str = Field(
@@ -500,7 +608,7 @@ class UpsertMobileNotificationWorkflowStepRequest(BaseUpsertWorkflowStepRequest)
 
     @field_validator("users")
     @classmethod
-    def validate_users(cls, v: List[str]) -> List[str]:
+    def validate_users(cls, v: list[str]) -> list[str]:
         email_regex = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
         field_name_regex = re.compile(r"^\{[a-zA-Z_][a-zA-Z0-9_]*\}$")
         phone_regex = re.compile(r"^\+?[1-9]\d{1,14}$")  # E.164 format
@@ -578,10 +686,10 @@ class UpsertRestApiWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     method_type: Literal["GET", "POST", "PATCH", "DELETE"] = Field(
         description="HTTP method type"
     )
-    body_type: Optional[Literal["JSON", "XML", "FORM-DATA"]] = Field(
+    body_type: Literal["JSON", "XML", "FORM-DATA"] | None = Field(
         None, description="Type of request body"
     )
-    headers: Optional[str] = Field(
+    headers: str | None = Field(
         "{}",
         description=(
             "HTTP headers as a JSON-formatted string. "
@@ -591,52 +699,36 @@ class UpsertRestApiWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
             '- \'{"Authorization": "{apiKey}"}\''
         ),
     )
-    body: Optional[str] = Field(
+    body: str | None = Field(
         "{}",
         description='Request body as JSON string. Example: \'{"field_name": "value"}\' or \'{"field_name": "{field_name}"}\'',
     )
-    query_string: Optional[str] = Field(
+    query_string: str | None = Field(
         None,
         description="URL query parameters. Example: '?field_name=value' or ?field_name={query_string}",
     )
-    response_mapping: List[RestApiOutputField] = Field(
+    response_mapping: list[RestApiOutputField] = Field(
         description="Array of output field mappings for API response"
     )
     allow_system_workflow_triggered_execution: bool = Field(
         False, description="Whether to allow system workflow triggered execution"
     )
 
-    @field_validator("server_url")
-    @classmethod
-    def validate_server_url(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Server URL cannot be empty")
-
-        # Basic URL validation
-        try:
-            result = urlparse(v.strip())
-            if not all([result.scheme, result.netloc]):
-                raise ValueError("Invalid URL format")
-        except Exception:
-            raise ValueError("Server URL must be a valid URL")
-
-        return v.strip()
-
     @field_validator("headers", "body")
     @classmethod
-    def validate_json_strings(cls, v: Optional[str]) -> Optional[str]:
+    def validate_json_strings(cls, v: str | None) -> str | None:
         if v is not None:
             try:
                 json.loads(v)
-            except json.JSONDecodeError:
-                raise ValueError("Must be valid JSON string")
+            except json.JSONDecodeError as e:
+                raise ValueError("Must be valid JSON string") from e
         return v
 
     @field_validator("response_mapping")
     @classmethod
     def validate_response_mapping(
-        cls, v: List[RestApiOutputField]
-    ) -> List[RestApiOutputField]:
+        cls, v: list[RestApiOutputField]
+    ) -> list[RestApiOutputField]:
         if not v or len(v) == 0:
             raise ValueError("Response mapping is required")
 
@@ -649,14 +741,14 @@ class UpsertRestApiWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("query_string")
     @classmethod
-    def validate_query_string(cls, v: Optional[str]) -> Optional[str]:
+    def validate_query_string(cls, v: str | None) -> str | None:
         if v is not None:
             if not re.match(r"^[\s\w%&.=[\]{}\-]*$", v):
                 raise ValueError("Invalid query string format")
         return v
 
     @model_validator(mode="after")
-    def validate_body_requirements(self):
+    def validate_body_requirements(self) -> "UpsertRestApiWorkflowStepRequest":
         if self.method_type in ["POST", "PATCH"]:
             if not self.body_type:
                 raise ValueError("Body type is required for POST and PATCH requests")
@@ -666,15 +758,17 @@ class UpsertRestApiWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
             if self.body_type == "JSON":
                 try:
                     json.loads(self.body)
-                except json.JSONDecodeError:
-                    raise ValueError("Body must be valid JSON when body type is JSON")
+                except json.JSONDecodeError as e:
+                    raise ValueError(
+                        "Body must be valid JSON when body type is JSON"
+                    ) from e
             elif self.body_type == "FORM-DATA":
                 try:
                     form_data = json.loads(self.body)
                     if not isinstance(form_data, dict) or len(form_data) == 0:
                         raise ValueError("Form data must be a non-empty JSON object")
-                except json.JSONDecodeError:
-                    raise ValueError("Form data must be valid JSON")
+                except json.JSONDecodeError as e:
+                    raise ValueError("Form data must be valid JSON") from e
         return self
 
 
@@ -713,24 +807,24 @@ class UpsertSlackWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 class UpsertSmsWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for SMS workflow step configuration"""
 
-    phone_numbers: List[str] = Field(
+    phone_numbers: list[str] = Field(
         description="Array of phone numbers to send SMS to. Can include actual phone numbers or field references. Maximum 1 phone number. Example: ['+91 1234567890', '{phoneField}']"
     )
-    sms_template_variables: Optional[List[Dict[str, str]]] = Field(
+    sms_template_variables: list[dict[str, str]] | None = Field(
         None, description="Array of template variables for SMS template"
     )
-    sms_template_id: Optional[str] = Field(
+    sms_template_id: str | None = Field(
         None,
         description="SMS template ID for non-India workplaces. Required for non-India, not needed for India. Example: 'template_12345'",
     )
-    body: Optional[str] = Field(
+    body: str | None = Field(
         None,
         description="SMS body content for India workplaces. Required for India, not needed for non-India. Can include field references. Example: 'Your order {orderId} has been confirmed'",
     )
 
     @field_validator("phone_numbers")
     @classmethod
-    def validate_phone_numbers(cls, v: List[str]) -> List[str]:
+    def validate_phone_numbers(cls, v: list[str]) -> list[str]:
         if not v or len(v) == 0:
             raise ValueError("Phone numbers are required")
 
@@ -756,8 +850,8 @@ class UpsertSmsWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     @field_validator("sms_template_variables")
     @classmethod
     def validate_sms_template_variables(
-        cls, v: Optional[List[Dict[str, str]]]
-    ) -> Optional[List[Dict[str, str]]]:
+        cls, v: list[dict[str, str]] | None
+    ) -> list[dict[str, str]] | None:
         if v is not None:
             for i, variable in enumerate(v):
                 if not isinstance(variable, dict) or len(variable) != 1:
@@ -779,7 +873,7 @@ class UpsertSmsWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
         return v
 
     @model_validator(mode="after")
-    def validate_sms_requirements(self):
+    def validate_sms_requirements(self) -> "UpsertSmsWorkflowStepRequest":
         if not self.sms_template_id and not self.body:
             raise ValueError(
                 "Either SMS template ID or body is required. "
@@ -792,21 +886,21 @@ class UpsertSmsWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 class UpsertWaitWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for wait workflow step configuration"""
 
-    wait_till_date: Optional[str] = Field(
+    wait_till_date: str | None = Field(
         None,
         description="Date to wait until (when using wait_till_date and wait_till_time). Can include field references. Example: '2024-12-31' or '{targetDateField}'",
     )
-    wait_for: Optional[str] = Field(
+    wait_for: str | None = Field(
         None,
         description="Duration to wait for in seconds. Can include field references. Example: '5000', '7200', '86400' or '{no_of_seconds}'",
     )
-    wait_till_time: Optional[str] = Field(
+    wait_till_time: str | None = Field(
         None,
         description="Time to wait until (when using wait_till_date and wait_till_time). Can include field references. Example: '14:30' or '{targetTimeField}'",
     )
 
     @model_validator(mode="after")
-    def validate_wait_requirements(self):
+    def validate_wait_requirements(self) -> "UpsertWaitWorkflowStepRequest":
         if not self.wait_for and (not self.wait_till_time or not self.wait_till_date):
             raise ValueError(
                 "Either wait_for or both wait_till_date and wait_till_time are required"
@@ -817,38 +911,38 @@ class UpsertWaitWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 class UpsertWhatsAppWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for WhatsApp workflow step configuration"""
 
-    phone_numbers: List[str] = Field(
+    phone_numbers: list[str] = Field(
         description="Array of phone numbers to send WhatsApp messages to. Can include actual phone numbers or field references. Example: ['+91 1234567890', '{phoneField}', '+911234567890', '{phoneField}']"
     )
-    whatsapp_template_variables: Optional[List[Dict[str, str]]] = Field(
+    whatsapp_template_variables: list[dict[str, str]] | None = Field(
         None, description="Array of template variables for WhatsApp template"
     )
     whatsapp_template_id: str = Field(
         description="WhatsApp template ID. Example: 'template_12345'"
     )
-    static_attachments: Optional[List[StaticAttachment]] = Field(
+    static_attachments: list[StaticAttachment] | None = Field(
         None, description="Array of static file attachments. Maximum 1 attachment."
     )
-    print_template_index: Optional[int] = Field(
+    print_template_index: int | None = Field(
         None,
         description="Index of template to include as attachment. Example: 0 for first template",
     )
-    language: Optional[str] = Field(
+    language: str | None = Field(
         None,
         description="Language code for WhatsApp message. Example: 'en', 'es', 'fr'",
     )
-    media_type: Optional[str] = Field(
+    media_type: str | None = Field(
         None,
         description="Type of media for WhatsApp message. Example: 'image', 'video', 'document'",
     )
-    dynamic_image_field: Optional[str] = Field(
+    dynamic_image_field: str | None = Field(
         None,
         description="Field name for file field used for dynamic image attachment. Example: 'imageField'",
     )
 
     @field_validator("phone_numbers")
     @classmethod
-    def validate_phone_numbers(cls, v: List[str]) -> List[str]:
+    def validate_phone_numbers(cls, v: list[str]) -> list[str]:
         if not v or len(v) == 0:
             raise ValueError("Phone numbers are required")
 
@@ -874,8 +968,8 @@ class UpsertWhatsAppWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     @field_validator("whatsapp_template_variables")
     @classmethod
     def validate_whatsapp_template_variables(
-        cls, v: Optional[List[Dict[str, str]]]
-    ) -> Optional[List[Dict[str, str]]]:
+        cls, v: list[dict[str, str]] | None
+    ) -> list[dict[str, str]] | None:
         if v is not None:
             for i, variable in enumerate(v):
                 if not isinstance(variable, dict) or len(variable) != 1:
@@ -899,8 +993,8 @@ class UpsertWhatsAppWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     @field_validator("static_attachments")
     @classmethod
     def validate_static_attachments(
-        cls, v: Optional[List[StaticAttachment]]
-    ) -> Optional[List[StaticAttachment]]:
+        cls, v: list[StaticAttachment] | None
+    ) -> list[StaticAttachment] | None:
         if v is not None:
             if len(v) > 1:
                 raise ValueError("Static attachments can have at most 1 attachment")
@@ -909,7 +1003,7 @@ class UpsertWhatsAppWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("print_template_index")
     @classmethod
-    def validate_print_template_index(cls, v: Optional[int]) -> Optional[int]:
+    def validate_print_template_index(cls, v: int | None) -> int | None:
         if v is not None:
             if v < 0:
                 raise ValueError("Print template index must be non-negative")
@@ -918,120 +1012,7 @@ class UpsertWhatsAppWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("language")
     @classmethod
-    def validate_language(cls, v: Optional[str]) -> Optional[str]:
-        WHATSAPP_LANGUAGE_CODES = [
-            "af",
-            "sq",
-            "ar",
-            "ar_EG",
-            "ar_AE",
-            "ar_LB",
-            "ar_MA",
-            "ar_QA",
-            "az",
-            "be_BY",
-            "bn",
-            "bn_IN",
-            "bg",
-            "ca",
-            "zh_CN",
-            "zh_HK",
-            "zh_TW",
-            "hr",
-            "cs",
-            "da",
-            "prs_AF",
-            "nl",
-            "nl_BE",
-            "en",
-            "en_GB",
-            "en_US",
-            "en_AE",
-            "en_AU",
-            "en_CA",
-            "en_GH",
-            "en_IE",
-            "en_IN",
-            "en_JM",
-            "en_MY",
-            "en_NZ",
-            "en_QA",
-            "en_SG",
-            "en_UG",
-            "en_ZA",
-            "et",
-            "fil",
-            "fi",
-            "fr",
-            "fr_BE",
-            "fr_CA",
-            "fr_CH",
-            "fr_CI",
-            "fr_MA",
-            "ka",
-            "de",
-            "de_AT",
-            "de_CH",
-            "el",
-            "gu",
-            "ha",
-            "he",
-            "hi",
-            "hu",
-            "id",
-            "ga",
-            "it",
-            "ja",
-            "kn",
-            "kk",
-            "rw_RW",
-            "ko",
-            "ky_KG",
-            "lo",
-            "lv",
-            "lt",
-            "mk",
-            "ms",
-            "ml",
-            "mr",
-            "nb",
-            "ps_AF",
-            "fa",
-            "pl",
-            "pt_BR",
-            "pt_PT",
-            "pa",
-            "ro",
-            "ru",
-            "sr",
-            "si_LK",
-            "sk",
-            "sl",
-            "es",
-            "es_AR",
-            "es_CL",
-            "es_CO",
-            "es_CR",
-            "es_DO",
-            "es_EC",
-            "es_HN",
-            "es_MX",
-            "es_PA",
-            "es_PE",
-            "es_ES",
-            "es_UY",
-            "sw",
-            "sv",
-            "ta",
-            "te",
-            "th",
-            "tr",
-            "uk",
-            "ur",
-            "uz",
-            "vi",
-            "zu",
-        ]
+    def validate_language(cls, v: str | None) -> str | None:
         if v is not None:
             if v not in WHATSAPP_LANGUAGE_CODES:
                 raise ValueError(
@@ -1042,7 +1023,7 @@ class UpsertWhatsAppWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("media_type")
     @classmethod
-    def validate_media_type(cls, v: Optional[str]) -> Optional[str]:
+    def validate_media_type(cls, v: str | None) -> str | None:
         if v is not None:
             valid_media_types = ["image", "video", "document", "audio"]
             if v.lower() not in valid_media_types:
@@ -1053,7 +1034,7 @@ class UpsertWhatsAppWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
         return v
 
     @model_validator(mode="after")
-    def validate_whatsapp_requirements(self):
+    def validate_whatsapp_requirements(self) -> "UpsertWhatsAppWorkflowStepRequest":
         # Validate that static_attachments and print_template_index are not provided together
         if (
             self.static_attachments
@@ -1073,18 +1054,18 @@ class UpsertCreateSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     target_app_id: str = Field(
         description="ID of the target app where the submission will be created. Example: 'app_12345'"
     )
-    field_values_map: Dict[str, Any] = Field(
+    field_values_map: dict[str, Any] = Field(
         description="Map of field names to values for the new submission, where the key is the field name of the target app and the value is the value to be set. Can include field references. Example: {'name': '{customerName}', 'email': 'customer@example.com'}"
     )
-    submission_status: Optional[str] = Field(
+    submission_status: str | None = Field(
         None,
         description="Initial status for the new submission. Can include field references. Example: 'pending' or '{initialStatusField}'",
     )
-    comments: Optional[str] = Field(
+    comments: str | None = Field(
         None,
         description="Comments to add to the new submission. Can include field references. Example: 'Created by workflow'",
     )
-    submission_owners: Optional[List[str]] = Field(
+    submission_owners: list[str] | None = Field(
         None,
         description="Array of email addresses or phone numbers for submission owners. Can include field references. Example: ['manager@company.com', '{ownerField}', '+911234567890']",
     )
@@ -1102,7 +1083,7 @@ class UpsertCreateSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("field_values_map")
     @classmethod
-    def validate_field_values_map(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_field_values_map(cls, v: dict[str, Any]) -> dict[str, Any]:
         if not v or len(v) == 0:
             raise ValueError("Field values map must contain at least one field")
 
@@ -1116,7 +1097,7 @@ class UpsertCreateSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("submission_owners")
     @classmethod
-    def validate_submission_owners(cls, v: Optional[List[str]]) -> Optional[List[str]]:
+    def validate_submission_owners(cls, v: list[str] | None) -> list[str] | None:
         if v is not None:
             email_regex = re.compile(
                 r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
@@ -1148,7 +1129,7 @@ class UpsertDeleteSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     target_app_id: str = Field(
         description="ID of the target app where submissions will be deleted. Example: 'app_12345'"
     )
-    filters: Dict[str, Any] = Field(
+    filters: dict[str, Any] = Field(
         description="Filters to find submissions to delete. Contains the keys value where the key is the field name of the target app and the value to be matched. Can include field references. Example: {'status': 'archived', 'userId': '{currentUserId}'}"
     )
     allow_multiple_deletes: bool = Field(
@@ -1169,7 +1150,7 @@ class UpsertDeleteSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("filters")
     @classmethod
-    def validate_filters(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_filters(cls, v: dict[str, Any]) -> dict[str, Any]:
         if not v or len(v) == 0:
             raise ValueError("Filters must contain at least one field")
 
@@ -1199,13 +1180,13 @@ class UpsertFindSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     target_app_id: str = Field(
         description="ID of the target app to search for submissions. Example: 'app_12345'"
     )
-    filters: Dict[str, Any] = Field(
+    filters: dict[str, Any] = Field(
         description="Filters to find submissions, where the key is the field name of the target app and the value to be matched. Can include field references. Example: {'status': 'active', 'userId': '{currentUserId}'}"
     )
-    selection_fields: List[str] = Field(
+    selection_fields: list[str] = Field(
         description="Array of field names to include in the search results. Example: ['name', 'email', 'status']"
     )
-    sort_fields: Optional[List[SortField]] = Field(
+    sort_fields: list[SortField] | None = Field(
         None, description="Array of sort criteria. Maximum 3 fields."
     )
 
@@ -1218,7 +1199,7 @@ class UpsertFindSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("filters")
     @classmethod
-    def validate_filters(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_filters(cls, v: dict[str, Any]) -> dict[str, Any]:
         if not v or len(v) == 0:
             raise ValueError("Filters must contain at least one field")
 
@@ -1232,7 +1213,7 @@ class UpsertFindSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("selection_fields")
     @classmethod
-    def validate_selection_fields(cls, v: List[str]) -> List[str]:
+    def validate_selection_fields(cls, v: list[str]) -> list[str]:
         if not v or len(v) == 0:
             raise ValueError("Selection fields must contain at least one field")
 
@@ -1244,9 +1225,7 @@ class UpsertFindSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("sort_fields")
     @classmethod
-    def validate_sort_fields(
-        cls, v: Optional[List[SortField]]
-    ) -> Optional[List[SortField]]:
+    def validate_sort_fields(cls, v: list[SortField] | None) -> list[SortField] | None:
         if v is not None:
             if len(v) > 3:
                 raise ValueError("Sort fields should not have more than 3 fields")
@@ -1266,21 +1245,21 @@ class UpsertEditSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     target_app_id: str = Field(
         description="ID of the target app where submissions will be edited. Example: 'app_12345'"
     )
-    filters: Dict[str, Any] = Field(
+    filters: dict[str, Any] = Field(
         description="Filters to find submissions to edit. Contains the keys value where the key is the field name of the target app and the value to be matched. Can include field references. Example: {'status': 'pending', 'userId': '{currentUserId}'}"
     )
-    field_values_map: Dict[str, Any] = Field(
+    field_values_map: dict[str, Any] = Field(
         description="Map of field names to new values, where the key is the field name of the target app and the value is the value to be set. Can include field references and cross-app references. Example: {'status': 'approved', 'approvedBy': '{sourceAppId_#_approverField}', 'name': '{sourceAppId_#_customerName}', 'email': '{targetAppId_#_customerEmail}'}"
     )
-    submission_status: Optional[str] = Field(
+    submission_status: str | None = Field(
         None,
         description="New status for the submission. Can include field references. Example: 'approved' or '{newStatusField}'",
     )
-    comments: Optional[str] = Field(
+    comments: str | None = Field(
         None,
         description="Comments to add to the submission. Can include field references. Example: 'Approved by {approverName}'",
     )
-    submission_owners: Optional[List[str]] = Field(
+    submission_owners: list[str] | None = Field(
         None,
         description="Array of email addresses or phone numbers for new submission owners. Can include field references. Example: ['manager@company.com', '{ownerField}', '+911234567890', '{phoneField}']",
     )
@@ -1306,7 +1285,7 @@ class UpsertEditSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("filters")
     @classmethod
-    def validate_filters(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_filters(cls, v: dict[str, Any]) -> dict[str, Any]:
         if not v or len(v) == 0:
             raise ValueError("Filters must contain at least one field")
 
@@ -1320,7 +1299,7 @@ class UpsertEditSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("field_values_map")
     @classmethod
-    def validate_field_values_map(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_field_values_map(cls, v: dict[str, Any]) -> dict[str, Any]:
         if not v or len(v) == 0:
             raise ValueError("Field values map must contain at least one field")
 
@@ -1334,7 +1313,7 @@ class UpsertEditSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     @field_validator("submission_owners")
     @classmethod
-    def validate_submission_owners(cls, v: Optional[List[str]]) -> Optional[List[str]]:
+    def validate_submission_owners(cls, v: list[str] | None) -> list[str] | None:
         if v is not None:
             email_regex = re.compile(
                 r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
