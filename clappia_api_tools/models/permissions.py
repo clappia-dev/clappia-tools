@@ -1,5 +1,6 @@
+from typing import Any
+
 from pydantic import BaseModel, Field
-from typing import Dict, Any
 
 
 class Permission(BaseModel):
@@ -13,10 +14,10 @@ class Permission(BaseModel):
     can_delete_data: bool = Field(default=False, description="Can delete data")
 
     @classmethod
-    def from_json(cls, json_data: Dict[str, Any]) -> "Permission":
+    def from_json(cls, json_data: dict[str, Any]) -> "Permission":
         return cls(**json_data)
 
-    def to_dict(self) -> Dict[str, bool]:
+    def to_dict(self) -> dict[str, bool]:
         return {
             "canSubmitData": self.can_submit_data,
             "canEditData": self.can_edit_data,

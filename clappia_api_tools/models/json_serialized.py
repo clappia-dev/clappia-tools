@@ -1,12 +1,12 @@
-from typing import Dict, Any
-from datetime import datetime, date
+from datetime import date, datetime
 from enum import Enum
+from typing import Any
 
 
 class JsonSerializableMixin:
     """Mixin to provide robust JSON serialization functionality."""
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         """Convert the object to a JSON-serializable dictionary."""
 
         def _serialize(value: Any) -> Any:

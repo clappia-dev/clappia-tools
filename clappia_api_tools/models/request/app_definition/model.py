@@ -1,5 +1,7 @@
 from typing import Literal
+
 from pydantic import Field, field_validator
+
 from .base import BaseFieldComponent, ValidatedString
 
 
@@ -13,7 +15,7 @@ class RestApiOutputField(BaseFieldComponent):
 
     @field_validator("name")
     @classmethod
-    def validate_name(cls, v: str) -> str:
+    def validate_name(cls, v: str) -> str | None:
         return ValidatedString.non_empty_string_validator(v, "Name")
 
 
@@ -23,7 +25,7 @@ class SortField(BaseFieldComponent):
 
     @field_validator("sort_by")
     @classmethod
-    def validate_sort_by(cls, v: str) -> str:
+    def validate_sort_by(cls, v: str) -> str | None:
         return ValidatedString.non_empty_string_validator(v, "Sort by field name")
 
 
@@ -35,5 +37,5 @@ class FilterField(BaseFieldComponent):
 
     @field_validator("key")
     @classmethod
-    def validate_key(cls, v: str) -> str:
+    def validate_key(cls, v: str) -> str | None:
         return ValidatedString.non_empty_string_validator(v, "Filter key")

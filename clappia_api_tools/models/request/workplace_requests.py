@@ -1,13 +1,14 @@
-from typing import Optional, List, Dict, Any, Literal
+import re
+from typing import Any
+
 from pydantic import (
     BaseModel,
-    Field,
     EmailStr,
+    Field,
     field_validator,
-    ValidationInfo,
     model_validator,
 )
-import re
+
 from clappia_api_tools.models.permissions import Permission
 from clappia_api_tools.utils.utils import Utils
 
@@ -17,39 +18,37 @@ utils = Utils()
 class BaseWorkplaceRequest(BaseModel):
     """Base class for workplace request models with common fields"""
 
-    email_address: EmailStr = Field(
-        None,
+    email_address: EmailStr | None = Field(
+        default=None,
         description="Email address of the user, only one of email or phone number is required",
     )
-    phone_number: Optional[str] = Field(
-        None,
+    phone_number: str | None = Field(
+        default=None,
         description="Phone number of the user, only one of email or phone number is required",
     )
 
     @field_validator("phone_number")
     @classmethod
-    def validate_phone_number(cls, v: Optional[str]) -> Optional[str]:
+    def validate_phone_number(cls, v: str | None) -> str | None:
         if v is not None:
             return utils.validate_phone_number(v)
         return v
 
     @model_validator(mode="after")
-    @classmethod
-    def validate_contact_method(cls, value: str, info: ValidationInfo) -> str:
-        if isinstance(info.context, dict):
-            """Ensure exactly one contact method is provided"""
-            email_address = info.data.get("email_address")
-            phone_number = info.data.get("phone_number")
+    def validate_contact_method(self) -> "BaseWorkplaceRequest":
+        """Ensure exactly one contact method is provided"""
+        email_address = self.email_address
+        phone_number = self.phone_number
 
-            if not email_address and not phone_number:
-                raise ValueError(
-                    "One of parameter 'emailAddress' or 'phoneNumber' must be present in the input."
-                )
-            if email_address and phone_number:
-                raise ValueError(
-                    "Only one of parameter 'emailAddress' or 'phoneNumber' must be present in the input."
-                )
-        return value
+        if not email_address and not phone_number:
+            raise ValueError(
+                "One of parameter 'emailAddress' or 'phoneNumber' must be present in the input."
+            )
+        if email_address and phone_number:
+            raise ValueError(
+                "Only one of parameter 'emailAddress' or 'phoneNumber' must be present in the input."
+            )
+        return self
 
 
 class AddUserToWorkplaceRequest(BaseWorkplaceRequest):
@@ -57,30 +56,30 @@ class AddUserToWorkplaceRequest(BaseWorkplaceRequest):
 
     first_name: str = Field(default="", description="First name of the user")
     last_name: str = Field(default="", description="Last name of the user")
-    group_names: List[str] = Field(
+    group_names: list[str] = Field(
         default_factory=list, description="List of group names"
     )
-    attributes: Dict[str, str] = Field(
+    attributes: dict[str, str] = Field(
         default_factory=dict, description="User attributes"
     )
 
     @field_validator("group_names")
     @classmethod
-    def validate_group_names(cls, v: List[str]) -> List[str]:
+    def validate_group_names(cls, v: list[str]) -> list[str]:
         if v:
             unique_groups = list(
-                set(
+                {
                     group_name.strip()
                     for group_name in v
                     if group_name and group_name.strip()
-                )
+                }
             )
             return unique_groups
         return []
 
     @field_validator("attributes")
     @classmethod
-    def validate_attributes(cls, v: Dict[str, str]) -> Dict[str, str]:
+    def validate_attributes(cls, v: dict[str, str]) -> dict[str, str]:
         if v:
             return {
                 key: str(value) if value is not None else "" for key, value in v.items()
@@ -91,11 +90,11 @@ class AddUserToWorkplaceRequest(BaseWorkplaceRequest):
 class UpdateWorkplaceUserDetailsRequest(BaseWorkplaceRequest):
     """Request model for updating workplace user details"""
 
-    updated_details: Dict[str, Any] = Field(description="Updated user details")
+    updated_details: dict[str, Any] = Field(description="Updated user details")
 
     @field_validator("updated_details")
     @classmethod
-    def validate_updated_details(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_updated_details(cls, v: dict[str, Any]) -> dict[str, Any]:
         if not v or not isinstance(v, dict):
             raise ValueError("Parameter 'updatedDetails' must be present in the input.")
 
@@ -116,48 +115,18 @@ class UpdateWorkplaceUserDetailsRequest(BaseWorkplaceRequest):
 class UpdateWorkplaceUserAttributesRequest(BaseWorkplaceRequest):
     """Request model for updating workplace user attributes"""
 
-    attributes: Dict[str, str] = Field(description="User attributes to update")
+    attributes: dict[str, str] = Field(description="User attributes to update")
 
     @field_validator("attributes")
     @classmethod
-    def validate_attributes(cls, v: Dict[str, str]) -> Dict[str, str]:
-        if not v or not isinstance(v, dict) or isinstance(v, list):
+    def validate_attributes(cls, v: dict[str, str]) -> dict[str, str]:
+        if not v or not isinstance(v, dict):
             raise ValueError(
                 "Parameter 'attributes' must be a dictionary and must be present in the input."
             )
         return {
             key: str(value) if value is not None else "" for key, value in v.items()
         }
-
-
-class UpdateWorkplaceUserRoleRequest(BaseWorkplaceRequest):
-    """Request model for updating workplace user role"""
-
-    role: Literal["Workplace Manager", "App Builder", "User"] = Field(
-        default="User", description="The new role for the user"
-    )
-
-
-class UpdateWorkplaceUserGroupsRequest(BaseWorkplaceRequest):
-    """Request model for updating workplace user groups"""
-
-    group_names: List[str] = Field(description="List of group names")
-
-    @field_validator("group_names")
-    @classmethod
-    def validate_group_names(cls, v: List[str]) -> List[str]:
-        if not isinstance(v, list) or len(v) == 0:
-            raise ValueError(
-                "Parameter 'groupNames' must be a non empty array and must be present in the input."
-            )
-        unique_groups = list(
-            set(
-                group_name.strip()
-                for group_name in v
-                if group_name and group_name.strip()
-            )
-        )
-        return unique_groups
 
 
 class AddUserToAppRequest(BaseWorkplaceRequest):
@@ -176,29 +145,3 @@ class AddUserToAppRequest(BaseWorkplaceRequest):
         if not re.match(r"^[A-Z0-9]+$", v.strip()):
             raise ValueError("App ID must contain only uppercase letters and numbers")
         return v.strip()
-
-
-class GetWorkplaceAppsRequest(BaseModel):
-    """Request model for getting workplace apps"""
-
-    pass
-
-
-class GetWorkplaceUserAppsRequest(BaseWorkplaceRequest):
-    """Request model for getting workplace user apps"""
-
-    pass
-
-
-class GetWorkplaceUsersRequest(BaseModel):
-    """Request model for getting workplace users"""
-
-    page_size: Optional[int] = Field(50, description="Page size, default is 50")
-    token: Optional[str] = Field(None, description="Token, needed for pagination")
-
-    @field_validator("page_size")
-    @classmethod
-    def validate_page_size(cls, v: int) -> int:
-        if v <= 0:
-            raise ValueError("Page size must be greater than 0")
-        return v

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class FieldType(Enum):
     # Data Input Blocks
     SINGLE_LINE_TEXT = "singleLineText"
@@ -54,6 +55,8 @@ class FieldType(Enum):
 
     # Additional field types
     DATABASE = "database"
+
+
 class TriggerType(Enum):
     SUBMISSION_CREATED = "newSubmission"
     SUBMISSION_EDITED = "editSubmission"
@@ -91,4 +94,3 @@ class ChartType(Enum):
     SUMMARY_CARD = "summary"
     MAP_CHART = "maps"
     GANTT_CHART = "gantt"
-

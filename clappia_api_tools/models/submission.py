@@ -1,7 +1,11 @@
-from typing import Optional, List, Dict, Any, Literal
-from pydantic import BaseModel, Field, field_validator, ValidationInfo
+from __future__ import annotations
 
-standard_fields = {
+from typing import Any, Literal
+
+from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
+
+# Define standard fields as a module-level constant
+STANDARD_FIELDS = {
     "$submissionId",
     "$owner",
     "$status",
@@ -14,7 +18,21 @@ standard_fields = {
 
 
 class FilterCondition(BaseModel):
-    operator: Literal["CONTAINS", "NOT_IN", "EQ", "NEQ", "EMPTY", "NON_EMPTY", "STARTS_WITH", "BETWEEN", "GT", "LT", "GTE", "LTE", "ENDS_WITH"] = Field(
+    operator: Literal[
+        "CONTAINS",
+        "NOT_IN",
+        "EQ",
+        "NEQ",
+        "EMPTY",
+        "NON_EMPTY",
+        "STARTS_WITH",
+        "BETWEEN",
+        "GT",
+        "LT",
+        "GTE",
+        "LTE",
+        "ENDS_WITH",
+    ] = Field(
         description="Filter operator to apply, possible values are CONTAINS, NOT_IN, EQ, NEQ, EMPTY, NON_EMPTY, STARTS_WITH, BETWEEN, GT, LT, GTE, LTE, ENDS_WITH",
     )
     filter_key_type: Literal["STANDARD", "CUSTOM"] = Field(
@@ -27,26 +45,57 @@ class FilterCondition(BaseModel):
     value: Any = Field(description="Value to filter by")
 
     @field_validator("key")
-    def validate_key(cls, v: str, values: ValidationInfo) -> str:
-        filter_key_type = values.data.get("filter_key_type")
+    @classmethod
+    def validate_key(cls, v: str, info: ValidationInfo) -> str:
+        filter_key_type = info.data.get("filter_key_type")
         if filter_key_type == "STANDARD":
-            standard_fields = {
-                "$submissionId",
-                "$owner",
-                "$status",
-                "$lastUpdatedAt",
-                "$lastModifiedAt",
-                "$createdAt",
-                "$updatedAt",
-                "$state",
-            }
-            if v not in standard_fields:
+            if v not in STANDARD_FIELDS:
                 raise ValueError(
-                    f"Standard filterKeyType used but key '{v}' is not a standard field"
+                    f"Standard filterKeyType used but key '{v}' is not a standard field. "
+                    f"Valid standard fields are: {', '.join(sorted(STANDARD_FIELDS))}"
                 )
         return v
 
-    def to_dict(self) -> Dict[str, Any]:
+    @classmethod
+    def from_json(cls, json_data: dict[str, Any]) -> FilterCondition:
+        """Create FilterCondition from JSON data"""
+        # Validate and extract required fields
+        key = json_data.get("key")
+        if not key or not isinstance(key, str):
+            raise ValueError(
+                "Parameter 'key' must be present and be a non-empty string"
+            )
+
+        operator = json_data.get("operator", "EQ")
+        if not isinstance(operator, str):
+            operator = "EQ"
+
+        filter_key_type = json_data.get("filterKeyType", "CUSTOM")
+        if not isinstance(filter_key_type, str):
+            filter_key_type = "CUSTOM"
+
+        return cls(
+            operator=operator,  # type: ignore[arg-type]
+            filter_key_type=filter_key_type,  # type: ignore[arg-type]
+            key=key,
+            value=json_data.get("value"),
+        )
+
+    def assign_from_json(self, json_data: dict[str, Any] | None) -> None:
+        """In-place assignment from JSON"""
+        if not json_data:
+            return
+
+        if "operator" in json_data and isinstance(json_data["operator"], str):
+            self.operator = json_data["operator"]  # type: ignore[assignment]
+        if "filterKeyType" in json_data and isinstance(json_data["filterKeyType"], str):
+            self.filter_key_type = json_data["filterKeyType"]  # type: ignore[assignment]
+        if "key" in json_data and isinstance(json_data["key"], str):
+            self.key = json_data["key"]
+        if "value" in json_data:
+            self.value = json_data["value"]
+
+    def to_dict(self) -> dict[str, Any]:
         return {
             "operator": self.operator,
             "filterKeyType": self.filter_key_type,
@@ -56,36 +105,95 @@ class FilterCondition(BaseModel):
 
 
 class SubmissionQuery(BaseModel):
-    conditions: List[FilterCondition] = Field(
-        min_length=1, description="Array of filter conditions"
+    queries: list[SubmissionQuery] = Field(
+        default_factory=list, description="Array of nested queries"
+    )
+    conditions: list[FilterCondition] = Field(
+        default_factory=list, description="Array of filter conditions"
     )
     operator: Literal["AND", "OR"] = Field(
         default="AND", description="Logical operator, possible values are AND, OR"
     )
 
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "conditions": [condition.to_dict() for condition in self.conditions],
-            "operator": self.operator,
-        }
+    @model_validator(mode="after")
+    def validate_queries_or_conditions(self) -> SubmissionQuery:
+        """Ensure at least one of queries or conditions is provided"""
+        if not self.queries and not self.conditions:
+            raise ValueError("Either queries or conditions must be provided")
+        return self
 
+    @classmethod
+    def from_json(cls, json_data: dict[str, Any]) -> SubmissionQuery:
+        """Create SubmissionQuery from JSON data"""
+        if not json_data:
+            return cls()
 
-class SubmissionQueryGroup(BaseModel):
-    queries: List[SubmissionQuery] = Field(
-        min_length=1, description="Array of individual queries"
-    )
+        operator = json_data.get("operator", "AND")
+        if not isinstance(operator, str) or operator not in ["AND", "OR"]:
+            operator = "AND"
 
-    def to_dict(self) -> Dict[str, Any]:
-        return {"queries": [query.to_dict() for query in self.queries]}
+        query = cls(operator=operator)  # type: ignore[arg-type]
 
+        # Handle nested queries
+        if json_data.get("queries") and isinstance(json_data["queries"], list):
+            query.queries = [
+                cls.from_json(q) for q in json_data["queries"] if isinstance(q, dict)
+            ]
 
-class SubmissionFilters(BaseModel):
-    queries: List[SubmissionQueryGroup] = Field(
-        min_length=1, description="Array of query groups"
-    )
+        # Handle conditions
+        if json_data.get("conditions") and isinstance(json_data["conditions"], list):
+            query.conditions = [
+                FilterCondition.from_json(c)
+                for c in json_data["conditions"]
+                if isinstance(c, dict)
+            ]
 
-    def to_dict(self) -> Dict[str, Any]:
-        return {"queries": [query_group.to_dict() for query_group in self.queries]}
+        return query
+
+    def assign_from_json(self, json_data: dict[str, Any] | None) -> None:
+        """In-place assignment from JSON (matches JavaScript method signature)"""
+        if not json_data:
+            return
+
+        # Handle operator
+        if "operator" in json_data and isinstance(json_data["operator"], str):
+            if json_data["operator"] in ["AND", "OR"]:
+                self.operator = json_data["operator"]  # type: ignore[assignment]
+
+        # Handle nested queries
+        if json_data.get("queries") and isinstance(json_data["queries"], list):
+            self.queries = []
+            for q in json_data["queries"]:
+                if isinstance(q, dict):
+                    query = SubmissionQuery()
+                    query.assign_from_json(q)
+                    self.queries.append(query)
+
+        # Handle conditions
+        if json_data.get("conditions") and isinstance(json_data["conditions"], list):
+            self.conditions = []
+            for c in json_data["conditions"]:
+                if isinstance(c, dict):
+                    try:
+                        condition = FilterCondition.from_json(c)
+                        self.conditions.append(condition)
+                    except (ValueError, TypeError):
+                        # Skip invalid conditions
+                        continue
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for JSON serialization"""
+        result: dict[str, Any] = {"operator": self.operator}
+
+        if self.queries:
+            result["queries"] = [query.to_dict() for query in self.queries]
+
+        if self.conditions:
+            result["conditions"] = [
+                condition.to_dict() for condition in self.conditions
+            ]
+
+        return result
 
 
 class AggregationOperand(BaseModel):
@@ -99,7 +207,7 @@ class AggregationOperand(BaseModel):
         description="Type of operand field, possible values are STANDARD, CUSTOM",
     )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "fieldName": self.field_name,
             "label": self.label,
@@ -118,20 +226,20 @@ class AggregationDimension(BaseModel):
         default="CUSTOM",
         description="Type of dimension field, possible values are STANDARD, CUSTOM",
     )
-    sort_direction: Optional[Literal["asc", "desc"]] = Field(
+    sort_direction: Literal["asc", "desc"] | None = Field(
         None, description="Sort direction, possible values are asc, desc"
     )
-    sort_type: Optional[Literal["number", "string"]] = Field(
+    sort_type: Literal["number", "string"] | None = Field(
         None, description="Type of sorting, possible values are number, string"
     )
-    missing_value: Optional[str] = Field(
+    missing_value: str | None = Field(
         None, description="Value when field data is missing"
     )
-    interval: Optional[Literal["day", "week", "month", "year"]] = Field(
+    interval: Literal["day", "week", "month", "year"] | None = Field(
         None, description="Interval for date/time grouping, use day, week, month, year"
     )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         result = {
             "fieldName": self.field_name,
             "label": self.label,
@@ -150,15 +258,16 @@ class AggregationDimension(BaseModel):
 
 
 class AggregationMetric(BaseModel):
-    type: Literal["count", "sum", "average", "minimum", "maximum", "unique"] = Field(default="count",
-        description="Type of aggregation, possible values are count, sum, average, minimum, maximum, unique"
+    type: Literal["count", "sum", "average", "minimum", "maximum", "unique"] = Field(
+        default="count",
+        description="Type of aggregation, possible values are count, sum, average, minimum, maximum, unique",
     )
-    operand: Optional[AggregationOperand] = Field(
-        None, description="Field to aggregate"
+    operand: AggregationOperand | None = Field(
+        default=None, description="Field to aggregate"
     )
 
-    def to_dict(self) -> Dict[str, Any]:
-        result = {"type": self.type}
+    def to_dict(self) -> dict[str, Any]:
+        result: dict[str, Any] = {"type": self.type}
         if self.operand:
             result["operand"] = self.operand.to_dict()
         return result

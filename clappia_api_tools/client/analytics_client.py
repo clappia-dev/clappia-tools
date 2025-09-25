@@ -1,36 +1,31 @@
 from abc import ABC
-from typing import Dict, Any, Optional
-from .base_client import BaseClappiaClient, BaseAPIKeyClient, BaseAuthTokenClient
-from clappia_api_tools.utils.logging_utils import get_logger
-from clappia_api_tools.models.request import (
-    UpsertSummaryChartDefinitionRequest,
-    UpsertBarChartDefinitionRequest,
-    UpsertPieChartDefinitionRequest,
-    UpsertDoughnutChartDefinitionRequest,
-    UpsertLineChartDefinitionRequest,
-    UpsertDataTableChartDefinitionRequest,
-    UpsertMapChartDefinitionRequest,
-    UpsertGanttChartDefinitionRequest,
-)
-from clappia_api_tools.models.response import ChartResponse, BaseResponse
-from clappia_api_tools.enums import ChartType
-from typing import Union
 
-ChartDefinitionRequestUnion = Union[
-    UpsertSummaryChartDefinitionRequest,
+from clappia_api_tools.enums import ChartType
+from clappia_api_tools.models.request import (
     UpsertBarChartDefinitionRequest,
-    UpsertPieChartDefinitionRequest,
-    UpsertDoughnutChartDefinitionRequest,
-    UpsertLineChartDefinitionRequest,
     UpsertDataTableChartDefinitionRequest,
-    UpsertMapChartDefinitionRequest,
+    UpsertDoughnutChartDefinitionRequest,
     UpsertGanttChartDefinitionRequest,
-]
-    
-ChartDefinitionResponseUnion = Union[
-    ChartResponse,
-    BaseResponse,
-]
+    UpsertLineChartDefinitionRequest,
+    UpsertMapChartDefinitionRequest,
+    UpsertPieChartDefinitionRequest,
+    UpsertSummaryChartDefinitionRequest,
+)
+from clappia_api_tools.models.response import BaseResponse, ChartResponse
+from clappia_api_tools.utils.logging_utils import get_logger
+
+from .base_client import BaseAPIKeyClient, BaseAuthTokenClient, BaseClappiaClient
+
+ChartDefinitionRequestUnion = (
+    UpsertSummaryChartDefinitionRequest
+    | UpsertBarChartDefinitionRequest
+    | UpsertPieChartDefinitionRequest
+    | UpsertDoughnutChartDefinitionRequest
+    | UpsertLineChartDefinitionRequest
+    | UpsertDataTableChartDefinitionRequest
+    | UpsertMapChartDefinitionRequest
+    | UpsertGanttChartDefinitionRequest
+)
 
 logger = get_logger(__name__)
 
@@ -48,7 +43,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         chart_index: int,
         chart_title: str,
         request: ChartDefinitionRequestUnion,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Add a chart to an app.
 
@@ -63,30 +58,48 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             ChartResponse: Response containing the result of the operation
         """
         if isinstance(request, UpsertSummaryChartDefinitionRequest):
-            return self._add_summary_chart(app_id, chart_index, chart_title, request, version_variable_name)
+            return self._add_summary_chart(
+                app_id, chart_index, chart_title, request, version_variable_name
+            )
         elif isinstance(request, UpsertBarChartDefinitionRequest):
-            return self._add_bar_chart(app_id, chart_index, chart_title, request, version_variable_name)
+            return self._add_bar_chart(
+                app_id, chart_index, chart_title, request, version_variable_name
+            )
         elif isinstance(request, UpsertPieChartDefinitionRequest):
-            return self._add_pie_chart(app_id, chart_index, chart_title, request, version_variable_name)
+            return self._add_pie_chart(
+                app_id, chart_index, chart_title, request, version_variable_name
+            )
         elif isinstance(request, UpsertDoughnutChartDefinitionRequest):
-            return self._add_doughnut_chart(app_id, chart_index, chart_title, request, version_variable_name)
+            return self._add_doughnut_chart(
+                app_id, chart_index, chart_title, request, version_variable_name
+            )
         elif isinstance(request, UpsertLineChartDefinitionRequest):
-            return self._add_line_chart(app_id, chart_index, chart_title, request, version_variable_name)
+            return self._add_line_chart(
+                app_id, chart_index, chart_title, request, version_variable_name
+            )
         elif isinstance(request, UpsertDataTableChartDefinitionRequest):
-            return self._add_data_table_chart(app_id, chart_index, chart_title, request, version_variable_name)
+            return self._add_data_table_chart(
+                app_id, chart_index, chart_title, request, version_variable_name
+            )
         elif isinstance(request, UpsertMapChartDefinitionRequest):
-            return self._add_map_chart(app_id, chart_index, chart_title, request, version_variable_name)
+            return self._add_map_chart(
+                app_id, chart_index, chart_title, request, version_variable_name
+            )
         elif isinstance(request, UpsertGanttChartDefinitionRequest):
-            return self._add_gantt_chart(app_id, chart_index, chart_title, request, version_variable_name)
+            return self._add_gantt_chart(
+                app_id, chart_index, chart_title, request, version_variable_name
+            )
         else:
-            raise ValueError(f"Unsupported chart definition request type: {type(request)}")
+            raise ValueError(
+                f"Unsupported chart definition request type: {type(request)}"
+            )
 
     def update(
         self,
         app_id: str,
         chart_index: int,
         request: ChartDefinitionRequestUnion,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Update a chart in an app.
 
@@ -100,23 +113,41 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             ChartResponse: Response containing the result of the operation
         """
         if isinstance(request, UpsertSummaryChartDefinitionRequest):
-            return self._update_summary_chart(app_id, chart_index, request, version_variable_name)
+            return self._update_summary_chart(
+                app_id, chart_index, request, version_variable_name
+            )
         elif isinstance(request, UpsertBarChartDefinitionRequest):
-            return self._update_bar_chart(app_id, chart_index, request, version_variable_name)
+            return self._update_bar_chart(
+                app_id, chart_index, request, version_variable_name
+            )
         elif isinstance(request, UpsertPieChartDefinitionRequest):
-            return self._update_pie_chart(app_id, chart_index, request, version_variable_name)
+            return self._update_pie_chart(
+                app_id, chart_index, request, version_variable_name
+            )
         elif isinstance(request, UpsertDoughnutChartDefinitionRequest):
-            return self._update_doughnut_chart(app_id, chart_index, request, version_variable_name)
+            return self._update_doughnut_chart(
+                app_id, chart_index, request, version_variable_name
+            )
         elif isinstance(request, UpsertLineChartDefinitionRequest):
-            return self._update_line_chart(app_id, chart_index, request, version_variable_name)
+            return self._update_line_chart(
+                app_id, chart_index, request, version_variable_name
+            )
         elif isinstance(request, UpsertDataTableChartDefinitionRequest):
-            return self._update_data_table_chart(app_id, chart_index, request, version_variable_name)
+            return self._update_data_table_chart(
+                app_id, chart_index, request, version_variable_name
+            )
         elif isinstance(request, UpsertMapChartDefinitionRequest):
-            return self._update_map_chart(app_id, chart_index, request, version_variable_name)
+            return self._update_map_chart(
+                app_id, chart_index, request, version_variable_name
+            )
         elif isinstance(request, UpsertGanttChartDefinitionRequest):
-            return self._update_gantt_chart(app_id, chart_index, request, version_variable_name)
+            return self._update_gantt_chart(
+                app_id, chart_index, request, version_variable_name
+            )
         else:
-            raise ValueError(f"Unsupported chart definition request type: {type(request)}")
+            raise ValueError(
+                f"Unsupported chart definition request type: {type(request)}"
+            )
 
     def _add_summary_chart(
         self,
@@ -124,7 +155,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         chart_index: int,
         chart_title: str,
         request: UpsertSummaryChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Add a summary chart to an app.
 
@@ -145,7 +176,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_summary_chart",
-                chart_type=ChartType.SUMMARY_CARD.value,
             )
 
         payload = {
@@ -173,14 +203,12 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_summary_chart",
-                chart_type=ChartType.SUMMARY_CARD.value,
             )
 
         return ChartResponse(
             success=True,
             message="Successfully added summary chart",
             app_id=app_id,
-            chart_type=ChartType.SUMMARY_CARD.value,
             version_variable_name=version_variable_name,
             operation="add_summary_chart",
             data=response_data,
@@ -191,7 +219,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         app_id: str,
         chart_index: int,
         request: UpsertSummaryChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Update a summary chart in an app.
 
@@ -211,7 +239,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_summary_chart",
-                chart_type=ChartType.SUMMARY_CARD.value,
             )
 
         payload = {
@@ -238,7 +265,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_summary_chart",
-                chart_type=ChartType.SUMMARY_CARD.value,
             )
 
         return ChartResponse(
@@ -247,7 +273,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             app_id=app_id,
             version_variable_name=version_variable_name,
             operation="update_summary_chart",
-            chart_type=ChartType.SUMMARY_CARD.value,
             data=response_data,
         )
 
@@ -257,7 +282,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         chart_index: int,
         chart_title: str,
         request: UpsertBarChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Add a bar chart to an app.
 
@@ -279,7 +304,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_bar_chart",
-                chart_type=ChartType.BAR_CHART.value,
             )
 
         payload = {
@@ -308,14 +332,12 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_bar_chart",
-                chart_type=ChartType.BAR_CHART.value,
             )
 
         return ChartResponse(
             success=True,
             message="Successfully added bar chart",
             app_id=app_id,
-            chart_type=ChartType.BAR_CHART.value,
             version_variable_name=version_variable_name,
             operation="add_bar_chart",
             data=response_data,
@@ -326,7 +348,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         app_id: str,
         chart_index: int,
         request: UpsertBarChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Update a bar chart in an app.
 
@@ -347,7 +369,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_bar_chart",
-                chart_type=ChartType.BAR_CHART.value,
             )
 
         payload = {
@@ -372,7 +393,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_bar_chart",
-                chart_type=ChartType.BAR_CHART.value,
             )
 
         return ChartResponse(
@@ -381,7 +401,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             app_id=app_id,
             version_variable_name=version_variable_name,
             operation="update_bar_chart",
-            chart_type=ChartType.BAR_CHART.value,
             data=response_data,
         )
 
@@ -391,7 +410,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         chart_index: int,
         chart_title: str,
         request: UpsertPieChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Add a pie chart to an app.
 
@@ -414,7 +433,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_pie_chart",
-                chart_type=ChartType.PIE_CHART.value,
             )
 
         payload = {
@@ -443,14 +461,12 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_pie_chart",
-                chart_type=ChartType.PIE_CHART.value,
             )
 
         return ChartResponse(
             success=True,
             message="Successfully added pie chart",
             app_id=app_id,
-            chart_type=ChartType.PIE_CHART.value,
             version_variable_name=version_variable_name,
             operation="add_pie_chart",
             data=response_data,
@@ -461,7 +477,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         app_id: str,
         chart_index: int,
         request: UpsertPieChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Update a pie chart in an app.
 
@@ -482,7 +498,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_pie_chart",
-                chart_type=ChartType.PIE_CHART.value,
             )
 
         payload = {
@@ -507,7 +522,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_pie_chart",
-                chart_type=ChartType.PIE_CHART.value,
             )
 
         return ChartResponse(
@@ -516,7 +530,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             app_id=app_id,
             version_variable_name=version_variable_name,
             operation="update_pie_chart",
-            chart_type=ChartType.PIE_CHART.value,
             data=response_data,
         )
 
@@ -526,7 +539,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         chart_index: int,
         chart_title: str,
         request: UpsertDoughnutChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Add a doughnut chart to an app.
 
@@ -549,7 +562,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_doughnut_chart",
-                chart_type=ChartType.DOUGHNUT_CHART.value,
             )
 
         payload = {
@@ -578,14 +590,12 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_doughnut_chart",
-                chart_type=ChartType.DOUGHNUT_CHART.value,
             )
 
         return ChartResponse(
             success=True,
             message="Successfully added doughnut chart",
             app_id=app_id,
-            chart_type=ChartType.DOUGHNUT_CHART.value,
             version_variable_name=version_variable_name,
             operation="add_doughnut_chart",
             data=response_data,
@@ -596,7 +606,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         app_id: str,
         chart_index: int,
         request: UpsertDoughnutChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Update a doughnut chart in an app.
 
@@ -617,7 +627,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_doughnut_chart",
-                chart_type=ChartType.DOUGHNUT_CHART.value,
             )
 
         payload = {
@@ -644,7 +653,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_doughnut_chart",
-                chart_type=ChartType.DOUGHNUT_CHART.value,
             )
 
         return ChartResponse(
@@ -653,7 +661,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             app_id=app_id,
             version_variable_name=version_variable_name,
             operation="update_doughnut_chart",
-            chart_type=ChartType.DOUGHNUT_CHART.value,
             data=response_data,
         )
 
@@ -663,7 +670,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         chart_index: int,
         chart_title: str,
         request: UpsertLineChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Add a line chart to an app.
 
@@ -686,7 +693,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_line_chart",
-                chart_type=ChartType.LINE_CHART.value,
             )
 
         payload = {
@@ -715,14 +721,12 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_line_chart",
-                chart_type=ChartType.LINE_CHART.value,
             )
 
         return ChartResponse(
             success=True,
             message="Successfully added line chart",
             app_id=app_id,
-            chart_type=ChartType.LINE_CHART.value,
             version_variable_name=version_variable_name,
             operation="add_line_chart",
             data=response_data,
@@ -733,7 +737,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         app_id: str,
         chart_index: int,
         request: UpsertLineChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Update a line chart in an app.
 
@@ -754,7 +758,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_line_chart",
-                chart_type=ChartType.LINE_CHART.value,
             )
 
         payload = {
@@ -779,7 +782,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_line_chart",
-                chart_type=ChartType.LINE_CHART.value,
             )
 
         return ChartResponse(
@@ -788,7 +790,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             app_id=app_id,
             version_variable_name=version_variable_name,
             operation="update_line_chart",
-            chart_type=ChartType.LINE_CHART.value,
             data=response_data,
         )
 
@@ -798,7 +799,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         chart_index: int,
         chart_title: str,
         request: UpsertDataTableChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Add a data table chart to an app.
 
@@ -821,7 +822,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_data_table_chart",
-                chart_type=ChartType.DATA_TABLE.value,
             )
 
         payload = {
@@ -850,14 +850,12 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_data_table_chart",
-                chart_type=ChartType.DATA_TABLE.value,
             )
 
         return ChartResponse(
             success=True,
             message="Successfully added data table chart",
             app_id=app_id,
-            chart_type=ChartType.DATA_TABLE.value,
             version_variable_name=version_variable_name,
             operation="add_data_table_chart",
             data=response_data,
@@ -868,7 +866,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         app_id: str,
         chart_index: int,
         request: UpsertDataTableChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Update a data table chart in an app.
 
@@ -889,7 +887,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_data_table_chart",
-                chart_type=ChartType.DATA_TABLE.value,
             )
 
         payload = {
@@ -916,7 +913,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_data_table_chart",
-                chart_type=ChartType.DATA_TABLE.value,
             )
 
         return ChartResponse(
@@ -925,7 +921,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             app_id=app_id,
             version_variable_name=version_variable_name,
             operation="update_data_table_chart",
-            chart_type=ChartType.DATA_TABLE.value,
             data=response_data,
         )
 
@@ -935,7 +930,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         chart_index: int,
         chart_title: str,
         request: UpsertMapChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Add a map chart to an app.
 
@@ -958,7 +953,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_map_chart",
-                chart_type=ChartType.MAP_CHART.value,
             )
 
         payload = {
@@ -987,14 +981,12 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_map_chart",
-                chart_type=ChartType.MAP_CHART.value,
             )
 
         return ChartResponse(
             success=True,
             message="Successfully added map chart",
             app_id=app_id,
-            chart_type=ChartType.MAP_CHART.value,
             version_variable_name=version_variable_name,
             operation="add_map_chart",
             data=response_data,
@@ -1005,7 +997,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         app_id: str,
         chart_index: int,
         request: UpsertMapChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Update a map chart in an app.
 
@@ -1026,7 +1018,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_map_chart",
-                chart_type=ChartType.MAP_CHART.value,
             )
 
         payload = {
@@ -1051,7 +1042,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_map_chart",
-                chart_type=ChartType.MAP_CHART.value,
             )
 
         return ChartResponse(
@@ -1060,7 +1050,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             app_id=app_id,
             version_variable_name=version_variable_name,
             operation="update_map_chart",
-            chart_type=ChartType.MAP_CHART.value,
             data=response_data,
         )
 
@@ -1070,7 +1059,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         chart_index: int,
         chart_title: str,
         request: UpsertGanttChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Add a Gantt chart to an app.
 
@@ -1093,7 +1082,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_gantt_chart",
-                chart_type=ChartType.GANTT_CHART.value,
             )
 
         payload = {
@@ -1122,14 +1110,12 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="add_gantt_chart",
-                chart_type=ChartType.GANTT_CHART.value,
             )
 
         return ChartResponse(
             success=True,
             message="Successfully added Gantt chart",
             app_id=app_id,
-            chart_type=ChartType.GANTT_CHART.value,
             version_variable_name=version_variable_name,
             operation="add_gantt_chart",
             data=response_data,
@@ -1140,7 +1126,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         app_id: str,
         chart_index: int,
         request: UpsertGanttChartDefinitionRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
         """Update a Gantt chart in an app.
 
@@ -1161,7 +1147,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_gantt_chart",
-                chart_type=ChartType.GANTT_CHART.value,
             )
 
         payload = {
@@ -1186,7 +1171,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 version_variable_name=version_variable_name,
                 operation="update_gantt_chart",
-                chart_type=ChartType.GANTT_CHART.value,
             )
 
         return ChartResponse(
@@ -1195,7 +1179,6 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             app_id=app_id,
             version_variable_name=version_variable_name,
             operation="update_gantt_chart",
-            chart_type=ChartType.GANTT_CHART.value,
             data=response_data,
         )
 
@@ -1204,13 +1187,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         app_id: str,
         source_index: int,
         target_index: int,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> ChartResponse:
-
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
             return ChartResponse(
-                success=False, message=env_error, app_id=app_id, version_variable_name=version_variable_name, operation="reorder"
+                success=False,
+                message=env_error,
+                app_id=app_id,
+                version_variable_name=version_variable_name,
+                operation="reorder",
             )
 
         payload = {
@@ -1232,7 +1218,11 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if not success:
             logger.error(f"Error: {error_message}")
             return ChartResponse(
-                success=False, message=error_message, app_id=app_id, version_variable_name=version_variable_name, operation="reorder"
+                success=False,
+                message=error_message,
+                app_id=app_id,
+                version_variable_name=version_variable_name,
+                operation="reorder",
             )
 
         return ChartResponse(
@@ -1244,7 +1234,9 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             data=response_data,
         )
 
-    def get_charts(self, app_id: str, version_variable_name: Optional[str] = None) -> BaseResponse:
+    def get_charts(
+        self, app_id: str, version_variable_name: str | None = None
+    ) -> BaseResponse:
         """Get all charts for a specific app.
 
         Args:
@@ -1293,7 +1285,7 @@ class AnalyticsAPIKeyClient(BaseAPIKeyClient, AnalyticsClient):
     def __init__(
         self,
         api_key: str,
-        base_url: Optional[str] = None,
+        base_url: str,
         timeout: int = 30,
     ):
         """Initialize analytics client with API key.
@@ -1316,7 +1308,7 @@ class AnalyticsAuthTokenClient(BaseAuthTokenClient, AnalyticsClient):
         self,
         auth_token: str,
         workplace_id: str,
-        base_url: Optional[str] = None,
+        base_url: str,
         timeout: int = 30,
     ):
         """Initialize analytics client with auth token.

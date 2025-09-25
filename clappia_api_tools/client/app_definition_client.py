@@ -1,122 +1,119 @@
-import json
 from abc import ABC
-from .base_client import BaseClappiaClient, BaseAPIKeyClient, BaseAuthTokenClient
-from clappia_api_tools.utils.logging_utils import get_logger
-from typing import List, Dict, Any, Optional, Union
-from clappia_api_tools.models.request import (
-    CreateAppRequest,
-    AddPageBreakRequest,
-    UpdatePageBreakRequest,
-    ReorderSectionRequest,
-    UpsertSectionRequest,
-    UpsertFieldTextRequest,
-    UpsertFieldTextAreaRequest,
-    UpsertFieldDependencyAppRequest,
-    UpsertFieldRestApiRequest,
-    UpsertFieldAddressRequest,
-    UpsertFieldDatabaseRequest,
-    UpsertFieldDateRequest,
-    UpsertFieldAIRequest,
-    UpsertFieldCodeRequest,
-    UpsertFieldCodeReaderRequest,
-    UpsertFieldEmailInputRequest,
-    UpsertFieldEmojiRequest,
-    UpsertFieldFileRequest,
-    UpsertFieldGpsLocationRequest,
-    UpsertFieldLiveTrackingRequest,
-    UpsertFieldManualAddressRequest,
-    UpsertFieldPhoneNumberRequest,
-    UpsertFieldProgressBarRequest,
-    UpsertFieldSignatureRequest,
-    UpsertFieldCounterRequest,
-    UpsertFieldSliderRequest,
-    UpsertFieldTimeRequest,
-    UpsertFieldToggleRequest,
-    UpsertFieldValidationRequest,
-    UpsertFieldVideoViewerRequest,
-    UpsertFieldVoiceRequest,
-    UpsertFieldFormulaRequest,
-    UpsertFieldImageViewerRequest,
-    UpsertFieldRichTextEditorRequest,
-    UpsertFieldNfcReaderRequest,
-    UpsertFieldNumberInputRequest,
-    UpsertFieldPdfViewerRequest,
-    UpsertFieldReadOnlyFileRequest,
-    UpsertFieldReadOnlyTextRequest,
-    UpsertFieldTagsRequest,
-    UpsertFieldUniqueSequentialRequest,
-    UpsertFieldDropdownRequest,
-    UpsertFieldRadioRequest,
-    UpsertFieldUrlInputRequest,
-    UpsertFieldCheckboxRequest,
-    UpsertFieldRazorpayPaymentGatewayRequest,
-    UpsertFieldEazypayPaymentGatewayRequest,
-    UpsertFieldPaypalPaymentGatewayRequest,
-    UpsertFieldStripePaymentGatewayRequest,
-    UpsertFieldButtonRequest,
-
-    UpdateAppMetadataRequest,
-)
-
-from clappia_api_tools.models.response import (
-    AppDefinitionResponse,
-    PageBreakOperationResponse,
-    FieldOperationResponse,
-    UpsertSectionOperationResponse,
-    AppCreationResponse,
-    ReorderSectionOperationResponse,
-)
 
 from clappia_api_tools.enums import FieldType
-
-# Union type for all field request types
-FieldRequestUnion = Union[
-    UpsertFieldTextRequest,
-    UpsertFieldTextAreaRequest,
-    UpsertFieldDependencyAppRequest,
-    UpsertFieldRestApiRequest,
+from clappia_api_tools.models.request import (
+    AddPageBreakRequest,
+    CreateAppRequest,
+    ReorderSectionRequest,
+    UpdateAppMetadataRequest,
+    UpdatePageBreakRequest,
     UpsertFieldAddressRequest,
+    UpsertFieldAIRequest,
+    UpsertFieldButtonRequest,
+    UpsertFieldCheckboxRequest,
+    UpsertFieldCodeReaderRequest,
+    UpsertFieldCodeRequest,
+    UpsertFieldCounterRequest,
     UpsertFieldDatabaseRequest,
     UpsertFieldDateRequest,
-    UpsertFieldAIRequest,
-    UpsertFieldCodeRequest,
-    UpsertFieldCodeReaderRequest,
+    UpsertFieldDependencyAppRequest,
+    UpsertFieldDropdownRequest,
+    UpsertFieldEazypayPaymentGatewayRequest,
     UpsertFieldEmailInputRequest,
     UpsertFieldEmojiRequest,
     UpsertFieldFileRequest,
+    UpsertFieldFormulaRequest,
     UpsertFieldGpsLocationRequest,
+    UpsertFieldImageViewerRequest,
     UpsertFieldLiveTrackingRequest,
     UpsertFieldManualAddressRequest,
+    UpsertFieldNfcReaderRequest,
+    UpsertFieldNumberInputRequest,
+    UpsertFieldPaypalPaymentGatewayRequest,
+    UpsertFieldPdfViewerRequest,
     UpsertFieldPhoneNumberRequest,
     UpsertFieldProgressBarRequest,
+    UpsertFieldRadioRequest,
+    UpsertFieldRazorpayPaymentGatewayRequest,
+    UpsertFieldReadOnlyFileRequest,
+    UpsertFieldReadOnlyTextRequest,
+    UpsertFieldRestApiRequest,
+    UpsertFieldRichTextEditorRequest,
     UpsertFieldSignatureRequest,
-    UpsertFieldCounterRequest,
     UpsertFieldSliderRequest,
+    UpsertFieldStripePaymentGatewayRequest,
+    UpsertFieldTagsRequest,
+    UpsertFieldTextAreaRequest,
+    UpsertFieldTextRequest,
     UpsertFieldTimeRequest,
     UpsertFieldToggleRequest,
+    UpsertFieldUniqueSequentialRequest,
+    UpsertFieldUrlInputRequest,
     UpsertFieldValidationRequest,
     UpsertFieldVideoViewerRequest,
     UpsertFieldVoiceRequest,
-    UpsertFieldFormulaRequest,
-    UpsertFieldImageViewerRequest,
-    UpsertFieldRichTextEditorRequest,
-    UpsertFieldNfcReaderRequest,
-    UpsertFieldNumberInputRequest,
-    UpsertFieldPdfViewerRequest,
-    UpsertFieldReadOnlyFileRequest,
-    UpsertFieldReadOnlyTextRequest,
-    UpsertFieldTagsRequest,
-    UpsertFieldUniqueSequentialRequest,
-    UpsertFieldDropdownRequest,
-    UpsertFieldRadioRequest,
-    UpsertFieldUrlInputRequest,
-    UpsertFieldCheckboxRequest,
-    UpsertFieldRazorpayPaymentGatewayRequest,
-    UpsertFieldEazypayPaymentGatewayRequest,
-    UpsertFieldPaypalPaymentGatewayRequest,
-    UpsertFieldStripePaymentGatewayRequest,
-    UpsertFieldButtonRequest,
-]
+    UpsertSectionRequest,
+)
+from clappia_api_tools.models.response import (
+    AppDefinitionResponse,
+    BaseResponse,
+    FieldOperationResponse,
+    PageBreakOperationResponse,
+    ReorderSectionOperationResponse,
+    UpsertSectionOperationResponse,
+)
+from clappia_api_tools.utils.logging_utils import get_logger
+
+from .base_client import BaseAPIKeyClient, BaseAuthTokenClient, BaseClappiaClient
+
+# Union type for all field request types
+FieldRequestUnion = (
+    UpsertFieldTextRequest
+    | UpsertFieldTextAreaRequest
+    | UpsertFieldDependencyAppRequest
+    | UpsertFieldRestApiRequest
+    | UpsertFieldAddressRequest
+    | UpsertFieldDatabaseRequest
+    | UpsertFieldDateRequest
+    | UpsertFieldAIRequest
+    | UpsertFieldCodeRequest
+    | UpsertFieldCodeReaderRequest
+    | UpsertFieldEmailInputRequest
+    | UpsertFieldEmojiRequest
+    | UpsertFieldFileRequest
+    | UpsertFieldGpsLocationRequest
+    | UpsertFieldLiveTrackingRequest
+    | UpsertFieldManualAddressRequest
+    | UpsertFieldPhoneNumberRequest
+    | UpsertFieldProgressBarRequest
+    | UpsertFieldSignatureRequest
+    | UpsertFieldCounterRequest
+    | UpsertFieldSliderRequest
+    | UpsertFieldTimeRequest
+    | UpsertFieldToggleRequest
+    | UpsertFieldValidationRequest
+    | UpsertFieldVideoViewerRequest
+    | UpsertFieldVoiceRequest
+    | UpsertFieldFormulaRequest
+    | UpsertFieldImageViewerRequest
+    | UpsertFieldRichTextEditorRequest
+    | UpsertFieldNfcReaderRequest
+    | UpsertFieldNumberInputRequest
+    | UpsertFieldPdfViewerRequest
+    | UpsertFieldReadOnlyFileRequest
+    | UpsertFieldReadOnlyTextRequest
+    | UpsertFieldTagsRequest
+    | UpsertFieldUniqueSequentialRequest
+    | UpsertFieldDropdownRequest
+    | UpsertFieldRadioRequest
+    | UpsertFieldUrlInputRequest
+    | UpsertFieldCheckboxRequest
+    | UpsertFieldRazorpayPaymentGatewayRequest
+    | UpsertFieldEazypayPaymentGatewayRequest
+    | UpsertFieldPaypalPaymentGatewayRequest
+    | UpsertFieldStripePaymentGatewayRequest
+    | UpsertFieldButtonRequest
+)
 
 logger = get_logger(__name__)
 
@@ -126,17 +123,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
 
     This client handles retrieving and managing app definitions, including
     getting app definitions, creating apps, adding fields, and updating fields.
-    
+
     Note: This is an abstract base class that contains business logic but no authentication.
     Use AppDefinitionAPIKeyClient or AppDefinitionAuthTokenClient for actual usage.
     """
 
-
-    def create_app(self, request: CreateAppRequest) -> AppCreationResponse:
+    def create_app(self, request: CreateAppRequest) -> BaseResponse:
         """Create a new app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return AppCreationResponse(success=False, message=env_error)
+            return BaseResponse(
+                success=False, message=env_error, operation="create_app"
+            )
 
         payload = request.to_json()
 
@@ -150,13 +148,20 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
 
         if not success:
             logger.error(f"Error: {error_message}")
-            return AppCreationResponse(success=False, message=error_message)
+            return BaseResponse(
+                success=False, message=error_message, operation="create_app"
+            )
 
-        return AppCreationResponse(
-            success=True, message="Successfully created app", data=response_data
+        return BaseResponse(
+            success=True,
+            message="Successfully created app",
+            data=response_data,
+            operation="create_app",
         )
 
-    def get_definition(self, app_id: str, version_variable_name: Optional[str] = None) -> AppDefinitionResponse:
+    def get_definition(
+        self, app_id: str, version_variable_name: str | None = None
+    ) -> AppDefinitionResponse:
         """Retrieve the complete definition for a specific app."""
         params = {"appId": app_id}
         if version_variable_name:
@@ -165,9 +170,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         logger.info(f"Getting app definition for app_id: {app_id}")
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="GET",
-            endpoint="/getAppDefinition",
-            params=params
+            method="GET", endpoint="/getAppDefinition", params=params
         )
 
         if not success:
@@ -197,7 +200,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: FieldRequestUnion,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a field to a Clappia app.
 
@@ -213,95 +216,455 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             FieldOperationResponse: Response containing the result of the operation
         """
         if isinstance(request, UpsertFieldTextRequest):
-            return self._add_text_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_text_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldTextAreaRequest):
-            return self._add_textarea_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_textarea_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldDependencyAppRequest):
-            return self._add_dependency_app_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_dependency_app_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldRestApiRequest):
-            return self._add_rest_api_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_rest_api_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldAddressRequest):
-            return self._add_address_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_address_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldDatabaseRequest):
-            return self._add_database_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_database_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldDateRequest):
-            return self._add_date_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_date_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldAIRequest):
-            return self._add_ai_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_ai_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldCodeRequest):
-            return self._add_code_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_code_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldCodeReaderRequest):
-            return self._add_code_reader_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_code_reader_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldEmailInputRequest):
-            return self._add_email_input_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_email_input_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldEmojiRequest):
-            return self._add_emoji_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_emoji_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldFileRequest):
-            return self._add_file_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_file_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldGpsLocationRequest):
-            return self._add_gps_location_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_gps_location_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldLiveTrackingRequest):
-            return self._add_live_tracking_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_live_tracking_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldManualAddressRequest):
-            return self._add_manual_address_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_manual_address_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldPhoneNumberRequest):
-            return self._add_phone_number_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_phone_number_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldProgressBarRequest):
-            return self._add_progress_bar_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_progress_bar_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldSignatureRequest):
-            return self._add_signature_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_signature_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldCounterRequest):
-            return self._add_counter_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_counter_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldSliderRequest):
-            return self._add_slider_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_slider_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldTimeRequest):
-            return self._add_time_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_time_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldToggleRequest):
-            return self._add_toggle_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_toggle_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldValidationRequest):
-            return self._add_validation_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_validation_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldVideoViewerRequest):
-            return self._add_video_viewer_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_video_viewer_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldVoiceRequest):
-            return self._add_voice_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_voice_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldFormulaRequest):
-            return self._add_formula_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_formula_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldImageViewerRequest):
-            return self._add_image_viewer_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_image_viewer_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldRichTextEditorRequest):
-            return self._add_rich_text_editor_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_rich_text_editor_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldNfcReaderRequest):
-            return self._add_nfc_reader_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_nfc_reader_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldNumberInputRequest):
-            return self._add_number_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_number_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldPdfViewerRequest):
-            return self._add_pdf_viewer_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_pdf_viewer_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldReadOnlyFileRequest):
-            return self._add_read_only_file_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_read_only_file_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldReadOnlyTextRequest):
-            return self._add_read_only_text_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_read_only_text_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldTagsRequest):
-            return self._add_tag_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_tag_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldUniqueSequentialRequest):
-            return self._add_unique_sequential_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_unique_sequential_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldDropdownRequest):
-            return self._add_drop_down_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_drop_down_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldRadioRequest):
-            return self._add_radio_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_radio_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldUrlInputRequest):
-            return self._add_url_input_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_url_input_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldCheckboxRequest):
-            return self._add_checkbox_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_checkbox_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldRazorpayPaymentGatewayRequest):
-            return self._add_razorpay_payment_gateway_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_razorpay_payment_gateway_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldEazypayPaymentGatewayRequest):
-            return self._add_eazypay_payment_gateway_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_eazypay_payment_gateway_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldPaypalPaymentGatewayRequest):
-            return self._add_paypal_payment_gateway_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_paypal_payment_gateway_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldStripePaymentGatewayRequest):
-            return self._add_stripe_payment_gateway_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_stripe_payment_gateway_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFieldButtonRequest):
-            return self._add_button_field(app_id, section_index, field_index, page_index, field_name, request, version_variable_name)
+            return self._add_button_field(
+                app_id,
+                section_index,
+                field_index,
+                page_index,
+                field_name,
+                request,
+                version_variable_name,
+            )
         else:
             raise ValueError(f"Unsupported field request type: {type(request)}")
 
@@ -310,7 +673,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: FieldRequestUnion,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a field in a Clappia app.
 
@@ -324,108 +687,198 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             FieldOperationResponse: Response containing the result of the operation
         """
         if isinstance(request, UpsertFieldTextRequest):
-            return self._update_text_field(app_id, field_name, request, version_variable_name)
+            return self._update_text_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldTextAreaRequest):
-            return self._update_textarea_field(app_id, field_name, request, version_variable_name)
+            return self._update_textarea_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldDependencyAppRequest):
-            return self._update_dependency_app_field(app_id, field_name, request, version_variable_name)
+            return self._update_dependency_app_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldRestApiRequest):
-            return self._update_rest_api_field(app_id, field_name, request, version_variable_name)
+            return self._update_rest_api_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldAddressRequest):
-            return self._update_address_field(app_id, field_name, request, version_variable_name)
+            return self._update_address_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldDatabaseRequest):
-            return self._update_database_field(app_id, field_name, request, version_variable_name)
+            return self._update_database_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldDateRequest):
-            return self._update_date_field(app_id, field_name, request, version_variable_name)
+            return self._update_date_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldAIRequest):
-            return self._update_ai_field(app_id, field_name, request, version_variable_name)
+            return self._update_ai_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldCodeRequest):
-            return self._update_code_field(app_id, field_name, request, version_variable_name)
+            return self._update_code_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldCodeReaderRequest):
-            return self._update_code_reader_field(app_id, field_name, request, version_variable_name)
+            return self._update_code_reader_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldEmailInputRequest):
-            return self._update_email_input_field(app_id, field_name, request, version_variable_name)
+            return self._update_email_input_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldEmojiRequest):
-            return self._update_emoji_field(app_id, field_name, request, version_variable_name)
+            return self._update_emoji_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldFileRequest):
-            return self._update_file_field(app_id, field_name, request, version_variable_name)
+            return self._update_file_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldGpsLocationRequest):
-            return self._update_gps_location_field(app_id, field_name, request, version_variable_name)
+            return self._update_gps_location_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldLiveTrackingRequest):
-            return self._update_live_tracking_field(app_id, field_name, request, version_variable_name)
+            return self._update_live_tracking_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldManualAddressRequest):
-            return self._update_manual_address_field(app_id, field_name, request, version_variable_name)
+            return self._update_manual_address_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldPhoneNumberRequest):
-            return self._update_phone_number_field(app_id, field_name, request, version_variable_name)
+            return self._update_phone_number_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldProgressBarRequest):
-            return self._update_progress_bar_field(app_id, field_name, request, version_variable_name)
+            return self._update_progress_bar_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldSignatureRequest):
-            return self._update_signature_field(app_id, field_name, request, version_variable_name)
+            return self._update_signature_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldCounterRequest):
-            return self._update_counter_field(app_id, field_name, request, version_variable_name)
+            return self._update_counter_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldSliderRequest):
-            return self._update_slider_field(app_id, field_name, request, version_variable_name)
+            return self._update_slider_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldTimeRequest):
-            return self._update_time_field(app_id, field_name, request, version_variable_name)
+            return self._update_time_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldToggleRequest):
-            return self._update_toggle_field(app_id, field_name, request, version_variable_name)
+            return self._update_toggle_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldValidationRequest):
-            return self._update_validation_field(app_id, field_name, request, version_variable_name)
+            return self._update_validation_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldVideoViewerRequest):
-            return self._update_video_viewer_field(app_id, field_name, request, version_variable_name)
+            return self._update_video_viewer_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldVoiceRequest):
-            return self._update_voice_field(app_id, field_name, request, version_variable_name)
+            return self._update_voice_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldFormulaRequest):
-            return self._update_formula_field(app_id, field_name, request, version_variable_name)
+            return self._update_formula_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldImageViewerRequest):
-            return self._update_image_viewer_field(app_id, field_name, request, version_variable_name)
+            return self._update_image_viewer_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldRichTextEditorRequest):
-            return self._update_rich_text_editor_field(app_id, field_name, request, version_variable_name)
+            return self._update_rich_text_editor_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldNfcReaderRequest):
-            return self._update_nfc_reader_field(app_id, field_name, request, version_variable_name)
+            return self._update_nfc_reader_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldNumberInputRequest):
-            return self._update_number_field(app_id, field_name, request, version_variable_name)
+            return self._update_number_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldPdfViewerRequest):
-            return self._update_pdf_viewer_field(app_id, field_name, request, version_variable_name)
+            return self._update_pdf_viewer_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldReadOnlyFileRequest):
-            return self._update_read_only_file_field(app_id, field_name, request, version_variable_name)
+            return self._update_read_only_file_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldReadOnlyTextRequest):
-            return self._update_read_only_text_field(app_id, field_name, request, version_variable_name)
+            return self._update_read_only_text_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldTagsRequest):
-            return self._update_tag_field(app_id, field_name, request, version_variable_name)
+            return self._update_tag_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldUniqueSequentialRequest):
-            return self._update_unique_sequential_field(app_id, field_name, request, version_variable_name)
+            return self._update_unique_sequential_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldDropdownRequest):
-            return self._update_drop_down_field(app_id, field_name, request, version_variable_name)
+            return self._update_drop_down_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldRadioRequest):
-            return self._update_radio_field(app_id, field_name, request, version_variable_name)
+            return self._update_radio_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldUrlInputRequest):
-            return self._update_url_input_field(app_id, field_name, request, version_variable_name)
+            return self._update_url_input_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldCheckboxRequest):
-            return self._update_checkbox_field(app_id, field_name, request, version_variable_name)
+            return self._update_checkbox_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldRazorpayPaymentGatewayRequest):
-            return self._update_razorpay_payment_gateway_field(app_id, field_name, request, version_variable_name)
+            return self._update_razorpay_payment_gateway_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldEazypayPaymentGatewayRequest):
-            return self._update_eazypay_payment_gateway_field(app_id, field_name, request, version_variable_name)
+            return self._update_eazypay_payment_gateway_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldPaypalPaymentGatewayRequest):
-            return self._update_paypal_payment_gateway_field(app_id, field_name, request, version_variable_name)
+            return self._update_paypal_payment_gateway_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldStripePaymentGatewayRequest):
-            return self._update_stripe_payment_gateway_field(app_id, field_name, request, version_variable_name)
+            return self._update_stripe_payment_gateway_field(
+                app_id, field_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFieldButtonRequest):
-            return self._update_button_field(app_id, field_name, request, version_variable_name)
+            return self._update_button_field(
+                app_id, field_name, request, version_variable_name
+            )
         else:
             raise ValueError(f"Unsupported field request type: {type(request)}")
 
     def reorder_field(
-            self,
-            app_id: str,
-            source_page_index: int,
-            target_page_index: int,
-            source_section_index: int,
-            target_section_index: int,
-            index_in_target_section: int,
-            field_name: str,
-            version_variable_name: Optional[str] = None,
+        self,
+        app_id: str,
+        source_page_index: int,
+        target_page_index: int,
+        source_section_index: int,
+        target_section_index: int,
+        index_in_target_section: int,
+        field_name: str,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Reorder a field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -438,7 +891,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 field_name=field_name,
                 operation="reorder_field",
             )
-        
+
         payload = {
             "appId": app_id,
             "sourcePageIndex": source_page_index,
@@ -450,7 +903,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         }
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
-            
+
         logger.info(f"Reordering field in app_id: {app_id} with payload: {payload}")
 
         success, error_message, response_data = self.api_utils.make_request(
@@ -488,7 +941,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldTextRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a text field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -547,7 +1000,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldTextRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a text field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -606,7 +1059,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldTextAreaRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a textarea field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -662,12 +1115,12 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             data=response_data,
         )
 
-    def _update_textarea_field( 
+    def _update_textarea_field(
         self,
         app_id: str,
         field_name: str,
         request: UpsertFieldTextAreaRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a textarea field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -728,7 +1181,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldDependencyAppRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a dependency app field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -752,7 +1205,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             **request.to_json(),
         }
         if version_variable_name is not None:
-            payload["versionVariableName"] = version_variable_name          
+            payload["versionVariableName"] = version_variable_name
         logger.info(
             f"Adding dependency app field to app_id: {app_id} with payload: {payload}"
         )
@@ -789,7 +1242,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldDependencyAppRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a dependency app field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -850,7 +1303,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldRestApiRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a REST API field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -911,8 +1364,8 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldRestApiRequest,
-        version_variable_name: Optional[str] = None,
-        ) -> FieldOperationResponse:
+        version_variable_name: str | None = None,
+    ) -> FieldOperationResponse:
         """Update a REST API field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
@@ -972,7 +1425,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldAddressRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add an address field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1031,7 +1484,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldAddressRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update an address field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1092,7 +1545,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldDatabaseRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a database field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1153,7 +1606,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldDatabaseRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a database field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1214,7 +1667,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldDateRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a date field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1273,7 +1726,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldDateRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a date field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1332,7 +1785,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldAIRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add an AI field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1391,7 +1844,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldAIRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update an AI field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1450,7 +1903,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldCodeRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a code field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1509,7 +1962,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldCodeRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a code field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1568,7 +2021,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldCodeReaderRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a code reader field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1629,7 +2082,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldCodeReaderRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a code reader field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1690,7 +2143,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldEmailInputRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add an email input field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1751,7 +2204,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldEmailInputRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update an email input field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1771,7 +2224,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             **request.to_json(),
         }
         if version_variable_name is not None:
-            payload["versionVariableName"] = version_variable_name      
+            payload["versionVariableName"] = version_variable_name
         logger.info(
             f"Updating email input field in app_id: {app_id} with payload: {payload}"
         )
@@ -1812,7 +2265,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldEmojiRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add an emoji field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1871,7 +2324,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldEmojiRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update an emoji field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1930,7 +2383,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldFileRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a file field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -1989,7 +2442,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldFileRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a file field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2048,7 +2501,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldGpsLocationRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a GPS location field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2109,7 +2562,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldGpsLocationRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a GPS location field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2170,7 +2623,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldLiveTrackingRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a live tracking field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2231,7 +2684,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldLiveTrackingRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a live tracking field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2292,7 +2745,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldManualAddressRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a manual address field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2353,7 +2806,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldManualAddressRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a manual address field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2414,7 +2867,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldPhoneNumberRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a phone number field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2475,7 +2928,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldPhoneNumberRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a phone number field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2536,7 +2989,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldProgressBarRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a progress bar field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2597,7 +3050,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldProgressBarRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a progress bar field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2617,7 +3070,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             **request.to_json(),
         }
         if version_variable_name is not None:
-            payload["versionVariableName"] = version_variable_name      
+            payload["versionVariableName"] = version_variable_name
         logger.info(
             f"Updating progress bar field in app_id: {app_id} with payload: {payload}"
         )
@@ -2658,7 +3111,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldSignatureRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a signature field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2719,7 +3172,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldSignatureRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a signature field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2780,7 +3233,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldCounterRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a counter field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2839,7 +3292,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldCounterRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a counter field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2900,7 +3353,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldSliderRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a slider field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -2959,7 +3412,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldSliderRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a slider field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3020,7 +3473,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldTimeRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a time field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3079,7 +3532,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldTimeRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a time field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3138,7 +3591,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldToggleRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a toggle field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3197,7 +3650,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldToggleRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a toggle field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3258,7 +3711,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldValidationRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a validation field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3319,7 +3772,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldValidationRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a validation field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3380,7 +3833,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldVideoViewerRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a video viewer field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3441,7 +3894,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldVideoViewerRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a video viewer field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3502,7 +3955,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldVoiceRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a voice field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3561,7 +4014,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldVoiceRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a voice field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3620,7 +4073,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldFormulaRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a formula field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3679,7 +4132,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldFormulaRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a formula field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3699,7 +4152,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             **request.to_json(),
         }
         if version_variable_name is not None:
-            payload["versionVariableName"] = version_variable_name              
+            payload["versionVariableName"] = version_variable_name
         logger.info(
             f"Updating formula field in app_id: {app_id} with payload: {payload}"
         )
@@ -3739,7 +4192,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldImageViewerRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add an image field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3798,7 +4251,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldImageViewerRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update an image field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3856,7 +4309,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldRichTextEditorRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a rich text editor field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3917,7 +4370,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldRichTextEditorRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a rich text editor field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -3977,7 +4430,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldNfcReaderRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add an NFC reader field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4001,7 +4454,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             **request.to_json(),
         }
         if version_variable_name is not None:
-            payload["versionVariableName"] = version_variable_name              
+            payload["versionVariableName"] = version_variable_name
         logger.info(
             f"Adding NFC reader field to app_id: {app_id} with payload: {payload}"
         )
@@ -4038,7 +4491,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldNfcReaderRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update an NFC reader field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4098,7 +4551,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldNumberInputRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a number field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4157,7 +4610,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldNumberInputRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a number field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4217,7 +4670,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldPdfViewerRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a PDF viewer field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4278,7 +4731,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldPdfViewerRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a PDF viewer field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4338,7 +4791,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldReadOnlyFileRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a read only field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4399,7 +4852,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldReadOnlyFileRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a read only field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4459,7 +4912,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldReadOnlyTextRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a read only text field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4520,7 +4973,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldReadOnlyTextRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a read only text field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4580,7 +5033,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldTagsRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a tag field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4639,7 +5092,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldTagsRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a tag field in an app."""
 
@@ -4698,7 +5151,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldUniqueSequentialRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a unique sequential field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4722,7 +5175,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             **request.to_json(),
         }
         if version_variable_name is not None:
-            payload["versionVariableName"] = version_variable_name              
+            payload["versionVariableName"] = version_variable_name
         logger.info(
             f"Adding unique sequential field to app_id: {app_id} with payload: {payload}"
         )
@@ -4759,7 +5212,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldUniqueSequentialRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a unique sequential field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4819,7 +5272,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldDropdownRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a drop down field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4880,7 +5333,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldDropdownRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a drop down field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4940,7 +5393,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldRadioRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a radio field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4999,7 +5452,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldRadioRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a radio field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -5057,7 +5510,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldUrlInputRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a URL input field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -5118,7 +5571,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldUrlInputRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a URL input field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -5178,7 +5631,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldCheckboxRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a checkbox field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -5239,7 +5692,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldCheckboxRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a checkbox field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -5299,7 +5752,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldRazorpayPaymentGatewayRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a razorpay payment gateway field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -5360,7 +5813,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldRazorpayPaymentGatewayRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a razorpay payment gateway field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -5420,7 +5873,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldEazypayPaymentGatewayRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add an eazypay payment gateway field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -5481,7 +5934,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldEazypayPaymentGatewayRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update an eazypay payment gateway field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -5541,7 +5994,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldPaypalPaymentGatewayRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a paypal payment gateway field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -5602,7 +6055,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldPaypalPaymentGatewayRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a paypal payment gateway field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -5662,7 +6115,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldStripePaymentGatewayRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a stripe payment gateway field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -5723,7 +6176,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldStripePaymentGatewayRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a stripe payment gateway field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -5743,7 +6196,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             **request.to_json(),
         }
         if version_variable_name is not None:
-            payload["versionVariableName"] = version_variable_name  
+            payload["versionVariableName"] = version_variable_name
         logger.info(
             f"Updating stripe payment gateway field in app_id: {app_id} with payload: {payload}"
         )
@@ -5783,7 +6236,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         page_index: int,
         field_name: str,
         request: UpsertFieldButtonRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Add a button field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -5841,7 +6294,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         field_name: str,
         request: UpsertFieldButtonRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> FieldOperationResponse:
         """Update a button field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -6175,9 +6628,8 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             operation="update_section",
             data=response_data,
         )
-    def get_app_versions(
-        self, app_id: str
-    ) -> AppDefinitionResponse:
+
+    def get_app_versions(self, app_id: str) -> AppDefinitionResponse:
         """Get an app version."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
@@ -6198,7 +6650,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             method="GET",
             endpoint="/getAppVersions",
             params=params,
-        )   
+        )
 
         if not success:
             logger.error(f"Error: {error_message}")
@@ -6235,7 +6687,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             "versionName": version_name,
         }
 
-        logger.info(f"Creating new app version in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Creating new app version in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -6275,7 +6729,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
 
         payload = {
             "appId": app_id,
-            "initialVersionName": initial_version_name, 
+            "initialVersionName": initial_version_name,
             "newVersionName": new_version_name,
         }
 
@@ -6303,7 +6757,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             operation="update_app_version",
             data=response_data,
         )
-    
+
     def update_live_version(
         self, app_id: str, version_variable_name: str
     ) -> AppDefinitionResponse:
@@ -6323,7 +6777,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             "versionVariableName": version_variable_name,
         }
 
-        logger.info(f"Updating live version in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating live version in app_id: {app_id} with payload: {payload}"
+        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -6349,9 +6805,12 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             operation="update_live_version",
             data=response_data,
         )
-    
+
     def update_app_metadata(
-        self, app_id: str, request: UpdateAppMetadataRequest, version_variable_name: Optional[str] = None,
+        self,
+        app_id: str,
+        request: UpdateAppMetadataRequest,
+        version_variable_name: str | None = None,
     ) -> AppDefinitionResponse:
         """Update app metadata."""
         env_valid, env_error = self.api_utils.validate_environment()
@@ -6371,9 +6830,11 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        logger.info(f"Updating app metadata in app_id: {app_id} with payload: {payload}")
+        logger.info(
+            f"Updating app metadata in app_id: {app_id} with payload: {payload}"
+        )
 
-        success, error_message, response_data = self.api_utils.make_request(    
+        success, error_message, response_data = self.api_utils.make_request(
             method="POST",
             endpoint="/updateAppMetadata",
             data=payload,
@@ -6398,6 +6859,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             data=response_data,
         )
 
+
 class AppDefinitionAPIKeyClient(BaseAPIKeyClient, AppDefinitionClient):
     """Client for managing Clappia app definitions with API key authentication.
     This client combines API key authentication with all app definition business logic.
@@ -6406,7 +6868,7 @@ class AppDefinitionAPIKeyClient(BaseAPIKeyClient, AppDefinitionClient):
     def __init__(
         self,
         api_key: str,
-        base_url: Optional[str] = None,
+        base_url: str,
         timeout: int = 30,
     ):
         """Initialize app definition client with API key.
@@ -6418,6 +6880,7 @@ class AppDefinitionAPIKeyClient(BaseAPIKeyClient, AppDefinitionClient):
         """
         BaseAPIKeyClient.__init__(self, api_key, base_url, timeout)
 
+
 class AppDefinitionAuthTokenClient(BaseAuthTokenClient, AppDefinitionClient):
     """Client for managing Clappia app definitions with auth token authentication.
 
@@ -6428,7 +6891,7 @@ class AppDefinitionAuthTokenClient(BaseAuthTokenClient, AppDefinitionClient):
         self,
         auth_token: str,
         workplace_id: str,
-        base_url: Optional[str] = None,
+        base_url: str,
         timeout: int = 30,
     ):
         """Initialize app definition client with auth token.
@@ -6440,6 +6903,3 @@ class AppDefinitionAuthTokenClient(BaseAuthTokenClient, AppDefinitionClient):
             timeout: Request timeout in seconds.
         """
         BaseAuthTokenClient.__init__(self, auth_token, workplace_id, base_url, timeout)
-
-
-    

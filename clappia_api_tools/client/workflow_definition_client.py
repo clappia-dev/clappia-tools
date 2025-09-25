@@ -1,15 +1,17 @@
 from abc import ABC
-from typing import Optional, Union
-from .base_client import BaseClappiaClient, BaseAPIKeyClient, BaseAuthTokenClient
-from clappia_api_tools.utils.logging_utils import get_logger
 
+from clappia_api_tools.enums import NodeType, TriggerType
 from clappia_api_tools.models.request import (
     UpsertAiWorkflowStepRequest,
     UpsertApprovalWorkflowStepRequest,
     UpsertCodeWorkflowStepRequest,
     UpsertConditionWorkflowStepRequest,
+    UpsertCreateSubmissionWorkflowStepRequest,
     UpsertDatabaseWorkflowStepRequest,
+    UpsertDeleteSubmissionWorkflowStepRequest,
+    UpsertEditSubmissionWorkflowStepRequest,
     UpsertEmailWorkflowStepRequest,
+    UpsertFindSubmissionWorkflowStepRequest,
     UpsertLoopWorkflowStepRequest,
     UpsertMobileNotificationWorkflowStepRequest,
     UpsertRestApiWorkflowStepRequest,
@@ -17,36 +19,35 @@ from clappia_api_tools.models.request import (
     UpsertSmsWorkflowStepRequest,
     UpsertWaitWorkflowStepRequest,
     UpsertWhatsAppWorkflowStepRequest,
-    UpsertCreateSubmissionWorkflowStepRequest,
-    UpsertDeleteSubmissionWorkflowStepRequest,
-    UpsertFindSubmissionWorkflowStepRequest,
-    UpsertEditSubmissionWorkflowStepRequest,
 )
 from clappia_api_tools.models.response import (
     WorkflowResponse,
     WorkflowStepResponse,
 )
-from clappia_api_tools.enums import TriggerType, NodeType
+from clappia_api_tools.utils.logging_utils import get_logger
 
-WorkflowStepRequestUnion = Union[
-    UpsertAiWorkflowStepRequest,
-    UpsertApprovalWorkflowStepRequest,
-    UpsertCodeWorkflowStepRequest,
-    UpsertConditionWorkflowStepRequest,
-    UpsertDatabaseWorkflowStepRequest,
-    UpsertEmailWorkflowStepRequest,
-    UpsertLoopWorkflowStepRequest,
-    UpsertMobileNotificationWorkflowStepRequest,
-    UpsertRestApiWorkflowStepRequest,
-    UpsertSlackWorkflowStepRequest,
-    UpsertSmsWorkflowStepRequest,
-    UpsertWaitWorkflowStepRequest,
-    UpsertWhatsAppWorkflowStepRequest,
-    UpsertCreateSubmissionWorkflowStepRequest,
-    UpsertDeleteSubmissionWorkflowStepRequest,
-    UpsertFindSubmissionWorkflowStepRequest,
-    UpsertEditSubmissionWorkflowStepRequest,
-]
+from .base_client import BaseAPIKeyClient, BaseAuthTokenClient, BaseClappiaClient
+
+WorkflowStepRequestUnion = (
+    UpsertAiWorkflowStepRequest
+    | UpsertApprovalWorkflowStepRequest
+    | UpsertCodeWorkflowStepRequest
+    | UpsertConditionWorkflowStepRequest
+    | UpsertDatabaseWorkflowStepRequest
+    | UpsertEmailWorkflowStepRequest
+    | UpsertLoopWorkflowStepRequest
+    | UpsertMobileNotificationWorkflowStepRequest
+    | UpsertRestApiWorkflowStepRequest
+    | UpsertSlackWorkflowStepRequest
+    | UpsertSmsWorkflowStepRequest
+    | UpsertWaitWorkflowStepRequest
+    | UpsertWhatsAppWorkflowStepRequest
+    | UpsertCreateSubmissionWorkflowStepRequest
+    | UpsertDeleteSubmissionWorkflowStepRequest
+    | UpsertFindSubmissionWorkflowStepRequest
+    | UpsertEditSubmissionWorkflowStepRequest
+)
+
 
 logger = get_logger(__name__)
 
@@ -57,13 +58,17 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
     This client handles retrieving and managing workflow definitions, including
     getting workflows, adding workflow steps, removing workflow steps,
     updating workflow steps, and reordering workflow steps.
-    
+
     Note: This is an abstract base class that contains business logic but no authentication.
     Use WorkflowDefinitionAPIKeyClient or WorkflowDefinitionAuthTokenClient for actual usage.
     """
 
-
-    def get_workflow(self, app_id: str, trigger_type: str, version_variable_name: Optional[str] = None) -> WorkflowResponse:
+    def get_workflow(
+        self,
+        app_id: str,
+        trigger_type: str,
+        version_variable_name: str | None = None,
+    ) -> WorkflowResponse:
         """Get a workflow definition for a specific app and trigger type"""
 
         env_valid, env_error = self.api_utils.validate_environment()
@@ -124,9 +129,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: WorkflowStepRequestUnion,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add a workflow step to a Clappia app.
 
@@ -141,39 +146,158 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             WorkflowStepResponse: Response containing the result of the operation
         """
         if isinstance(request, UpsertAiWorkflowStepRequest):
-            return self._add_ai_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_ai_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertApprovalWorkflowStepRequest):
-            return self._add_approval_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_approval_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertCodeWorkflowStepRequest):
-            return self._add_code_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_code_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertConditionWorkflowStepRequest):
-            return self._add_condition_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_condition_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertDatabaseWorkflowStepRequest):
-            return self._add_database_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_database_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertEmailWorkflowStepRequest):
-            return self._add_email_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_email_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertLoopWorkflowStepRequest):
-            return self._add_loop_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_loop_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertMobileNotificationWorkflowStepRequest):
-            return self._add_mobile_notification_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_mobile_notification_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertRestApiWorkflowStepRequest):
-            return self._add_rest_api_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_rest_api_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertSlackWorkflowStepRequest):
-            return self._add_slack_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_slack_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertSmsWorkflowStepRequest):
-            return self._add_sms_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_sms_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertWaitWorkflowStepRequest):
-            return self._add_wait_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_wait_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertWhatsAppWorkflowStepRequest):
-            return self._add_whatsapp_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_whatsapp_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertCreateSubmissionWorkflowStepRequest):
-            return self._add_create_submission_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_create_submission_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertDeleteSubmissionWorkflowStepRequest):
-            return self._add_delete_submission_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_delete_submission_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertFindSubmissionWorkflowStepRequest):
-            return self._add_find_submission_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_find_submission_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         elif isinstance(request, UpsertEditSubmissionWorkflowStepRequest):
-            return self._add_edit_submission_step(app_id, trigger_type, request, step_variable_name, parent_step_variable_name, version_variable_name)
+            return self._add_edit_submission_step(
+                app_id,
+                trigger_type,
+                request,
+                step_variable_name,
+                parent_step_variable_name,
+                version_variable_name,
+            )
         else:
             raise ValueError(f"Unsupported workflow step request type: {type(request)}")
 
@@ -183,7 +307,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: WorkflowStepRequestUnion,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update a workflow step in a Clappia app.
 
@@ -197,49 +321,83 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             WorkflowStepResponse: Response containing the result of the operation
         """
         if isinstance(request, UpsertAiWorkflowStepRequest):
-            return self._update_ai_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_ai_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertApprovalWorkflowStepRequest):
-            return self._update_approval_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_approval_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertCodeWorkflowStepRequest):
-            return self._update_code_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_code_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertConditionWorkflowStepRequest):
-            return self._update_condition_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_condition_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertDatabaseWorkflowStepRequest):
-            return self._update_database_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_database_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertEmailWorkflowStepRequest):
-            return self._update_email_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_email_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertLoopWorkflowStepRequest):
-            return self._update_loop_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_loop_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertMobileNotificationWorkflowStepRequest):
-            return self._update_mobile_notification_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_mobile_notification_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertRestApiWorkflowStepRequest):
-            return self._update_rest_api_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_rest_api_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertSlackWorkflowStepRequest):
-            return self._update_slack_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_slack_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertSmsWorkflowStepRequest):
-            return self._update_sms_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_sms_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertWaitWorkflowStepRequest):
-            return self._update_wait_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_wait_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertWhatsAppWorkflowStepRequest):
-            return self._update_whatsapp_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_whatsapp_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertCreateSubmissionWorkflowStepRequest):
-            return self._update_create_submission_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_create_submission_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertDeleteSubmissionWorkflowStepRequest):
-            return self._update_delete_submission_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_delete_submission_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertFindSubmissionWorkflowStepRequest):
-            return self._update_find_submission_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_find_submission_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         elif isinstance(request, UpsertEditSubmissionWorkflowStepRequest):
-            return self._update_edit_submission_step(app_id, trigger_type, step_variable_name, request, version_variable_name)
+            return self._update_edit_submission_step(
+                app_id, trigger_type, step_variable_name, request, version_variable_name
+            )
         else:
             raise ValueError(f"Unsupported workflow step request type: {type(request)}")
-        
+
     def reorder_step(
         self,
         app_id: str,
         trigger_type: str,
         step_variable_name: str,
         parent_step_variable_name: str,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Reorder a workflow step in a Clappia app"""
 
@@ -249,7 +407,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 success=False,
                 message=env_error,
                 app_id=app_id,
-                trigger_type=trigger_type,
                 operation="reorder",
                 version_variable_name=version_variable_name,
             )
@@ -260,7 +417,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="reorder",
             )
 
@@ -289,7 +445,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="reorder",
             )
 
@@ -298,7 +453,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully reordered workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="reorder",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -310,9 +464,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertAiWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add an AI workflow step to a Clappia app"""
 
@@ -323,7 +477,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_ai_step",
             )
 
@@ -333,7 +486,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_ai_step",
             )
 
@@ -366,7 +518,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_ai_step",
             )
 
@@ -375,7 +526,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added AI workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_ai_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -388,7 +538,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertAiWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update an AI workflow step in a Clappia app"""
 
@@ -399,8 +549,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
-                operation="update_ai_step", 
+                operation="update_ai_step",
             )
 
         if trigger_type not in [t.value for t in TriggerType]:
@@ -409,7 +558,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_ai_step",
             )
 
@@ -438,7 +586,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_ai_step",
             )
 
@@ -447,7 +594,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated AI workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_ai_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -458,9 +604,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertApprovalWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add an approval workflow step to a Clappia app"""
 
@@ -471,7 +617,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_approval_step",
             )
 
@@ -481,7 +626,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_approval_step",
             )
 
@@ -515,7 +659,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_approval_step",
             )
 
@@ -524,7 +667,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added approval workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_approval_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -537,7 +679,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertApprovalWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update an approval workflow step in a Clappia app"""
 
@@ -548,7 +690,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_approval_step",
             )
 
@@ -558,7 +699,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_approval_step",
             )
 
@@ -588,7 +728,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_approval_step",
             )
 
@@ -597,7 +736,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated approval workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_approval_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -609,9 +747,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertCodeWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add a code workflow step to a Clappia app"""
 
@@ -622,7 +760,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_code_step",
             )
 
@@ -632,7 +769,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_code_step",
             )
 
@@ -666,7 +802,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_code_step",
             )
 
@@ -675,7 +810,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added code workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_code_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -688,7 +822,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertCodeWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update a code workflow step in a Clappia app"""
 
@@ -699,7 +833,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_code_step",
             )
 
@@ -709,7 +842,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_code_step",
             )
 
@@ -739,7 +871,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_code_step",
             )
 
@@ -748,7 +879,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated code workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_code_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -760,9 +890,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertConditionWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add a condition workflow step to a Clappia app"""
 
@@ -773,7 +903,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_condition_step",
             )
 
@@ -783,7 +912,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_condition_step",
             )
 
@@ -816,7 +944,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_condition_step",
             )
 
@@ -825,7 +952,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added condition workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_condition_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -838,7 +964,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertConditionWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update a condition workflow step in a Clappia app"""
 
@@ -849,7 +975,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_condition_step",
             )
 
@@ -859,7 +984,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_condition_step",
             )
 
@@ -889,7 +1013,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_condition_step",
             )
 
@@ -898,7 +1021,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated condition workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_condition_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -910,9 +1032,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertDatabaseWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add a database workflow step to a Clappia app"""
 
@@ -923,7 +1045,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_database_step",
             )
 
@@ -933,7 +1054,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_database_step",
             )
 
@@ -966,7 +1086,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_database_step",
             )
 
@@ -975,7 +1094,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added database workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_database_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -988,7 +1106,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertDatabaseWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update a database workflow step in a Clappia app"""
 
@@ -999,7 +1117,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_database_step",
             )
 
@@ -1009,7 +1126,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_database_step",
             )
 
@@ -1038,7 +1154,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_database_step",
             )
 
@@ -1047,7 +1162,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated database workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_database_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -1059,9 +1173,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertEmailWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add an email workflow step to a Clappia app"""
 
@@ -1072,7 +1186,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_email_step",
             )
 
@@ -1082,7 +1195,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_email_step",
             )
 
@@ -1115,7 +1227,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_email_step",
             )
 
@@ -1124,7 +1235,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added email workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_email_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -1137,7 +1247,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertEmailWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update an email workflow step in a Clappia app"""
 
@@ -1148,7 +1258,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_email_step",
             )
 
@@ -1158,7 +1267,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_email_step",
             )
 
@@ -1187,7 +1295,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_email_step",
             )
 
@@ -1196,7 +1303,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated email workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_email_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -1208,9 +1314,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertLoopWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add a loop workflow step to a Clappia app"""
 
@@ -1221,7 +1327,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_loop_step",
             )
 
@@ -1231,7 +1336,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_loop_step",
             )
 
@@ -1264,7 +1368,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_loop_step",
             )
 
@@ -1273,7 +1376,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added loop workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_loop_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -1286,7 +1388,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertLoopWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update a loop workflow step in a Clappia app"""
 
@@ -1297,7 +1399,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_loop_step",
             )
 
@@ -1307,7 +1408,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_loop_step",
             )
 
@@ -1336,7 +1436,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_loop_step",
             )
 
@@ -1345,7 +1444,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated loop workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_loop_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -1357,9 +1455,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertMobileNotificationWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add a mobile notification workflow step to a Clappia app"""
 
@@ -1370,7 +1468,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_mobile_notification_step",
             )
 
@@ -1380,7 +1477,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_mobile_notification_step",
             )
 
@@ -1413,7 +1509,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_mobile_notification_step",
             )
 
@@ -1422,7 +1517,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added mobile notification workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_mobile_notification_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -1435,7 +1529,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertMobileNotificationWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update a mobile notification workflow step in a Clappia app"""
 
@@ -1446,7 +1540,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_mobile_notification_step",
             )
 
@@ -1456,7 +1549,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_mobile_notification_step",
             )
 
@@ -1485,7 +1577,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_mobile_notification_step",
             )
 
@@ -1494,7 +1585,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated mobile notification workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_mobile_notification_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -1506,9 +1596,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertRestApiWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add a REST API workflow step to a Clappia app"""
 
@@ -1519,7 +1609,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_rest_api_step",
             )
 
@@ -1529,7 +1618,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_rest_api_step",
             )
 
@@ -1562,7 +1650,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_rest_api_step",
             )
 
@@ -1571,7 +1658,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added REST API workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_rest_api_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -1584,7 +1670,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertRestApiWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update a REST API workflow step in a Clappia app"""
 
@@ -1595,7 +1681,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_rest_api_step",
             )
 
@@ -1605,7 +1690,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_rest_api_step",
             )
 
@@ -1616,7 +1700,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             **request.to_json(),
         }
         if version_variable_name is not None:
-            payload["versionVariableName"] = version_variable_name  
+            payload["versionVariableName"] = version_variable_name
         logger.info(
             f"Updating REST API workflow step in app_id: {app_id} with payload: {payload}"
         )
@@ -1634,7 +1718,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_rest_api_step",
             )
 
@@ -1643,7 +1726,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated REST API workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_rest_api_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -1655,9 +1737,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertSlackWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add a Slack workflow step to a Clappia app"""
 
@@ -1668,7 +1750,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_slack_step",
             )
 
@@ -1678,7 +1759,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_slack_step",
             )
 
@@ -1711,7 +1791,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_slack_step",
             )
 
@@ -1720,7 +1799,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added Slack workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_slack_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -1733,7 +1811,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertSlackWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update a Slack workflow step in a Clappia app"""
 
@@ -1744,7 +1822,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_slack_step",
             )
 
@@ -1754,7 +1831,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_slack_step",
             )
 
@@ -1783,7 +1859,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_slack_step",
             )
 
@@ -1792,7 +1867,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated Slack workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_slack_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -1804,9 +1878,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertSmsWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add an SMS workflow step to a Clappia app"""
 
@@ -1817,7 +1891,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_sms_step",
             )
 
@@ -1827,7 +1900,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_sms_step",
             )
 
@@ -1860,7 +1932,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_sms_step",
             )
 
@@ -1869,7 +1940,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added SMS workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_sms_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -1882,7 +1952,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertSmsWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update an SMS workflow step in a Clappia app"""
 
@@ -1893,7 +1963,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_sms_step",
             )
 
@@ -1903,7 +1972,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_sms_step",
             )
 
@@ -1932,7 +2000,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_sms_step",
             )
 
@@ -1941,7 +2008,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated SMS workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_sms_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -1953,9 +2019,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertWaitWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add a wait workflow step to a Clappia app"""
 
@@ -1966,7 +2032,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_wait_step",
             )
 
@@ -1976,7 +2041,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_wait_step",
             )
 
@@ -1991,7 +2055,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if parent_step_variable_name is not None:
             payload["parentVariableName"] = parent_step_variable_name
         if version_variable_name is not None:
-            payload["versionVariableName"] = version_variable_name  
+            payload["versionVariableName"] = version_variable_name
         logger.info(
             f"Adding wait workflow step to app_id: {app_id} with payload: {payload}"
         )
@@ -2009,7 +2073,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_wait_step",
             )
 
@@ -2018,7 +2081,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added wait workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_wait_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -2031,7 +2093,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertWaitWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update a wait workflow step in a Clappia app"""
 
@@ -2042,7 +2104,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_wait_step",
             )
 
@@ -2052,7 +2113,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_wait_step",
             )
 
@@ -2081,7 +2141,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_wait_step",
             )
 
@@ -2090,7 +2149,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated wait workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_wait_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -2102,9 +2160,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertWhatsAppWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add a WhatsApp workflow step to a Clappia app"""
 
@@ -2115,7 +2173,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_whatsapp_step",
             )
 
@@ -2125,7 +2182,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_whatsapp_step",
             )
 
@@ -2158,7 +2214,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_whatsapp_step",
             )
 
@@ -2167,7 +2222,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added WhatsApp workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_whatsapp_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -2180,7 +2234,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertWhatsAppWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update a WhatsApp workflow step in a Clappia app"""
 
@@ -2191,7 +2245,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_whatsapp_step",
             )
 
@@ -2201,7 +2254,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_whatsapp_step",
             )
 
@@ -2212,7 +2264,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             **request.to_json(),
         }
         if version_variable_name is not None:
-            payload["versionVariableName"] = version_variable_name      
+            payload["versionVariableName"] = version_variable_name
         logger.info(
             f"Updating WhatsApp workflow step in app_id: {app_id} with payload: {payload}"
         )
@@ -2230,7 +2282,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_whatsapp_step",
             )
 
@@ -2239,7 +2290,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated WhatsApp workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_whatsapp_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -2251,9 +2301,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertCreateSubmissionWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add a create submission workflow step to a Clappia app"""
 
@@ -2264,7 +2314,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_create_submission_step",
             )
 
@@ -2274,7 +2323,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_create_submission_step",
             )
 
@@ -2307,7 +2355,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_create_submission_step",
             )
 
@@ -2316,7 +2363,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added create submission workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_create_submission_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -2329,7 +2375,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertCreateSubmissionWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update a create submission workflow step in a Clappia app"""
 
@@ -2340,7 +2386,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_create_submission_step",
             )
 
@@ -2350,7 +2395,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_create_submission_step",
             )
 
@@ -2379,7 +2423,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_create_submission_step",
             )
 
@@ -2387,8 +2430,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             success=True,
             message="Successfully updated create submission workflow step",
             app_id=app_id,
-            version_variable_name=version_variable_name,    
-            trigger_type=trigger_type,
+            version_variable_name=version_variable_name,
             operation="update_create_submission_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -2400,9 +2442,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertDeleteSubmissionWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add a delete submission workflow step to a Clappia app"""
 
@@ -2413,7 +2455,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_delete_submission_step",
             )
 
@@ -2423,7 +2464,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_delete_submission_step",
             )
 
@@ -2456,7 +2496,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_delete_submission_step",
             )
 
@@ -2465,7 +2504,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added delete submission workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_delete_submission_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -2478,7 +2516,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertDeleteSubmissionWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update a delete submission workflow step in a Clappia app"""
 
@@ -2489,7 +2527,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_delete_submission_step",
             )
 
@@ -2499,7 +2536,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_delete_submission_step",
             )
 
@@ -2528,7 +2564,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_delete_submission_step",
             )
 
@@ -2537,7 +2572,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated delete submission workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_delete_submission_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -2549,9 +2583,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertFindSubmissionWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add a find submission workflow step to a Clappia app"""
 
@@ -2562,7 +2596,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_find_submission_step",
             )
 
@@ -2572,7 +2605,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_find_submission_step",
             )
 
@@ -2587,7 +2619,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if parent_step_variable_name is not None:
             payload["parentVariableName"] = parent_step_variable_name
         if version_variable_name is not None:
-            payload["versionVariableName"] = version_variable_name          
+            payload["versionVariableName"] = version_variable_name
         logger.info(
             f"Adding find submission workflow step to app_id: {app_id} with payload: {payload}"
         )
@@ -2605,7 +2637,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_find_submission_step",
             )
 
@@ -2614,7 +2645,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added find submission workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_find_submission_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -2627,7 +2657,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertFindSubmissionWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update a find submission workflow step in a Clappia app"""
 
@@ -2638,7 +2668,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_find_submission_step",
             )
 
@@ -2648,7 +2677,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_find_submission_step",
             )
 
@@ -2677,7 +2705,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_find_submission_step",
             )
 
@@ -2686,7 +2713,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated find submission workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_find_submission_step",
             step_variable_name=step_variable_name,
             data=response_data,
@@ -2698,9 +2724,9 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         trigger_type: str,
         request: UpsertEditSubmissionWorkflowStepRequest,
-        step_variable_name: Optional[str] = None,
-        parent_step_variable_name: Optional[str] = None,
-        version_variable_name: Optional[str] = None,
+        step_variable_name: str | None = None,
+        parent_step_variable_name: str | None = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Add an edit submission workflow step to a Clappia app"""
 
@@ -2711,7 +2737,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_edit_submission_step",
             )
 
@@ -2721,7 +2746,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_edit_submission_step",
             )
 
@@ -2754,7 +2778,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="add_edit_submission_step",
             )
 
@@ -2763,7 +2786,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully added edit submission workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="add_edit_submission_step",
             step_variable_name=step_variable_name,
             parent_step_variable_name=parent_step_variable_name,
@@ -2776,7 +2798,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         trigger_type: str,
         step_variable_name: str,
         request: UpsertEditSubmissionWorkflowStepRequest,
-        version_variable_name: Optional[str] = None,
+        version_variable_name: str | None = None,
     ) -> WorkflowStepResponse:
         """Update an edit submission workflow step in a Clappia app"""
 
@@ -2787,8 +2809,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=env_error,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
-                operation="update_edit_submission_step"
+                operation="update_edit_submission_step",
             )
 
         if trigger_type not in [t.value for t in TriggerType]:
@@ -2797,7 +2818,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=f"Invalid trigger type: {trigger_type}, allowed types are: {', '.join([t.value for t in TriggerType])}",
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_edit_submission_step",
             )
 
@@ -2826,7 +2846,6 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 message=error_message,
                 app_id=app_id,
                 version_variable_name=version_variable_name,
-                trigger_type=trigger_type,
                 operation="update_edit_submission_step",
             )
 
@@ -2835,11 +2854,11 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             message="Successfully updated edit submission workflow step",
             app_id=app_id,
             version_variable_name=version_variable_name,
-            trigger_type=trigger_type,
             operation="update_edit_submission_step",
             step_variable_name=step_variable_name,
             data=response_data,
         )
+
 
 class WorkflowDefinitionAPIKeyClient(BaseAPIKeyClient, WorkflowDefinitionClient):
     """Client for managing Clappia workflow definitions with API key authentication.
@@ -2850,7 +2869,7 @@ class WorkflowDefinitionAPIKeyClient(BaseAPIKeyClient, WorkflowDefinitionClient)
     def __init__(
         self,
         api_key: str,
-        base_url: Optional[str] = None,
+        base_url: str,
         timeout: int = 30,
     ):
         """Initialize workflow definition client with API key.
@@ -2873,7 +2892,7 @@ class WorkflowDefinitionAuthTokenClient(BaseAuthTokenClient, WorkflowDefinitionC
         self,
         auth_token: str,
         workplace_id: str,
-        base_url: Optional[str] = None,
+        base_url: str,
         timeout: int = 30,
     ):
         """Initialize workflow definition client with auth token.

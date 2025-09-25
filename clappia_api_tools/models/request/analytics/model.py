@@ -1,8 +1,8 @@
-from typing import List, Any, Optional
 from typing import Any, Literal
-from pydantic import Field, BaseModel, ConfigDict
-from ...json_serialized import JsonSerializableMixin
 
+from pydantic import BaseModel, ConfigDict, Field
+
+from ...json_serialized import JsonSerializableMixin
 
 
 class ExternalCondition(BaseModel, JsonSerializableMixin):
@@ -68,14 +68,28 @@ class ExternalCondition(BaseModel, JsonSerializableMixin):
         "Reserved fields: $submissionId, $status, $createdAt, $updatedAt, $owners, $all_fields. "
         "Example: 'customerName', '$status', '$createdAt'"
     )
-    condition_field_operator: Literal["CONTAINS", "NOT_IN", "EQ", "NEQ", "EMPTY", "NON_EMPTY", "STARTS_WITH", "BETWEEN", "GT", "LT", "GTE", "LTE", "ENDS_WITH"] = Field(
+    condition_field_operator: Literal[
+        "CONTAINS",
+        "NOT_IN",
+        "EQ",
+        "NEQ",
+        "EMPTY",
+        "NON_EMPTY",
+        "STARTS_WITH",
+        "BETWEEN",
+        "GT",
+        "LT",
+        "GTE",
+        "LTE",
+        "ENDS_WITH",
+    ] = Field(
         description="Operator to apply to the field. Text fields support: CONTAINS, NOT_IN, STARTS_WITH, "
         "EQ, NEQ, EMPTY, NON_EMPTY. Numeric fields support: CONTAINS, NOT_IN, EQ, NEQ, GT, "
         "GTE, LT, LTE, EMPTY, NON_EMPTY, STARTS_WITH. Date fields support: BETWEEN, EMPTY, "
         "NON_EMPTY. Selection fields support: EQ, NEQ, EMPTY, NON_EMPTY. "
         "Example: 'CONTAINS', 'EQ', 'BETWEEN', 'EMPTY'"
     )
-    condition_field_values: List[Any] = Field(
+    condition_field_values: list[Any] = Field(
         description="Array of values to filter by. Not required for EMPTY/NON_EMPTY operators. "
         "For BETWEEN date operations, requires exactly 2 values (start and end date). "
         "For selection fields, values must match field options. For numeric fields, "
@@ -83,7 +97,30 @@ class ExternalCondition(BaseModel, JsonSerializableMixin):
         "For app-related fields, values must be string IDs. "
         "Example: ['John', 'Jane'], [100, 200], ['2024-01-01', '2024-12-31']"
     )
-    condition_field_date_token: Optional[Literal["CUS", "TOD", "YES", "TOM", "L_W", "L_M", "L_Y", "L_7", "L30", "L90", "C_W", "C_M", "C_Y", "N_W", "N_M", "N_Y", "N_7", "N30", "N90"]] = Field(
+    condition_field_date_token: (
+        Literal[
+            "CUS",
+            "TOD",
+            "YES",
+            "TOM",
+            "L_W",
+            "L_M",
+            "L_Y",
+            "L_7",
+            "L30",
+            "L90",
+            "C_W",
+            "C_M",
+            "C_Y",
+            "N_W",
+            "N_M",
+            "N_Y",
+            "N_7",
+            "N30",
+            "N90",
+        ]
+        | None
+    ) = Field(
         default=None,
         description="Date token for date field filtering. Only valid for date fields with BETWEEN operator. "
         "Required for date BETWEEN operations. CUS = Custom date range, TOD = Today, YES = Yesterday. "
@@ -179,6 +216,7 @@ class ExternalFilter(BaseModel, JsonSerializableMixin):
         "Example: 'AND', 'OR'",
     )
 
+
 class ExternalChartDimension(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
     """
@@ -213,7 +251,7 @@ class ExternalChartDimension(BaseModel, JsonSerializableMixin):
         date_external_dim = ExternalChartDimension(
             dimension_field_name="order_date",
             dimension_label="Order Date",
-            dimension_type="CUSTOM",    
+            dimension_type="CUSTOM",
             dimension_interval="month",
             dimension_sort_direction="asc",
             dimension_sort_type="string"
@@ -224,28 +262,28 @@ class ExternalChartDimension(BaseModel, JsonSerializableMixin):
         description="Name of the field to use as dimension. Can be a custom field or standard field. "
         "Example: 'category', 'region', 'date', 'status'"
     )
-    dimension_label: Optional[str] = Field(
+    dimension_label: str | None = Field(
         default=None,
         description="Display label for the dimension. Example: 'Category', 'Region', 'Date Range'",
     )
-    dimension_type: Optional[Literal["STANDARD", "CUSTOM"]] = Field(
+    dimension_type: Literal["STANDARD", "CUSTOM"] | None = Field(
         default="CUSTOM",
         description="Type of dimension field. Example: 'STANDARD', 'CUSTOM'",
     )
-    dimension_interval: Optional[Literal["day", "week", "month", "year"]] = Field(
+    dimension_interval: Literal["day", "week", "month", "year"] | None = Field(
         default=None,
         description="Interval for date-based dimensions. Only applicable for date fields. "
         "Example: 'day', 'week', 'month', 'year'",
     )
-    dimension_sort_direction: Optional[Literal["asc", "desc"]] = Field(
+    dimension_sort_direction: Literal["asc", "desc"] | None = Field(
         default="asc",
         description="Sort direction for the dimension values. Example: 'asc', 'desc'",
     )
-    dimension_sort_type: Optional[Literal["number", "string"]] = Field(
+    dimension_sort_type: Literal["number", "string"] | None = Field(
         default="string",
         description="Type of sorting to apply to dimension values. Example: 'number', 'string'",
     )
-    dimension_missing_value: Optional[str] = Field(
+    dimension_missing_value: str | None = Field(
         default=None,
         description="Value to use when dimension field data is missing. Example: 'Unknown', 'N/A'",
     )
@@ -306,10 +344,12 @@ class ExternalAggregation(BaseModel, JsonSerializableMixin):
         )
     """
 
-    aggregation_type: Literal["count", "sum", "average", "minimum", "maximum", "unique"] = Field(
+    aggregation_type: Literal[
+        "count", "sum", "average", "minimum", "maximum", "unique"
+    ] = Field(
         default="count",
         description="Type of aggregation to perform on the data. "
-        "Example: 'count', 'sum', 'average', 'minimum', 'maximum', 'unique'"
+        "Example: 'count', 'sum', 'average', 'minimum', 'maximum', 'unique'",
     )
     aggregation_field: ExternalChartDimension = Field(
         description="Field to aggregate on. Defines which field the aggregation will be performed on."

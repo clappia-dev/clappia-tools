@@ -1,14 +1,14 @@
 import phonenumbers
 from phonenumbers import (
     NumberParseException,
-    is_valid_number,
-    format_number,
     PhoneNumberFormat,
+    format_number,
+    is_valid_number,
 )
 
 
 class Utils:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     def validate_phone_number(

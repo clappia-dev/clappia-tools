@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import Enum
 
 
-class bcolors:
+class Colors:
     HEADER = "\033[95m"
     OKBLUE = "\033[94m"
     OKCYAN = "\033[96m"
@@ -35,13 +35,13 @@ class Logger:
         self.timestamp_format = timestamp_format
 
         self.colors = {
-            LogLevel.DEBUG: bcolors.OKBLUE,
-            LogLevel.INFO: bcolors.OKGREEN,
-            LogLevel.WARNING: bcolors.WARNING,
-            LogLevel.ERROR: bcolors.FAIL,
-            LogLevel.CRITICAL: bcolors.HEADER,
+            LogLevel.DEBUG: Colors.OKBLUE,
+            LogLevel.INFO: Colors.OKGREEN,
+            LogLevel.WARNING: Colors.WARNING,
+            LogLevel.ERROR: Colors.FAIL,
+            LogLevel.CRITICAL: Colors.HEADER,
         }
-        self.reset_color = bcolors.ENDC
+        self.reset_color = Colors.ENDC
 
     def _should_log(self, level: LogLevel) -> bool:
         return level.value >= self.level.value
@@ -50,7 +50,7 @@ class Logger:
         timestamp = datetime.now().strftime(self.timestamp_format)
         return f"[{timestamp}] [{self.name}] [{level.name}] {message}"
 
-    def _log(self, level: LogLevel, message: str):
+    def _log(self, level: LogLevel, message: str) -> None:
         if not self._should_log(level):
             return
 
@@ -70,22 +70,22 @@ class Logger:
         )
         print(colored_message, file=output_stream)
 
-    def debug(self, message: str):
+    def debug(self, message: str) -> None:
         self._log(LogLevel.DEBUG, message)
 
-    def info(self, message: str):
+    def info(self, message: str) -> None:
         self._log(LogLevel.INFO, message)
 
-    def warning(self, message: str):
+    def warning(self, message: str) -> None:
         self._log(LogLevel.WARNING, message)
 
-    def error(self, message: str):
+    def error(self, message: str) -> None:
         self._log(LogLevel.ERROR, message)
 
-    def critical(self, message: str):
+    def critical(self, message: str) -> None:
         self._log(LogLevel.CRITICAL, message)
 
-    def set_level(self, level: LogLevel):
+    def set_level(self, level: LogLevel) -> None:
         self.level = level
 
 
@@ -96,37 +96,37 @@ def get_logger(name: str = "Logger", level: LogLevel = LogLevel.INFO) -> Logger:
     return Logger(name, level)
 
 
-def debug(message: str):
+def debug(message: str) -> None:
     _default_logger.debug(message)
 
 
-def info(message: str):
+def info(message: str) -> None:
     _default_logger.info(message)
 
 
-def warning(message: str):
+def warning(message: str) -> None:
     _default_logger.warning(message)
 
 
-def error(message: str):
+def error(message: str) -> None:
     _default_logger.error(message)
 
 
-def critical(message: str):
+def critical(message: str) -> None:
     _default_logger.critical(message)
 
 
-def set_level(level: LogLevel):
+def set_level(level: LogLevel) -> None:
     _default_logger.set_level(level)
 
 
 __all__ = [
-    "get_logger",
-    "set_level",
-    "debug",
-    "info",
-    "warning",
-    "error",
-    "critical",
     "LogLevel",
+    "critical",
+    "debug",
+    "error",
+    "get_logger",
+    "info",
+    "set_level",
+    "warning",
 ]

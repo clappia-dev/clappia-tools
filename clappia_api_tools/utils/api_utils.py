@@ -1,14 +1,14 @@
-import os
 import json
+from typing import Any
+
 import requests
-from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any, Tuple
+
 from clappia_api_tools.utils.logging_utils import get_logger
 
 logger = get_logger(__name__)
 
 
-class ClappiaAPIUtils(ABC):
+class ClappiaAPIUtils:
     """Abstract base API utilities with common functionality for all Clappia API interactions"""
 
     def __init__(
@@ -26,7 +26,7 @@ class ClappiaAPIUtils(ABC):
         self.base_url = base_url
         self.timeout = timeout
 
-    def validate_environment(self) -> Tuple[bool, str]:
+    def validate_environment(self) -> tuple[bool, str]:
         """Validate that required configuration is available"""
         if not self.base_url:
             return (
@@ -35,15 +35,17 @@ class ClappiaAPIUtils(ABC):
             )
         return True, ""
 
-    def get_headers(self, data: Optional[Dict[str, Any]] = None, params: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
+    def get_headers(
+        self,
+        data: Any | None = None,
+        params: dict[str, Any] | None = None,
+    ) -> dict[str, str]:
         """Get standard headers for API requests"""
-        return {
-            "Content-Type": "application/json"
-        }
+        return {"Content-Type": "application/json"}
 
     def handle_response(
         self, response: requests.Response
-    ) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
+    ) -> tuple[bool, str | None, dict[str, Any] | None]:
         """
         Handle API response and return structured result
 
@@ -75,9 +77,9 @@ class ClappiaAPIUtils(ABC):
         self,
         method: str,
         endpoint: str,
-        data: Optional[Dict[str, Any]] = None,
-        params: Optional[Dict[str, Any]] = None
-    ) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
+        data: Any | None = None,
+        params: dict[str, Any] | None = None,
+    ) -> tuple[bool, str | None, Any | None]:
         """
         Make HTTP request to Clappia API
 
@@ -97,7 +99,9 @@ class ClappiaAPIUtils(ABC):
         url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
         headers = self.get_headers(data, params)
         try:
-            logger.info(f"Making {method} request to {url}, headers: {headers}, data: {data}, params: {params}")
+            logger.info(
+                f"Making {method} request to {url}, headers: {headers}, data: {data}, params: {params}"
+            )
             if data:
                 logger.debug(f"Request data: {json.dumps(data, indent=2)}")
 
@@ -120,7 +124,8 @@ class ClappiaAPIUtils(ABC):
         except requests.exceptions.ConnectionError:
             return False, "Connection error - unable to reach Clappia API", None
         except Exception as e:
-            return False, f"Unexpected error: {str(e)}", None
+            return False, f"Unexpected error: {e!s}", None
+
 
 class ClappiaAPIKeyUtils(ClappiaAPIUtils):
     """API utilities for Clappia API key authentication"""
@@ -142,7 +147,7 @@ class ClappiaAPIKeyUtils(ClappiaAPIUtils):
         super().__init__(base_url, timeout)
         self.api_key = api_key
 
-    def validate_environment(self) -> Tuple[bool, str]:
+    def validate_environment(self) -> tuple[bool, str]:
         """Validate that required configuration is available"""
         if not self.api_key:
             return (
@@ -151,7 +156,11 @@ class ClappiaAPIKeyUtils(ClappiaAPIUtils):
             )
         return super().validate_environment()
 
-    def get_headers(self, data: Optional[Dict[str, Any]] = None, params: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
+    def get_headers(
+        self,
+        data: Any | None = None,
+        params: dict[str, Any] | None = None,
+    ) -> dict[str, str]:
         """Get standard headers for API requests"""
         headers = super().get_headers(data, params)
         headers["x-api-key"] = self.api_key
@@ -181,7 +190,7 @@ class ClappiaAuthTokenUtils(ClappiaAPIUtils):
         self.auth_token = auth_token
         self.workplace_id = workplace_id
 
-    def validate_environment(self) -> Tuple[bool, str]:
+    def validate_environment(self) -> tuple[bool, str]:
         """Validate that required configuration is available"""
         if not self.auth_token:
             return (
@@ -195,18 +204,20 @@ class ClappiaAuthTokenUtils(ClappiaAPIUtils):
             )
         return super().validate_environment()
 
-    def get_headers(self, data: Optional[Dict[str, Any]] = None, params: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
+    def get_headers(
+        self,
+        data: Any | None = None,
+        params: dict[str, Any] | None = None,
+    ) -> dict[str, str]:
         """Get standard headers for API requests with auth token and optional app_id"""
         headers = super().get_headers(data, params)
         headers["Authorization"] = self.auth_token
         headers["workplaceId"] = self.workplace_id
-        
+
         # Add appId header if present in request data or params
         if params and "appId" in params:
             headers["appId"] = params["appId"]
         elif data and "appId" in data:
             headers["appId"] = data["appId"]
-            
+
         return headers
-
-

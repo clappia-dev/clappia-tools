@@ -1,29 +1,31 @@
 from abc import ABC
-from typing import Dict, Any, List, Optional
-from .base_client import BaseClappiaClient, BaseAPIKeyClient, BaseAuthTokenClient
-from clappia_api_tools.utils.logging_utils import get_logger
+from typing import Any, Literal
+
 from clappia_api_tools.models.request import (
-    GetSubmissionsRequest,
-    GetSubmissionsAggregationRequest,
     CreateSubmissionRequest,
     EditSubmissionRequest,
-    UpdateSubmissionStatusRequest,
-    UpdateSubmissionOwnersRequest,
-    GetSubmissionsInExcelRequest,
+    GetSubmissionsAggregationRequest,
     GetSubmissionsCountRequest,
-)
-from clappia_api_tools.models.submission import (
-    SubmissionFilters,
-    AggregationDimension,
-    AggregationMetric,
+    GetSubmissionsInExcelRequest,
+    GetSubmissionsRequest,
+    UpdateSubmissionOwnersRequest,
+    UpdateSubmissionStatusRequest,
 )
 from clappia_api_tools.models.response import (
-    SubmissionsAggregationResponse,
-    SubmissionsResponse,
     SubmissionResponse,
-    SubmissionsExcelResponse,
+    SubmissionsAggregationResponse,
     SubmissionsCountResponse,
+    SubmissionsExcelResponse,
+    SubmissionsResponse,
 )
+from clappia_api_tools.models.submission import (
+    AggregationDimension,
+    AggregationMetric,
+    SubmissionQuery,
+)
+from clappia_api_tools.utils.logging_utils import get_logger
+
+from .base_client import BaseAPIKeyClient, BaseAuthTokenClient, BaseClappiaClient
 
 logger = get_logger(__name__)
 
@@ -36,16 +38,15 @@ class SubmissionClient(BaseClappiaClient, ABC):
     editing submissions, updating submission status, updating submission owners.
     """
 
-
     def get_submissions(
         self,
         app_id: str,
-        fields: Optional[List[str]] = None,
+        fields: list[str] | None = None,
         page_size: int = 10,
         forward: bool = True,
-        filters: Optional[SubmissionFilters] = None,
-        last_submission_id: Optional[str] = None,
-        requesting_user_email_address: Optional[str] = None,
+        filters: SubmissionQuery | None = None,
+        last_submission_id: str | None = None,
+        requesting_user_email_address: str | None = None,
     ) -> SubmissionsResponse:
         try:
             request = GetSubmissionsRequest(
@@ -64,8 +65,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return SubmissionsResponse(success=False, message=env_error, app_id=app_id)
 
-        payload = {
-            "workplaceId": self.workplace_id,
+        payload: dict[str, Any] = {
             "appId": request.app_id,
             "pageSize": request.page_size,
             "forward": request.forward,
@@ -97,20 +97,20 @@ class SubmissionClient(BaseClappiaClient, ABC):
             success=True,
             message=f"Successfully retrieved {submissions_count} submissions",
             app_id=app_id,
-            metadata=response_data.get("metadata", {}),
-            data=response_data.get("submissions", []),
+            metadata=response_data.get("metadata", {}) if response_data else {},
+            data=response_data.get("submissions", []) if response_data else [],
         )
 
     def get_submissions_aggregation(
         self,
         app_id: str,
-        dimensions: Optional[List[AggregationDimension]] = None,
-        aggregation_dimensions: Optional[List[AggregationMetric]] = None,
-        x_axis_labels: Optional[List[str]] = None,
+        dimensions: list[AggregationDimension] | None = None,
+        aggregation_dimensions: list[AggregationMetric] | None = None,
+        x_axis_labels: list[str] | None = None,
         forward: bool = True,
         page_size: int = 1000,
-        filters: Optional[SubmissionFilters] = None,
-        requesting_user_email_address: Optional[str] = None,
+        filters: SubmissionQuery | None = None,
+        requesting_user_email_address: str | None = None,
     ) -> SubmissionsAggregationResponse:
         try:
             request = GetSubmissionsAggregationRequest(
@@ -141,8 +141,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 app_id=app_id,
             )
 
-        payload = {
-            "workplaceId": self.workplace_id,
+        payload: dict[str, Any] = {
             "appId": request.app_id,
             "forward": request.forward,
             "pageSize": request.page_size,
@@ -185,8 +184,8 @@ class SubmissionClient(BaseClappiaClient, ABC):
     def create_submission(
         self,
         app_id: str,
-        data: Dict[str, Any],
-        requesting_user_email_address: Optional[str] = None,
+        data: dict[str, Any],
+        requesting_user_email_address: str | None = None,
     ) -> SubmissionResponse:
         try:
             request = CreateSubmissionRequest(
@@ -219,8 +218,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 operation="create_submission",
             )
 
-        payload = {
-            "workplaceId": self.workplace_id,
+        payload: dict[str, Any] = {
             "appId": request.app_id,
             "data": request.data,
             "requestingUserEmailAddress": request.requesting_user_email_address,
@@ -256,8 +254,8 @@ class SubmissionClient(BaseClappiaClient, ABC):
         self,
         app_id: str,
         submission_id: str,
-        data: Dict[str, Any],
-        requesting_user_email_address: Optional[str] = None,
+        data: dict[str, Any],
+        requesting_user_email_address: str | None = None,
     ) -> SubmissionResponse:
         try:
             request = EditSubmissionRequest(
@@ -294,8 +292,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 operation="edit_submission",
             )
 
-        payload = {
-            "workplaceId": self.workplace_id,
+        payload: dict[str, Any] = {
             "appId": request.app_id,
             "submissionId": request.submission_id,
             "data": request.data,
@@ -322,7 +319,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
 
         return SubmissionResponse(
             success=True,
-            message=f"Successfully edited submission",
+            message="Successfully edited submission",
             app_id=app_id,
             submission_id=submission_id,
             data=response_data,
@@ -334,8 +331,8 @@ class SubmissionClient(BaseClappiaClient, ABC):
         app_id: str,
         submission_id: str,
         status_name: str,
-        comments: Optional[str] = None,
-        requesting_user_email_address: Optional[str] = None,
+        comments: str | None = None,
+        requesting_user_email_address: str | None = None,
     ) -> SubmissionResponse:
         try:
             request = UpdateSubmissionStatusRequest(
@@ -364,13 +361,12 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 operation="update_status",
             )
 
-        status = {
+        status: dict[str, Any] = {
             "name": request.status_name.strip(),
             "comments": request.comments.strip() if request.comments else None,
         }
 
-        payload = {
-            "workplaceId": self.workplace_id,
+        payload: dict[str, Any] = {
             "appId": request.app_id,
             "submissionId": request.submission_id,
             "status": status,
@@ -406,9 +402,9 @@ class SubmissionClient(BaseClappiaClient, ABC):
         self,
         app_id: str,
         submission_id: str,
-        email_ids: List[str],
-        phone_numbers: Optional[List[str]] = None,
-        requesting_user_email_address: Optional[str] = None,
+        email_ids: list[str],
+        phone_numbers: list[str] | None = None,
+        requesting_user_email_address: str | None = None,
     ) -> SubmissionResponse:
         try:
             request = UpdateSubmissionOwnersRequest(
@@ -437,8 +433,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 operation="update_owners",
             )
 
-        payload = {
-            "workplaceId": self.workplace_id,
+        payload: dict[str, Any] = {
             "appId": request.app_id,
             "submissionId": request.submission_id,
             "emailIds": [str(email) for email in request.email_ids],
@@ -474,9 +469,9 @@ class SubmissionClient(BaseClappiaClient, ABC):
         self,
         app_id: str,
         requesting_user_email_address: str,
-        filters: Optional[SubmissionFilters] = None,
-        field_names: Optional[List[str]] = None,
-        format: str = "Excel",
+        filters: SubmissionQuery | None = None,
+        field_names: list[str] | None = None,
+        format: Literal["Excel", "Csv"] = "Excel",
     ) -> SubmissionsExcelResponse:
         try:
             request = GetSubmissionsInExcelRequest(
@@ -497,8 +492,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 success=False, message=env_error, app_id=app_id
             )
 
-        payload = {
-            "workplaceId": self.workplace_id,
+        payload: dict[str, Any] = {
             "appId": request.app_id,
             "requestingUserEmailAddress": str(request.requesting_user_email_address),
             "format": request.format,
@@ -523,29 +517,25 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 success=False, message=error_message, app_id=app_id
             )
 
-        if response_data.get("statusCode") == 202:
+        if response_data and response_data.get("statusCode") == 202:
             return SubmissionsExcelResponse(
                 success=True,
                 message=f"The {format} file has been sent to {requesting_user_email_address}",
                 app_id=app_id,
-                format=format,
-                requesting_user_email_address=requesting_user_email_address,
             )
         else:
             return SubmissionsExcelResponse(
                 success=True,
                 message="Excel file generated successfully and will be sent to the requesting user email address since the submissions are large in number",
                 app_id=app_id,
-                url=response_data.get("url"),
-                format=format,
-                requesting_user_email_address=requesting_user_email_address,
+                url=response_data.get("url", "") if response_data else "",
             )
 
     def get_submissions_count(
         self,
         app_id: str,
-        filters: Optional[SubmissionFilters] = None,
-        requesting_user_email_address: Optional[str] = None,
+        filters: SubmissionQuery | None = None,
+        requesting_user_email_address: str | None = None,
     ) -> SubmissionsCountResponse:
         try:
             request = GetSubmissionsCountRequest(
@@ -564,8 +554,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 success=False, message=env_error, app_id=app_id
             )
 
-        payload = {
-            "workplaceId": self.workplace_id,
+        payload: dict[str, Any] = {
             "appId": request.app_id,
             "requestingUserEmailAddress": request.requesting_user_email_address,
         }
@@ -589,8 +578,10 @@ class SubmissionClient(BaseClappiaClient, ABC):
             success=True,
             message="Successfully retrieved submissions count",
             app_id=app_id,
-            total_count=response_data.get("totalCount"),
-            filtered_count=response_data.get("filteredCount"),
+            total_count=response_data.get("totalCount") if response_data else None,
+            filtered_count=response_data.get("filteredCount")
+            if response_data
+            else None,
         )
 
 
@@ -603,20 +594,17 @@ class SubmissionAPIKeyClient(BaseAPIKeyClient, SubmissionClient):
     def __init__(
         self,
         api_key: str,
-        workplace_id: str,
-        base_url: Optional[str] = None,
+        base_url: str,
         timeout: int = 30,
     ):
         """Initialize submission client with API key.
 
         Args:
             api_key: Clappia API key.
-            workplace_id: Clappia Workplace ID #TODO: remove this parameter once ClappiaExternalService/v4 is live in all stages
             base_url: API base URL.
             timeout: Request timeout in seconds.
         """
         BaseAPIKeyClient.__init__(self, api_key, base_url, timeout)
-        self.workplace_id = workplace_id
 
 
 class SubmissionAuthTokenClient(BaseAuthTokenClient, SubmissionClient):
@@ -629,7 +617,7 @@ class SubmissionAuthTokenClient(BaseAuthTokenClient, SubmissionClient):
         self,
         auth_token: str,
         workplace_id: str,
-        base_url: Optional[str] = None,
+        base_url: str,
         timeout: int = 30,
     ):
         """Initialize submission client with auth token.
@@ -641,4 +629,3 @@ class SubmissionAuthTokenClient(BaseAuthTokenClient, SubmissionClient):
             timeout: Request timeout in seconds.
         """
         BaseAuthTokenClient.__init__(self, auth_token, workplace_id, base_url, timeout)
-        self.workplace_id = workplace_id

@@ -1,17 +1,17 @@
-from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, ConfigDict, field_validator
-import re
 import json
+import re
 from urllib.parse import urlparse
-from ...json_serialized import JsonSerializableMixin
 
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from ...json_serialized import JsonSerializableMixin
 
 
 class ValidatedString(str):
     """Custom string type with common validation patterns"""
 
     @classmethod
-    def field_name_validator(cls, v: Optional[str]) -> Optional[str]:
+    def field_name_validator(cls, v: str | None) -> str | None:
         if v is not None:
             if not v or not v.strip():
                 raise ValueError("Field name cannot be empty")
@@ -24,8 +24,8 @@ class ValidatedString(str):
 
     @classmethod
     def non_empty_string_validator(
-        cls, v: Optional[str], field_name: str = "Field"
-    ) -> Optional[str]:
+        cls, v: str | None, field_name: str = "Field"
+    ) -> str | None:
         if v is not None and (not v or not v.strip()):
             raise ValueError(f"{field_name} cannot be empty")
         return v.strip() if v else v
@@ -39,17 +39,17 @@ class ValidatedString(str):
             result = urlparse(v)
             if not all([result.scheme, result.netloc]):
                 raise ValueError("Must be a valid URL")
-        except Exception:
-            raise ValueError("Must be a valid URL")
+        except Exception as err:
+            raise ValueError("Must be a valid URL") from err
         return v
 
     @classmethod
-    def json_string_validator(cls, v: Optional[str]) -> Optional[str]:
+    def json_string_validator(cls, v: str | None) -> str | None:
         if v is not None:
             try:
                 json.loads(v)
-            except json.JSONDecodeError:
-                raise ValueError("Must be valid JSON string")
+            except json.JSONDecodeError as err:
+                raise ValueError("Must be valid JSON string") from err
         return v
 
 
@@ -58,8 +58,8 @@ class UniqueListValidator:
 
     @classmethod
     def validate_unique_strings(
-        cls, v: Optional[List[str]], field_name: str = "Items"
-    ) -> Optional[List[str]]:
+        cls, v: list[str] | None, field_name: str = "Items"
+    ) -> list[str] | None:
         if v is not None:
             if len(set(v)) != len(v):
                 raise ValueError(f"{field_name} must be unique")
@@ -75,48 +75,34 @@ class BaseFieldComponent(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
 
 
-"""
-    For this class we need to provide the extra things
-    In case of add 
-    app_id
-    pade_index      
-    section_index
-    field_index
-    field_type
-    field_name
-
-    In case of update
-    app_id
-    field_name
-    newFieldName (if field name need to change)
-"""
-
-
 class BaseUpsertFieldRequest(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
     label: str = Field(description="Display label for the field")
-    new_field_name: Optional[str] = Field(None, description="New field variable name for the field, mandatory if field name needs to be changed")
-    description: Optional[str] = Field(
+    new_field_name: str | None = Field(
+        None,
+        description="New field variable name for the field, mandatory if field name needs to be changed",
+    )
+    description: str | None = Field(
         None,
         description="Field description, Example: This is a description for the field",
     )
-    placeholder: Optional[str] = Field(None, description="Field placeholder")
-    dependency_app_id: Optional[str] = Field(
+    placeholder: str | None = Field(default=None, description="Field placeholder")
+    dependency_app_id: str | None = Field(
         None, description="Dependency app ID, must be a valid Clappia app ID"
     )
-    server_url: Optional[str] = Field(
+    server_url: str | None = Field(
         None, description="Server URL, mandatory if field type is getDataFromRestApis"
     )
-    display_condition: Optional[str] = Field(
+    display_condition: str | None = Field(
         None, description="Display condition Example: {field_name} == 'value'"
     )
     required: bool = Field(default=False, description="Whether field is required")
     hidden: bool = Field(default=False, description="Whether field is hidden")
     is_editable: bool = Field(default=True, description="Whether field is editable")
-    editability_condition: Optional[str] = Field(
+    editability_condition: str | None = Field(
         None, description="Editability condition, Example: {field_name} == 'value'"
     )
-    default_value: Optional[str] = Field(
+    default_value: str | None = Field(
         None, description="Default value, Example: 'value'"
     )
     block_width_percentage_desktop: int = Field(default=50, description="Desktop width")
@@ -125,30 +111,35 @@ class BaseUpsertFieldRequest(BaseModel, JsonSerializableMixin):
 
     @field_validator("label")
     @classmethod
-    def validate_label(cls, v: str) -> str:
+    def validate_label(cls, v: str) -> str | None:
         return ValidatedString.non_empty_string_validator(v, "Label")
 
 
 class BaseUpsertPageRequest(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
     app_id: str = Field(description="App ID")
-    version_variable_name: Optional[str] = Field(None, description="The variable name representing the app version. If not specified, the live version is used")
+    version_variable_name: str | None = Field(
+        None,
+        description="The variable name representing the app version. If not specified, the live version is used",
+    )
 
     @field_validator("app_id")
     @classmethod
-    def validate_app_id(cls, v: str) -> str:
+    def validate_app_id(cls, v: str) -> str | None:
         return ValidatedString.non_empty_string_validator(v, "App ID")
 
 
 class BaseUpsertSectionRequest(BaseModel, JsonSerializableMixin):
     model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True)
     app_id: str = Field(description="App ID")
-    version_variable_name: Optional[str] = Field(None, description="The variable name representing the app version. If not specified, the live version is used")
+    version_variable_name: str | None = Field(
+        None,
+        description="The variable name representing the app version. If not specified, the live version is used",
+    )
     section_index: int = Field(ge=0, description="Section index")
     page_index: int = Field(ge=0, description="Page index")
 
     @field_validator("app_id")
     @classmethod
-    def validate_app_id(cls, v: str) -> str:
+    def validate_app_id(cls, v: str) -> str | None:
         return ValidatedString.non_empty_string_validator(v, "App ID")
-    

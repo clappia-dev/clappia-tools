@@ -1,8 +1,9 @@
-from typing import Optional, List, Dict, Any, Literal
-from pydantic import BaseModel, Field, EmailStr, field_validator
 import re
+from typing import Any, Literal
+
+from pydantic import BaseModel, EmailStr, Field, field_validator
+
 from ..submission import (
-    SubmissionFilters,
     AggregationDimension,
     AggregationMetric,
     SubmissionQuery,
@@ -12,12 +13,12 @@ from ..submission import (
 class BaseSubmissionRequest(BaseModel):
     app_id: str = Field(description="App Id")
     # TODO: Remove this field once ClappiaExternalService/v4 is live in all stages
-    requesting_user_email_address: Optional[EmailStr] = Field(
+    requesting_user_email_address: EmailStr | None = Field(
         None, description="Email of requesting user"
     )
 
-
     @field_validator("app_id")
+    @classmethod
     def validate_app_id(cls, v: str) -> str:
         if not v or not v.strip():
             raise ValueError("App ID is required and cannot be empty")
@@ -31,46 +32,52 @@ class GetSubmissionsRequest(BaseSubmissionRequest):
         default=10, ge=1, le=1000, description="Number of submissions per page"
     )
     forward: bool = Field(default=True, description="Direction for pagination")
-    filters: Optional[SubmissionFilters] = Field(None, description="Optional filters")
-    last_submission_id: Optional[str] = Field(
-        None, description="Last submission ID, next page will be fetched from this ID"
+    filters: SubmissionQuery | None = Field(
+        default=None, description="Optional filters"
     )
-    fields: Optional[List[str]] = Field(
-        None,
+    last_submission_id: str | None = Field(
+        default=None,
+        description="Last submission ID, next page will be fetched from this ID",
+    )
+    fields: list[str] | None = Field(
+        default=None,
         description="List of fields to include in the response, both standard and custom fields",
     )
 
 
 class GetSubmissionsAggregationRequest(BaseSubmissionRequest):
     forward: bool = Field(default=True, description="Direction for pagination")
-    dimensions: Optional[List[AggregationDimension]] = Field(
+    dimensions: list[AggregationDimension] | None = Field(
         None, description="Fields to group by"
     )
-    aggregation_dimensions: Optional[List[AggregationMetric]] = Field(
+    aggregation_dimensions: list[AggregationMetric] | None = Field(
         None, description="Aggregation calculations"
     )
-    x_axis_labels: Optional[List[str]] = Field(
+    x_axis_labels: list[str] | None = Field(
         None, description="X-axis labels for charts"
     )
     page_size: int = Field(
         default=1000, ge=1, le=1000, description="Number of results per page"
     )
-    filters: Optional[SubmissionFilters] = Field(None, description="Optional filters")
+    filters: SubmissionQuery | None = Field(
+        default=None, description="Optional filters"
+    )
 
 
 class CreateSubmissionRequest(BaseSubmissionRequest):
-    data: Dict[str, Any] = Field(
+    data: dict[str, Any] = Field(
         description="Submission data, in the format of a dictionary. Example {'employee_name': 'Jane Doe', 'department': 'HR', 'salary': 60000, 'start_date': '10-02-2024', 'location':'23.456789, 45.678901', 'image_field_name': [{\"s3Path\": {\"bucket\": \"my-files-bucket\", \"key\": \"images/photo.jpg\", \"makePublic\": false}}]}"
     )
 
 
 class EditSubmissionRequest(BaseSubmissionRequest):
     submission_id: str = Field(description="Submission Id to edit")
-    data: Dict[str, Any] = Field(
+    data: dict[str, Any] = Field(
         description="Updated submission data, in the format of a dictionary. Example {'employee_name': 'Jane Doe', 'department': 'HR', 'salary': 60000, 'start_date': '10-02-2024', 'location':'23.456789, 45.678901', 'image_field_name': [{\"s3Path\": {\"bucket\": \"my-files-bucket\", \"key\": \"images/photo.jpg\", \"makePublic\": false}}]}"
     )
 
     @field_validator("submission_id")
+    @classmethod
     def validate_submission_id(cls, v: str) -> str:
         if not v or not v.strip():
             raise ValueError("Submission ID is required and cannot be empty")
@@ -84,9 +91,10 @@ class EditSubmissionRequest(BaseSubmissionRequest):
 class UpdateSubmissionStatusRequest(BaseSubmissionRequest):
     submission_id: str = Field(description="Submission Id")
     status_name: str = Field(description="New status name")
-    comments: Optional[str] = Field(None, description="Optional comments")
+    comments: str | None = Field(default=None, description="Optional comments")
 
     @field_validator("submission_id")
+    @classmethod
     def validate_submission_id(cls, v: str) -> str:
         if not v or not v.strip():
             raise ValueError("Submission ID is required and cannot be empty")
@@ -99,16 +107,17 @@ class UpdateSubmissionStatusRequest(BaseSubmissionRequest):
 
 class UpdateSubmissionOwnersRequest(BaseSubmissionRequest):
     submission_id: str = Field(description="Submission Id")
-    email_ids: List[EmailStr] = Field(
+    email_ids: list[EmailStr] = Field(
         min_length=1,
         description="List of email addresses, cannot pass both email_ids and phone_numbers",
     )
-    phone_numbers: Optional[List[str]] = Field(
+    phone_numbers: list[str] | None = Field(
         None,
         description="List of phone numbers, cannot pass both email_ids and phone_numbers",
     )
 
     @field_validator("submission_id")
+    @classmethod
     def validate_submission_id(cls, v: str) -> str:
         if not v or not v.strip():
             raise ValueError("Submission ID is required and cannot be empty")
@@ -120,11 +129,13 @@ class UpdateSubmissionOwnersRequest(BaseSubmissionRequest):
 
 
 class GetSubmissionsInExcelRequest(BaseSubmissionRequest):
-    filters: Optional[SubmissionFilters] = Field(None, description="Optional filters")
+    filters: SubmissionQuery | None = Field(
+        default=None, description="Optional filters"
+    )
     requesting_user_email_address: EmailStr = Field(
         description="Email of requesting user"
     )
-    field_names: Optional[List[str]] = Field(
+    field_names: list[str] | None = Field(
         None,
         description="List of field names to include in export, both standard and custom fields",
     )
@@ -134,4 +145,6 @@ class GetSubmissionsInExcelRequest(BaseSubmissionRequest):
 
 
 class GetSubmissionsCountRequest(BaseSubmissionRequest):
-    filters: Optional[SubmissionQuery] = Field(None, description="Optional filters")
+    filters: SubmissionQuery | None = Field(
+        default=None, description="Optional filters"
+    )

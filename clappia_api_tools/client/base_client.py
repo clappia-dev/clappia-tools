@@ -1,9 +1,11 @@
-from abc import ABC
-from typing import Optional
-from clappia_api_tools.utils.api_utils import ClappiaAPIKeyUtils, ClappiaAuthTokenUtils
+from clappia_api_tools.utils.api_utils import (
+    ClappiaAPIKeyUtils,
+    ClappiaAPIUtils,
+    ClappiaAuthTokenUtils,
+)
 
 
-class BaseClappiaClient(ABC):
+class BaseClappiaClient:
     """Base client with shared functionality for all Clappia clients.
 
     This class provides the common initialization and shared utilities
@@ -12,7 +14,7 @@ class BaseClappiaClient(ABC):
 
     def __init__(
         self,
-        base_url: Optional[str] = None,
+        base_url: str,
         timeout: int = 30,
     ):
         """Initialize base Clappia client.
@@ -22,6 +24,8 @@ class BaseClappiaClient(ABC):
         """
         self.base_url = base_url
         self.timeout = timeout
+        self.api_utils = ClappiaAPIUtils(base_url, timeout)
+
 
 class BaseAPIKeyClient(BaseClappiaClient):
     """Base client for API key authentication.
@@ -32,8 +36,8 @@ class BaseAPIKeyClient(BaseClappiaClient):
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
+        api_key: str,
+        base_url: str,
         timeout: int = 30,
     ):
         """Initialize base API key client.
@@ -56,9 +60,9 @@ class BaseAuthTokenClient(BaseClappiaClient):
 
     def __init__(
         self,
-        auth_token: Optional[str] = None,
-        workplace_id: Optional[str] = None,
-        base_url: Optional[str] = None,
+        auth_token: str,
+        workplace_id: str,
+        base_url: str,
         timeout: int = 30,
     ):
         """Initialize base auth token client.
@@ -70,6 +74,6 @@ class BaseAuthTokenClient(BaseClappiaClient):
             timeout: Request timeout in seconds.
         """
         super().__init__(base_url, timeout)
-        self.api_utils = ClappiaAuthTokenUtils(auth_token, workplace_id, base_url, timeout)
-
-
+        self.api_utils = ClappiaAuthTokenUtils(
+            auth_token, workplace_id, base_url, timeout
+        )

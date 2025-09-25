@@ -1,21 +1,23 @@
-from typing import Optional, Dict, Any, List
-from pydantic import BaseModel, Field
+from pydantic import Field
+
 from .base_response import BaseResponse
-from ...enums import TriggerType
 
 
 class WorkflowResponse(BaseResponse):
-    app_id: str = Field(None, description="App ID")
-    version_variable_name: Optional[str] = Field(None, description="Version variable name")
+    app_id: str = Field(description="App ID")
+    version_variable_name: str | None = Field(
+        default=None, description="Version variable name"
+    )
 
 
 class WorkflowStepResponse(BaseResponse):
-    app_id: str = Field(None, description="App ID")
-    trigger_type: TriggerType = Field(None, description="Trigger type")
-    step_variable_name: Optional[str] = Field(
-        None, description="Variable name of the affected step"
+    app_id: str = Field(description="App ID")
+    step_variable_name: str | None = Field(
+        default=None, description="Variable name of the affected step"
     )
-    parent_step_variable_name: Optional[str] = Field(
-        None, description="Parent step variable name"
+    parent_step_variable_name: str | None = Field(
+        default=None, description="Parent step variable name"
     )
-    version_variable_name: Optional[str] = Field(None, description="Version variable name")
+    version_variable_name: str | None = Field(
+        default=None, description="Version variable name"
+    )
