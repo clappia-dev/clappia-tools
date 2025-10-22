@@ -1,6 +1,8 @@
 from abc import ABC
 from typing import Any, Literal
 
+from pydantic import BaseModel
+
 from clappia_api_tools.models.request import (
     CreateSubmissionRequest,
     EditSubmissionRequest,
@@ -11,23 +13,19 @@ from clappia_api_tools.models.request import (
     UpdateSubmissionOwnersRequest,
     UpdateSubmissionStatusRequest,
 )
-from clappia_api_tools.models.response import (
-    SubmissionResponse,
-    SubmissionsAggregationResponse,
-    SubmissionsCountResponse,
-    SubmissionsExcelResponse,
-    SubmissionsResponse,
-)
 from clappia_api_tools.models.submission import (
     AggregationDimension,
     AggregationMetric,
     SubmissionQuery,
 )
-from clappia_api_tools.utils.logging_utils import get_logger
 
 from .base_client import BaseAPIKeyClient, BaseAuthTokenClient, BaseClappiaClient
 
-logger = get_logger(__name__)
+
+class ClientResponse(BaseModel):
+    success: bool
+    data: Any | None = None
+    error: str | None = None
 
 
 class SubmissionClient(BaseClappiaClient, ABC):
@@ -47,7 +45,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
         filters: SubmissionQuery | None = None,
         last_submission_id: str | None = None,
         requesting_user_email_address: str | None = None,
-    ) -> SubmissionsResponse:
+    ) -> ClientResponse:
         try:
             request = GetSubmissionsRequest(
                 app_id=app_id,
@@ -59,11 +57,17 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 requesting_user_email_address=requesting_user_email_address,
             )
         except Exception as e:
-            return SubmissionsResponse(success=False, message=str(e), app_id=app_id)
+            return ClientResponse(
+                success=False,
+                error=str(e)
+            )
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return SubmissionsResponse(success=False, message=env_error, app_id=app_id)
+            return ClientResponse(
+                success=False,
+                error=env_error
+            )
 
         payload: dict[str, Any] = {
             "appId": request.app_id,
@@ -75,30 +79,19 @@ class SubmissionClient(BaseClappiaClient, ABC):
         if request.filters:
             payload["filters"] = request.filters.to_dict()
 
-        logger.info(
-            f"Getting submissions for app_id: {app_id} with page_size: {page_size}"
-        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST", endpoint="submissions/getSubmissions", data=payload
         )
 
         if not success:
-            logger.error(f"Error: {error_message}")
-            return SubmissionsResponse(
-                success=False, message=error_message, app_id=app_id
+            return ClientResponse(
+                success=False,
+                error=error_message
             )
-
-        submissions_count = (
-            len(response_data.get("submissions", [])) if response_data else 0
-        )
-
-        return SubmissionsResponse(
+        return ClientResponse(
             success=True,
-            message=f"Successfully retrieved {submissions_count} submissions",
-            app_id=app_id,
-            metadata=response_data.get("metadata", {}) if response_data else {},
-            data=response_data.get("submissions", []) if response_data else [],
+            data=response_data
         )
 
     def get_submissions_aggregation(
@@ -111,7 +104,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
         page_size: int = 1000,
         filters: SubmissionQuery | None = None,
         requesting_user_email_address: str | None = None,
-    ) -> SubmissionsAggregationResponse:
+    ) -> ClientResponse:
         try:
             request = GetSubmissionsAggregationRequest(
                 app_id=app_id,
@@ -124,21 +117,22 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 requesting_user_email_address=requesting_user_email_address,
             )
         except Exception as e:
-            return SubmissionsAggregationResponse(
-                success=False, message=str(e), app_id=app_id
+            return ClientResponse(
+                success=False,
+                error=str(e)
             )
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return SubmissionsAggregationResponse(
-                success=False, message=env_error, app_id=app_id
+            return ClientResponse(
+                success=False,
+                error=env_error
             )
 
         if not request.dimensions and not request.aggregation_dimensions:
-            return SubmissionsAggregationResponse(
+            return ClientResponse(
                 success=False,
-                message="At least one dimension or aggregation dimension must be provided",
-                app_id=app_id,
+                error="At least one dimension or aggregation dimension must be provided"
             )
 
         payload: dict[str, Any] = {
@@ -158,9 +152,6 @@ class SubmissionClient(BaseClappiaClient, ABC):
         if request.filters:
             payload["filters"] = request.filters.to_dict()
 
-        logger.info(
-            f"Getting submissions aggregation for app_id: {app_id} with {len(request.dimensions or [])} dimensions and {len(request.aggregation_dimensions or [])} aggregation dimensions"
-        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
@@ -169,16 +160,14 @@ class SubmissionClient(BaseClappiaClient, ABC):
         )
 
         if not success:
-            logger.error(f"Error: {error_message}")
-            return SubmissionsAggregationResponse(
-                success=False, message=error_message, app_id=app_id
+            return ClientResponse(
+                success=False,
+                error=error_message
             )
 
-        return SubmissionsAggregationResponse(
+        return ClientResponse(
             success=True,
-            message="Successfully retrieved aggregated data",
-            app_id=app_id,
-            data=response_data,
+            data=response_data
         )
 
     def create_submission(
@@ -186,7 +175,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
         app_id: str,
         data: dict[str, Any],
         requesting_user_email_address: str | None = None,
-    ) -> SubmissionResponse:
+    ) -> ClientResponse:
         try:
             request = CreateSubmissionRequest(
                 app_id=app_id,
@@ -194,28 +183,22 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 requesting_user_email_address=requesting_user_email_address,
             )
         except Exception as e:
-            return SubmissionResponse(
+            return ClientResponse(
                 success=False,
-                message=str(e),
-                app_id=app_id,
-                operation="create_submission",
+                error=str(e)
             )
 
         if not data:
-            return SubmissionResponse(
+            return ClientResponse(
                 success=False,
-                message="data cannot be empty - at least one field is required",
-                app_id=app_id,
-                operation="create_submission",
+                error="data cannot be empty - at least one field is required"
             )
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return SubmissionResponse(
+            return ClientResponse(
                 success=False,
-                message=env_error,
-                app_id=app_id,
-                operation="create_submission",
+                error=env_error
             )
 
         payload: dict[str, Any] = {
@@ -224,30 +207,21 @@ class SubmissionClient(BaseClappiaClient, ABC):
             "requestingUserEmailAddress": request.requesting_user_email_address,
         }
 
-        logger.info(f"Creating submission for app_id: {app_id} with data: {data}")
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST", endpoint="submissions/create", data=payload
         )
 
         if not success:
-            logger.error(f"Error: {error_message}")
-            return SubmissionResponse(
+            return ClientResponse(
                 success=False,
-                message=error_message,
-                app_id=app_id,
-                operation="create_submission",
+                error=error_message
             )
 
-        submission_id = response_data.get("submissionId") if response_data else None
 
-        return SubmissionResponse(
+        return ClientResponse(
             success=True,
-            message="Successfully created submission",
-            app_id=app_id,
-            submission_id=submission_id,
-            data=response_data,
-            operation="create_submission",
+            data=response_data
         )
 
     def edit_submission(
@@ -256,7 +230,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
         submission_id: str,
         data: dict[str, Any],
         requesting_user_email_address: str | None = None,
-    ) -> SubmissionResponse:
+    ) -> ClientResponse:
         try:
             request = EditSubmissionRequest(
                 app_id=app_id,
@@ -265,31 +239,22 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 requesting_user_email_address=requesting_user_email_address,
             )
         except Exception as e:
-            return SubmissionResponse(
+            return ClientResponse(
                 success=False,
-                message=str(e),
-                app_id=app_id,
-                submission_id=submission_id,
-                operation="edit_submission",
+                error=str(e)
             )
 
         if not data:
-            return SubmissionResponse(
+            return ClientResponse(
                 success=False,
-                message="data cannot be empty - at least one field is required",
-                app_id=app_id,
-                submission_id=submission_id,
-                operation="edit_submission",
+                error="data cannot be empty - at least one field is required"
             )
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return SubmissionResponse(
+            return ClientResponse(
                 success=False,
-                message=env_error,
-                app_id=app_id,
-                submission_id=submission_id,
-                operation="edit_submission",
+                error=env_error
             )
 
         payload: dict[str, Any] = {
@@ -299,31 +264,20 @@ class SubmissionClient(BaseClappiaClient, ABC):
             "requestingUserEmailAddress": request.requesting_user_email_address,
         }
 
-        logger.info(
-            f"Editing submission {submission_id} for app_id: {app_id} with data: {data}"
-        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST", endpoint="submissions/edit", data=payload
         )
 
         if not success:
-            logger.error(f"Error: {error_message}")
-            return SubmissionResponse(
+            return ClientResponse(
                 success=False,
-                message=error_message,
-                app_id=app_id,
-                submission_id=submission_id,
-                operation="edit_submission",
+                error=error_message
             )
 
-        return SubmissionResponse(
+        return ClientResponse(
             success=True,
-            message="Successfully edited submission",
-            app_id=app_id,
-            submission_id=submission_id,
-            data=response_data,
-            operation="edit_submission",
+            data=response_data
         )
 
     def update_status(
@@ -333,7 +287,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
         status_name: str,
         comments: str | None = None,
         requesting_user_email_address: str | None = None,
-    ) -> SubmissionResponse:
+    ) -> ClientResponse:
         try:
             request = UpdateSubmissionStatusRequest(
                 app_id=app_id,
@@ -343,22 +297,16 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 requesting_user_email_address=requesting_user_email_address,
             )
         except Exception as e:
-            return SubmissionResponse(
+            return ClientResponse(
                 success=False,
-                message=str(e),
-                app_id=app_id,
-                submission_id=submission_id,
-                operation="update_status",
+                error=str(e)
             )
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return SubmissionResponse(
+            return ClientResponse(
                 success=False,
-                message=env_error,
-                app_id=app_id,
-                submission_id=submission_id,
-                operation="update_status",
+                error=env_error
             )
 
         status: dict[str, Any] = {
@@ -373,29 +321,20 @@ class SubmissionClient(BaseClappiaClient, ABC):
             "requestingUserEmailAddress": request.requesting_user_email_address,
         }
 
-        logger.info(f"Updating status for submission {submission_id} to {status_name}")
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST", endpoint="submissions/updateStatus", data=payload
         )
 
         if not success:
-            logger.error(f"Error: {error_message}")
-            return SubmissionResponse(
+            return ClientResponse(
                 success=False,
-                message=error_message,
-                app_id=app_id,
-                submission_id=submission_id,
-                operation="update_status",
+                error=error_message
             )
 
-        return SubmissionResponse(
+        return ClientResponse(
             success=True,
-            message=f"Successfully updated status to '{status_name} and added comments '{comments}'",
-            app_id=app_id,
-            submission_id=submission_id,
-            data=response_data,
-            operation="update_status",
+            data=response_data
         )
 
     def update_owners(
@@ -405,7 +344,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
         email_ids: list[str],
         phone_numbers: list[str] | None = None,
         requesting_user_email_address: str | None = None,
-    ) -> SubmissionResponse:
+    ) -> ClientResponse:
         try:
             request = UpdateSubmissionOwnersRequest(
                 app_id=app_id,
@@ -415,22 +354,16 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 requesting_user_email_address=requesting_user_email_address,
             )
         except Exception as e:
-            return SubmissionResponse(
+            return ClientResponse(
                 success=False,
-                message=str(e),
-                app_id=app_id,
-                submission_id=submission_id,
-                operation="update_owners",
+                error=str(e)
             )
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return SubmissionResponse(
+            return ClientResponse(
                 success=False,
-                message=env_error,
-                app_id=app_id,
-                submission_id=submission_id,
-                operation="update_owners",
+                error=env_error
             )
 
         payload: dict[str, Any] = {
@@ -440,29 +373,20 @@ class SubmissionClient(BaseClappiaClient, ABC):
             "requestingUserEmailAddress": request.requesting_user_email_address,
         }
 
-        logger.info(f"Updating owners for submission {submission_id}")
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST", endpoint="submissions/updateSubmissionOwners", data=payload
         )
 
         if not success:
-            logger.error(f"Error: {error_message}")
-            return SubmissionResponse(
+            return ClientResponse(
                 success=False,
-                message=error_message,
-                app_id=app_id,
-                submission_id=submission_id,
-                operation="update_owners",
+                error=error_message
             )
 
-        return SubmissionResponse(
+        return ClientResponse(
             success=True,
-            message=f"Successfully updated owners for owners {', '.join(request.email_ids)}",
-            app_id=app_id,
-            submission_id=submission_id,
-            data=response_data,
-            operation="update_owners",
+            data=response_data
         )
 
     def get_submissions_in_excel(
@@ -472,7 +396,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
         filters: SubmissionQuery | None = None,
         field_names: list[str] | None = None,
         format: Literal["Excel", "Csv"] = "Excel",
-    ) -> SubmissionsExcelResponse:
+    ) -> ClientResponse:
         try:
             request = GetSubmissionsInExcelRequest(
                 app_id=app_id,
@@ -482,14 +406,16 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 format=format,
             )
         except Exception as e:
-            return SubmissionsExcelResponse(
-                success=False, message=str(e), app_id=app_id
+            return ClientResponse(
+                success=False,
+                error=str(e)
             )
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return SubmissionsExcelResponse(
-                success=False, message=env_error, app_id=app_id
+            return ClientResponse(
+                success=False,
+                error=env_error
             )
 
         payload: dict[str, Any] = {
@@ -503,32 +429,26 @@ class SubmissionClient(BaseClappiaClient, ABC):
         if request.field_names:
             payload["fieldNames"] = request.field_names
 
-        logger.info(
-            f"Getting submissions in Excel for app_id: {app_id} with format: {format}"
-        )
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST", endpoint="submissions/getSubmissionsExcel", data=payload
         )
 
         if not success:
-            logger.error(f"Error: {error_message}")
-            return SubmissionsExcelResponse(
-                success=False, message=error_message, app_id=app_id
+            return ClientResponse(
+                success=False,
+                error=error_message
             )
 
         if response_data and response_data.get("statusCode") == 202:
-            return SubmissionsExcelResponse(
+            return ClientResponse(
                 success=True,
-                message=f"The {format} file has been sent to {requesting_user_email_address}",
-                app_id=app_id,
+                data=response_data
             )
         else:
-            return SubmissionsExcelResponse(
+            return ClientResponse(
                 success=True,
-                message="Excel file generated successfully and will be sent to the requesting user email address since the submissions are large in number",
-                app_id=app_id,
-                url=response_data.get("url", "") if response_data else "",
+                data=response_data
             )
 
     def get_submissions_count(
@@ -536,7 +456,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
         app_id: str,
         filters: SubmissionQuery | None = None,
         requesting_user_email_address: str | None = None,
-    ) -> SubmissionsCountResponse:
+    ) -> ClientResponse:
         try:
             request = GetSubmissionsCountRequest(
                 app_id=app_id,
@@ -544,14 +464,16 @@ class SubmissionClient(BaseClappiaClient, ABC):
                 requesting_user_email_address=requesting_user_email_address,
             )
         except Exception as e:
-            return SubmissionsCountResponse(
-                success=False, message=str(e), app_id=app_id
+            return ClientResponse(
+                success=False,
+                error=str(e)
             )
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return SubmissionsCountResponse(
-                success=False, message=env_error, app_id=app_id
+            return ClientResponse(
+                success=False,
+                error=env_error
             )
 
         payload: dict[str, Any] = {
@@ -562,34 +484,25 @@ class SubmissionClient(BaseClappiaClient, ABC):
         if request.filters:
             payload["filters"] = request.filters.to_dict()
 
-        logger.info(f"Getting submissions count for app_id: {app_id}")
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST", endpoint="submissions/getSubmissionsCount", data=payload
         )
 
         if not success:
-            logger.error(f"Error: {error_message}")
-            return SubmissionsCountResponse(
-                success=False, message=error_message, app_id=app_id
+            return ClientResponse(
+                success=False,
+                error=error_message
             )
 
-        return SubmissionsCountResponse(
+        return ClientResponse(
             success=True,
-            message="Successfully retrieved submissions count",
-            app_id=app_id,
-            total_count=response_data.get("totalCount") if response_data else None,
-            filtered_count=response_data.get("filteredCount")
-            if response_data
-            else None,
+            data=response_data
         )
 
 
 class SubmissionAPIKeyClient(BaseAPIKeyClient, SubmissionClient):
-    """Client for managing Clappia submissions with API key authentication.
-
-    This client combines API key authentication with all submission business logic.
-    """
+    """Client for managing Clappia submissions with API key authentication."""
 
     def __init__(
         self,
@@ -608,10 +521,7 @@ class SubmissionAPIKeyClient(BaseAPIKeyClient, SubmissionClient):
 
 
 class SubmissionAuthTokenClient(BaseAuthTokenClient, SubmissionClient):
-    """Client for managing Clappia submissions with auth token authentication.
-
-    This client combines auth token authentication with all submission business logic.
-    """
+    """Client for managing Clappia submissions with auth token authentication."""
 
     def __init__(
         self,
