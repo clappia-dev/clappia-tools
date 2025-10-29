@@ -152,7 +152,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/addChart", data=payload
+            method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
@@ -191,7 +191,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/updateChart", data=payload
+            method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
@@ -233,7 +233,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/addChart", data=payload
+            method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
@@ -272,7 +272,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/updateChart", data=payload
+            method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
@@ -313,7 +313,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/addChart", data=payload
+            method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
@@ -352,7 +352,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/updateChart", data=payload
+            method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
@@ -394,7 +394,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/addChart", data=payload
+            method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
@@ -433,7 +433,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/updateChart", data=payload
+            method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
@@ -475,7 +475,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/addChart", data=payload
+            method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
@@ -514,7 +514,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/updateChart", data=payload
+            method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
@@ -555,7 +555,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/addChart", data=payload
+            method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
@@ -594,7 +594,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/updateChart", data=payload
+            method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
@@ -636,7 +636,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/addChart", data=payload
+            method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
@@ -675,7 +675,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/updateChart", data=payload
+            method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
@@ -716,7 +716,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/addChart", data=payload
+            method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
@@ -755,7 +755,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/updateChart", data=payload
+            method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
@@ -792,7 +792,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             payload["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="POST", endpoint="analytics/reorderChart", data=payload
+            method="POST", endpoint="/reorderChart", data=payload
         )
 
         if not success:
@@ -823,7 +823,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
             params["versionVariableName"] = version_variable_name
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="GET", endpoint="analytics/getAppCharts", params=params
+            method="GET", endpoint="/getAppCharts", params=params
         )
 
         if not success:

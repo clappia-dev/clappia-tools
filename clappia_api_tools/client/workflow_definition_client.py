@@ -96,7 +96,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
 
         success, error_message, response_data = self.api_utils.make_request(
-            method="GET", endpoint="workflowdefinitionv2/getWorkflow", params=params
+            method="GET", endpoint="/getWorkflow", params=params
         )
 
         if not success:
@@ -406,7 +406,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/reorderWorkflowStep",
+            endpoint="/reorderWorkflowStep",
             data=payload,
         )
 
@@ -460,7 +460,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -509,7 +509,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -564,7 +564,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -614,7 +614,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -670,7 +670,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -720,7 +720,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -775,7 +775,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -825,7 +825,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -880,7 +880,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -929,7 +929,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -984,7 +984,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -1033,7 +1033,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -1088,7 +1088,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -1137,7 +1137,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -1192,7 +1192,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -1241,7 +1241,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -1296,7 +1296,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -1345,7 +1345,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -1400,7 +1400,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -1449,7 +1449,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -1504,7 +1504,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -1553,7 +1553,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -1608,7 +1608,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -1657,7 +1657,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -1712,7 +1712,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -1761,7 +1761,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -1816,7 +1816,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -1865,7 +1865,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -1920,7 +1920,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -1969,7 +1969,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -2024,7 +2024,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -2073,7 +2073,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
@@ -2128,7 +2128,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/addWorkflowStep",
+            endpoint="/addWorkflowStep",
             data=payload,
         )
 
@@ -2177,7 +2177,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = self.api_utils.make_request(
             method="POST",
-            endpoint="workflowdefinitionv2/updateWorkflowStep",
+            endpoint="/updateWorkflowStep",
             data=payload,
         )
 
