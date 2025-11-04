@@ -1,13 +1,12 @@
 from abc import ABC
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 from clappia_api_tools.enums import FieldType
+from clappia_api_tools.models.definition import ExternalPageDefinition
 from clappia_api_tools.models.request import (
     AddPageBreakRequest,
-    CreateAppRequest,
-    ReorderSectionRequest,
     UpdateAppMetadataRequest,
     UpdatePageBreakRequest,
     UpsertFieldAddressRequest,
@@ -66,7 +65,7 @@ class ClientResponse(BaseModel):
     data: Any | None = None
     error: str | None = None
 
-# Union type for all field request types
+
 FieldRequestUnion = (
     UpsertFieldTextRequest
     | UpsertFieldTextAreaRequest
@@ -115,6 +114,7 @@ FieldRequestUnion = (
     | UpsertFieldButtonRequest
 )
 
+
 class AppDefinitionClient(BaseClappiaClient, ABC):
     """Abstract client for managing Clappia app definitions.
 
@@ -125,32 +125,35 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
     Use AppDefinitionAPIKeyClient or AppDefinitionAuthTokenClient for actual usage.
     """
 
-    def create_app(self, request: CreateAppRequest) -> ClientResponse:
+    async def create_app(
+        self,
+        name: str,
+        requesting_user_email_address: EmailStr,
+        pages: list[ExternalPageDefinition],
+        description: str | None = None,
+    ) -> ClientResponse:
         """Create a new app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False, error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/createApp",
-            data=request.to_json(),
+            data={
+                "name": name,
+                "requestingUserEmailAddress": requesting_user_email_address,
+                "pages": [page.to_json() for page in pages],
+                "description": description,
+            },
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def get_definition(
+    async def get_definition(
         self, app_id: str, version_variable_name: str | None = None
     ) -> ClientResponse:
         """Retrieve the complete definition for a specific app."""
@@ -159,22 +162,16 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name:
             params["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="GET", endpoint="/getAppDefinition", params=params
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def add_field(
+    async def add_field(
         self,
         app_id: str,
         section_index: int,
@@ -186,7 +183,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
     ) -> ClientResponse:
         """Add a field to a Clappia app."""
         if isinstance(request, UpsertFieldTextRequest):
-            return self._add_text_field(
+            return await self._add_text_field(
                 app_id,
                 section_index,
                 field_index,
@@ -196,7 +193,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldTextAreaRequest):
-            return self._add_textarea_field(
+            return await self._add_textarea_field(
                 app_id,
                 section_index,
                 field_index,
@@ -206,7 +203,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldDependencyAppRequest):
-            return self._add_dependency_app_field(
+            return await self._add_dependency_app_field(
                 app_id,
                 section_index,
                 field_index,
@@ -216,7 +213,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldRestApiRequest):
-            return self._add_rest_api_field(
+            return await self._add_rest_api_field(
                 app_id,
                 section_index,
                 field_index,
@@ -226,7 +223,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldAddressRequest):
-            return self._add_address_field(
+            return await self._add_address_field(
                 app_id,
                 section_index,
                 field_index,
@@ -236,7 +233,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldDatabaseRequest):
-            return self._add_database_field(
+            return await self._add_database_field(
                 app_id,
                 section_index,
                 field_index,
@@ -246,7 +243,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldDateRequest):
-            return self._add_date_field(
+            return await self._add_date_field(
                 app_id,
                 section_index,
                 field_index,
@@ -256,7 +253,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldAIRequest):
-            return self._add_ai_field(
+            return await self._add_ai_field(
                 app_id,
                 section_index,
                 field_index,
@@ -266,7 +263,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldCodeRequest):
-            return self._add_code_field(
+            return await self._add_code_field(
                 app_id,
                 section_index,
                 field_index,
@@ -276,7 +273,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldCodeReaderRequest):
-            return self._add_code_reader_field(
+            return await self._add_code_reader_field(
                 app_id,
                 section_index,
                 field_index,
@@ -286,7 +283,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldEmailInputRequest):
-            return self._add_email_input_field(
+            return await self._add_email_input_field(
                 app_id,
                 section_index,
                 field_index,
@@ -296,7 +293,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldEmojiRequest):
-            return self._add_emoji_field(
+            return await self._add_emoji_field(
                 app_id,
                 section_index,
                 field_index,
@@ -306,7 +303,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldFileRequest):
-            return self._add_file_field(
+            return await self._add_file_field(
                 app_id,
                 section_index,
                 field_index,
@@ -316,7 +313,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldGpsLocationRequest):
-            return self._add_gps_location_field(
+            return await self._add_gps_location_field(
                 app_id,
                 section_index,
                 field_index,
@@ -326,7 +323,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldLiveTrackingRequest):
-            return self._add_live_tracking_field(
+            return await self._add_live_tracking_field(
                 app_id,
                 section_index,
                 field_index,
@@ -336,7 +333,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldManualAddressRequest):
-            return self._add_manual_address_field(
+            return await self._add_manual_address_field(
                 app_id,
                 section_index,
                 field_index,
@@ -346,7 +343,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldPhoneNumberRequest):
-            return self._add_phone_number_field(
+            return await self._add_phone_number_field(
                 app_id,
                 section_index,
                 field_index,
@@ -356,7 +353,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldProgressBarRequest):
-            return self._add_progress_bar_field(
+            return await self._add_progress_bar_field(
                 app_id,
                 section_index,
                 field_index,
@@ -366,7 +363,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldSignatureRequest):
-            return self._add_signature_field(
+            return await self._add_signature_field(
                 app_id,
                 section_index,
                 field_index,
@@ -376,7 +373,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldCounterRequest):
-            return self._add_counter_field(
+            return await self._add_counter_field(
                 app_id,
                 section_index,
                 field_index,
@@ -386,7 +383,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldSliderRequest):
-            return self._add_slider_field(
+            return await self._add_slider_field(
                 app_id,
                 section_index,
                 field_index,
@@ -396,7 +393,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldTimeRequest):
-            return self._add_time_field(
+            return await self._add_time_field(
                 app_id,
                 section_index,
                 field_index,
@@ -406,7 +403,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldToggleRequest):
-            return self._add_toggle_field(
+            return await self._add_toggle_field(
                 app_id,
                 section_index,
                 field_index,
@@ -416,7 +413,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldValidationRequest):
-            return self._add_validation_field(
+            return await self._add_validation_field(
                 app_id,
                 section_index,
                 field_index,
@@ -426,7 +423,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldVideoViewerRequest):
-            return self._add_video_viewer_field(
+            return await self._add_video_viewer_field(
                 app_id,
                 section_index,
                 field_index,
@@ -436,7 +433,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldVoiceRequest):
-            return self._add_voice_field(
+            return await self._add_voice_field(
                 app_id,
                 section_index,
                 field_index,
@@ -446,7 +443,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldFormulaRequest):
-            return self._add_formula_field(
+            return await self._add_formula_field(
                 app_id,
                 section_index,
                 field_index,
@@ -456,7 +453,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldImageViewerRequest):
-            return self._add_image_viewer_field(
+            return await self._add_image_viewer_field(
                 app_id,
                 section_index,
                 field_index,
@@ -466,7 +463,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldRichTextEditorRequest):
-            return self._add_rich_text_editor_field(
+            return await self._add_rich_text_editor_field(
                 app_id,
                 section_index,
                 field_index,
@@ -476,7 +473,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldNfcReaderRequest):
-            return self._add_nfc_reader_field(
+            return await self._add_nfc_reader_field(
                 app_id,
                 section_index,
                 field_index,
@@ -486,7 +483,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldNumberInputRequest):
-            return self._add_number_field(
+            return await self._add_number_field(
                 app_id,
                 section_index,
                 field_index,
@@ -496,7 +493,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldPdfViewerRequest):
-            return self._add_pdf_viewer_field(
+            return await self._add_pdf_viewer_field(
                 app_id,
                 section_index,
                 field_index,
@@ -506,7 +503,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldReadOnlyFileRequest):
-            return self._add_read_only_file_field(
+            return await self._add_read_only_file_field(
                 app_id,
                 section_index,
                 field_index,
@@ -516,7 +513,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldReadOnlyTextRequest):
-            return self._add_read_only_text_field(
+            return await self._add_read_only_text_field(
                 app_id,
                 section_index,
                 field_index,
@@ -526,7 +523,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldTagsRequest):
-            return self._add_tag_field(
+            return await self._add_tag_field(
                 app_id,
                 section_index,
                 field_index,
@@ -536,7 +533,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldUniqueSequentialRequest):
-            return self._add_unique_sequential_field(
+            return await self._add_unique_sequential_field(
                 app_id,
                 section_index,
                 field_index,
@@ -546,7 +543,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldDropdownRequest):
-            return self._add_drop_down_field(
+            return await self._add_drop_down_field(
                 app_id,
                 section_index,
                 field_index,
@@ -556,7 +553,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldRadioRequest):
-            return self._add_radio_field(
+            return await self._add_radio_field(
                 app_id,
                 section_index,
                 field_index,
@@ -566,7 +563,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldUrlInputRequest):
-            return self._add_url_input_field(
+            return await self._add_url_input_field(
                 app_id,
                 section_index,
                 field_index,
@@ -576,7 +573,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldCheckboxRequest):
-            return self._add_checkbox_field(
+            return await self._add_checkbox_field(
                 app_id,
                 section_index,
                 field_index,
@@ -586,7 +583,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldRazorpayPaymentGatewayRequest):
-            return self._add_razorpay_payment_gateway_field(
+            return await self._add_razorpay_payment_gateway_field(
                 app_id,
                 section_index,
                 field_index,
@@ -596,7 +593,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldEazypayPaymentGatewayRequest):
-            return self._add_eazypay_payment_gateway_field(
+            return await self._add_eazypay_payment_gateway_field(
                 app_id,
                 section_index,
                 field_index,
@@ -606,7 +603,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldPaypalPaymentGatewayRequest):
-            return self._add_paypal_payment_gateway_field(
+            return await self._add_paypal_payment_gateway_field(
                 app_id,
                 section_index,
                 field_index,
@@ -616,7 +613,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldStripePaymentGatewayRequest):
-            return self._add_stripe_payment_gateway_field(
+            return await self._add_stripe_payment_gateway_field(
                 app_id,
                 section_index,
                 field_index,
@@ -626,7 +623,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFieldButtonRequest):
-            return self._add_button_field(
+            return await self._add_button_field(
                 app_id,
                 section_index,
                 field_index,
@@ -638,7 +635,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         else:
             raise ValueError(f"Unsupported field request type: {type(request)}")
 
-    def update_field(
+    async def update_field(
         self,
         app_id: str,
         field_name: str,
@@ -647,189 +644,189 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
     ) -> ClientResponse:
         """Update a field in a Clappia app."""
         if isinstance(request, UpsertFieldTextRequest):
-            return self._update_text_field(
+            return await self._update_text_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldTextAreaRequest):
-            return self._update_textarea_field(
+            return await self._update_textarea_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldDependencyAppRequest):
-            return self._update_dependency_app_field(
+            return await self._update_dependency_app_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldRestApiRequest):
-            return self._update_rest_api_field(
+            return await self._update_rest_api_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldAddressRequest):
-            return self._update_address_field(
+            return await self._update_address_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldDatabaseRequest):
-            return self._update_database_field(
+            return await self._update_database_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldDateRequest):
-            return self._update_date_field(
+            return await self._update_date_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldAIRequest):
-            return self._update_ai_field(
+            return await self._update_ai_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldCodeRequest):
-            return self._update_code_field(
+            return await self._update_code_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldCodeReaderRequest):
-            return self._update_code_reader_field(
+            return await self._update_code_reader_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldEmailInputRequest):
-            return self._update_email_input_field(
+            return await self._update_email_input_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldEmojiRequest):
-            return self._update_emoji_field(
+            return await self._update_emoji_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldFileRequest):
-            return self._update_file_field(
+            return await self._update_file_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldGpsLocationRequest):
-            return self._update_gps_location_field(
+            return await self._update_gps_location_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldLiveTrackingRequest):
-            return self._update_live_tracking_field(
+            return await self._update_live_tracking_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldManualAddressRequest):
-            return self._update_manual_address_field(
+            return await self._update_manual_address_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldPhoneNumberRequest):
-            return self._update_phone_number_field(
+            return await self._update_phone_number_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldProgressBarRequest):
-            return self._update_progress_bar_field(
+            return await self._update_progress_bar_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldSignatureRequest):
-            return self._update_signature_field(
+            return await self._update_signature_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldCounterRequest):
-            return self._update_counter_field(
+            return await self._update_counter_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldSliderRequest):
-            return self._update_slider_field(
+            return await self._update_slider_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldTimeRequest):
-            return self._update_time_field(
+            return await self._update_time_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldToggleRequest):
-            return self._update_toggle_field(
+            return await self._update_toggle_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldValidationRequest):
-            return self._update_validation_field(
+            return await self._update_validation_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldVideoViewerRequest):
-            return self._update_video_viewer_field(
+            return await self._update_video_viewer_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldVoiceRequest):
-            return self._update_voice_field(
+            return await self._update_voice_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldFormulaRequest):
-            return self._update_formula_field(
+            return await self._update_formula_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldImageViewerRequest):
-            return self._update_image_viewer_field(
+            return await self._update_image_viewer_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldRichTextEditorRequest):
-            return self._update_rich_text_editor_field(
+            return await self._update_rich_text_editor_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldNfcReaderRequest):
-            return self._update_nfc_reader_field(
+            return await self._update_nfc_reader_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldNumberInputRequest):
-            return self._update_number_field(
+            return await self._update_number_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldPdfViewerRequest):
-            return self._update_pdf_viewer_field(
+            return await self._update_pdf_viewer_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldReadOnlyFileRequest):
-            return self._update_read_only_file_field(
+            return await self._update_read_only_file_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldReadOnlyTextRequest):
-            return self._update_read_only_text_field(
+            return await self._update_read_only_text_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldTagsRequest):
-            return self._update_tag_field(
+            return await self._update_tag_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldUniqueSequentialRequest):
-            return self._update_unique_sequential_field(
+            return await self._update_unique_sequential_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldDropdownRequest):
-            return self._update_drop_down_field(
+            return await self._update_drop_down_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldRadioRequest):
-            return self._update_radio_field(
+            return await self._update_radio_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldUrlInputRequest):
-            return self._update_url_input_field(
+            return await self._update_url_input_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldCheckboxRequest):
-            return self._update_checkbox_field(
+            return await self._update_checkbox_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldRazorpayPaymentGatewayRequest):
-            return self._update_razorpay_payment_gateway_field(
+            return await self._update_razorpay_payment_gateway_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldEazypayPaymentGatewayRequest):
-            return self._update_eazypay_payment_gateway_field(
+            return await self._update_eazypay_payment_gateway_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldPaypalPaymentGatewayRequest):
-            return self._update_paypal_payment_gateway_field(
+            return await self._update_paypal_payment_gateway_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldStripePaymentGatewayRequest):
-            return self._update_stripe_payment_gateway_field(
+            return await self._update_stripe_payment_gateway_field(
                 app_id, field_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFieldButtonRequest):
-            return self._update_button_field(
+            return await self._update_button_field(
                 app_id, field_name, request, version_variable_name
             )
         else:
             raise ValueError(f"Unsupported field request type: {type(request)}")
 
-    def reorder_field(
+    async def reorder_field(
         self,
         app_id: str,
         source_page_index: int,
@@ -843,10 +840,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Reorder a field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -860,24 +854,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/reorderField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_text_field(
+    async def _add_text_field(
         self,
         app_id: str,
         section_index: int,
@@ -890,10 +878,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a text field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -907,24 +892,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_text_field(
+    async def _update_text_field(
         self,
         app_id: str,
         field_name: str,
@@ -934,10 +913,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a text field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -947,25 +923,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # TextArea Field Methods
-    def _add_textarea_field(
+    async def _add_textarea_field(
         self,
         app_id: str,
         section_index: int,
@@ -978,10 +948,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a textarea field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -995,24 +962,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_textarea_field(
+    async def _update_textarea_field(
         self,
         app_id: str,
         field_name: str,
@@ -1022,10 +983,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a textarea field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1035,25 +993,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Dependency App Field Methods
-    def _add_dependency_app_field(
+    async def _add_dependency_app_field(
         self,
         app_id: str,
         section_index: int,
@@ -1066,10 +1018,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a dependency app field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1083,24 +1032,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_dependency_app_field(
+    async def _update_dependency_app_field(
         self,
         app_id: str,
         field_name: str,
@@ -1110,10 +1053,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a dependency app field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1123,25 +1063,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Rest API Field Methods
-    def _add_rest_api_field(
+    async def _add_rest_api_field(
         self,
         app_id: str,
         section_index: int,
@@ -1154,10 +1088,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a REST API field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1171,24 +1102,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_rest_api_field(
+    async def _update_rest_api_field(
         self,
         app_id: str,
         field_name: str,
@@ -1198,10 +1123,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a REST API field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1211,25 +1133,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-                return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Address Field Methods
-    def _add_address_field(
+    async def _add_address_field(
         self,
         app_id: str,
         section_index: int,
@@ -1242,10 +1158,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add an address field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1259,24 +1172,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_address_field(
+    async def _update_address_field(
         self,
         app_id: str,
         field_name: str,
@@ -1286,10 +1193,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update an address field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1299,25 +1203,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Database Field Methods
-    def _add_database_field(
+    async def _add_database_field(
         self,
         app_id: str,
         section_index: int,
@@ -1330,10 +1228,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a database field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1347,24 +1242,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_database_field(
+    async def _update_database_field(
         self,
         app_id: str,
         field_name: str,
@@ -1374,10 +1263,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a database field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1387,25 +1273,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Date Field Methods
-    def _add_date_field(
+    async def _add_date_field(
         self,
         app_id: str,
         section_index: int,
@@ -1418,10 +1298,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a date field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1435,24 +1312,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_date_field(
+    async def _update_date_field(
         self,
         app_id: str,
         field_name: str,
@@ -1462,10 +1333,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a date field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1475,25 +1343,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # AI Field Methods
-    def _add_ai_field(
+    async def _add_ai_field(
         self,
         app_id: str,
         section_index: int,
@@ -1506,10 +1368,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add an AI field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1523,24 +1382,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_ai_field(
+    async def _update_ai_field(
         self,
         app_id: str,
         field_name: str,
@@ -1550,10 +1403,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update an AI field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1563,25 +1413,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Code Field Methods
-    def _add_code_field(
+    async def _add_code_field(
         self,
         app_id: str,
         section_index: int,
@@ -1594,10 +1438,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a code field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1611,24 +1452,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_code_field(
+    async def _update_code_field(
         self,
         app_id: str,
         field_name: str,
@@ -1638,10 +1473,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a code field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1651,25 +1483,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Code Reader Field Methods
-    def _add_code_reader_field(
+    async def _add_code_reader_field(
         self,
         app_id: str,
         section_index: int,
@@ -1682,10 +1508,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a code reader field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1699,37 +1522,28 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_code_reader_field(
+    async def _update_code_reader_field(
         self,
         app_id: str,
         field_name: str,
         request: UpsertFieldCodeReaderRequest,
         version_variable_name: str | None = None,
-        ) -> ClientResponse:
+    ) -> ClientResponse:
         """Update a code reader field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1739,25 +1553,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Email Input Field Methods
-    def _add_email_input_field(
+    async def _add_email_input_field(
         self,
         app_id: str,
         section_index: int,
@@ -1770,10 +1578,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add an email input field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1787,24 +1592,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_email_input_field(
+    async def _update_email_input_field(
         self,
         app_id: str,
         field_name: str,
@@ -1814,10 +1613,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update an email input field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1827,25 +1623,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Emoji Field Methods
-    def _add_emoji_field(
+    async def _add_emoji_field(
         self,
         app_id: str,
         section_index: int,
@@ -1858,10 +1648,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add an emoji field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1875,24 +1662,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_emoji_field(
+    async def _update_emoji_field(
         self,
         app_id: str,
         field_name: str,
@@ -1902,10 +1683,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update an emoji field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1915,25 +1693,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # File Field Methods
-    def _add_file_field(
+    async def _add_file_field(
         self,
         app_id: str,
         section_index: int,
@@ -1946,10 +1718,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a file field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -1963,24 +1732,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_file_field(
+    async def _update_file_field(
         self,
         app_id: str,
         field_name: str,
@@ -1990,10 +1753,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a file field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2003,25 +1763,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # GPS Location Field Methods
-    def _add_gps_location_field(
+    async def _add_gps_location_field(
         self,
         app_id: str,
         section_index: int,
@@ -2034,10 +1788,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a GPS location field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2051,24 +1802,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_gps_location_field(
+    async def _update_gps_location_field(
         self,
         app_id: str,
         field_name: str,
@@ -2078,10 +1823,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a GPS location field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2091,25 +1833,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Live Tracking Field Methods
-    def _add_live_tracking_field(
+    async def _add_live_tracking_field(
         self,
         app_id: str,
         section_index: int,
@@ -2122,10 +1858,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a live tracking field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2139,24 +1872,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_live_tracking_field(
+    async def _update_live_tracking_field(
         self,
         app_id: str,
         field_name: str,
@@ -2166,10 +1893,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a live tracking field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-                    return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2179,25 +1903,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Manual Address Field Methods
-    def _add_manual_address_field(
+    async def _add_manual_address_field(
         self,
         app_id: str,
         section_index: int,
@@ -2210,10 +1928,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a manual address field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2227,24 +1942,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-                    return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_manual_address_field(
+    async def _update_manual_address_field(
         self,
         app_id: str,
         field_name: str,
@@ -2254,10 +1963,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a manual address field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2267,25 +1973,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Phone Number Field Methods
-    def _add_phone_number_field(
+    async def _add_phone_number_field(
         self,
         app_id: str,
         section_index: int,
@@ -2298,10 +1998,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a phone number field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-                    return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2315,24 +2012,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_phone_number_field(
+    async def _update_phone_number_field(
         self,
         app_id: str,
         field_name: str,
@@ -2342,10 +2033,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a phone number field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2355,25 +2043,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                    error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Progress Bar Field Methods
-    def _add_progress_bar_field(
+    async def _add_progress_bar_field(
         self,
         app_id: str,
         section_index: int,
@@ -2386,10 +2068,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a progress bar field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2403,24 +2082,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_progress_bar_field(
+    async def _update_progress_bar_field(
         self,
         app_id: str,
         field_name: str,
@@ -2430,10 +2103,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a progress bar field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2443,25 +2113,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-                    return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Signature Field Methods
-    def _add_signature_field(
+    async def _add_signature_field(
         self,
         app_id: str,
         section_index: int,
@@ -2474,10 +2138,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a signature field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2491,24 +2152,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                            error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_signature_field(
+    async def _update_signature_field(
         self,
         app_id: str,
         field_name: str,
@@ -2518,10 +2173,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a signature field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2531,25 +2183,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Counter Field Methods
-    def _add_counter_field(
+    async def _add_counter_field(
         self,
         app_id: str,
         section_index: int,
@@ -2562,10 +2208,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a counter field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2579,24 +2222,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-                    return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_counter_field(
+    async def _update_counter_field(
         self,
         app_id: str,
         field_name: str,
@@ -2606,10 +2243,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a counter field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2619,25 +2253,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Slider Field Methods
-    def _add_slider_field(
+    async def _add_slider_field(
         self,
         app_id: str,
         section_index: int,
@@ -2646,14 +2274,11 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         field_name: str,
         request: UpsertFieldSliderRequest,
         version_variable_name: str | None = None,
-        ) -> ClientResponse:
+    ) -> ClientResponse:
         """Add a slider field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-                return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2667,24 +2292,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_slider_field(
+    async def _update_slider_field(
         self,
         app_id: str,
         field_name: str,
@@ -2694,10 +2313,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a slider field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2707,25 +2323,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Time Field Methods
-    def _add_time_field(
+    async def _add_time_field(
         self,
         app_id: str,
         section_index: int,
@@ -2738,10 +2348,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a time field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2755,37 +2362,28 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_time_field(
+    async def _update_time_field(
         self,
         app_id: str,
         field_name: str,
         request: UpsertFieldTimeRequest,
         version_variable_name: str | None = None,
-            ) -> ClientResponse:
+    ) -> ClientResponse:
         """Update a time field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2795,25 +2393,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-                return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Toggle Field Methods
-    def _add_toggle_field(
+    async def _add_toggle_field(
         self,
         app_id: str,
         section_index: int,
@@ -2826,10 +2418,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a toggle field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2843,24 +2432,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_toggle_field(
+    async def _update_toggle_field(
         self,
         app_id: str,
         field_name: str,
@@ -2870,10 +2453,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a toggle field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2883,25 +2463,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Validation Field Methods
-    def _add_validation_field(
+    async def _add_validation_field(
         self,
         app_id: str,
         section_index: int,
@@ -2914,10 +2488,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a validation field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-                    return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2931,24 +2502,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_validation_field(
+    async def _update_validation_field(
         self,
         app_id: str,
         field_name: str,
@@ -2958,10 +2523,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a validation field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -2971,25 +2533,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-                return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Video Viewer Field Methods
-    def _add_video_viewer_field(
+    async def _add_video_viewer_field(
         self,
         app_id: str,
         section_index: int,
@@ -3002,10 +2558,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a video viewer field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-                return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3019,24 +2572,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_video_viewer_field(
+    async def _update_video_viewer_field(
         self,
         app_id: str,
         field_name: str,
@@ -3046,10 +2593,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a video viewer field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3059,25 +2603,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Voice Field Methods
-    def _add_voice_field(
+    async def _add_voice_field(
         self,
         app_id: str,
         section_index: int,
@@ -3090,10 +2628,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a voice field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-                return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3107,24 +2642,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_voice_field(
+    async def _update_voice_field(
         self,
         app_id: str,
         field_name: str,
@@ -3134,10 +2663,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a voice field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3147,25 +2673,19 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-                return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Formula Field Methods
-    def _add_formula_field(
+    async def _add_formula_field(
         self,
         app_id: str,
         section_index: int,
@@ -3178,10 +2698,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a formula field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3195,24 +2712,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_formula_field(
+    async def _update_formula_field(
         self,
         app_id: str,
         field_name: str,
@@ -3222,10 +2733,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a formula field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3235,24 +2743,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_image_viewer_field(
+    async def _add_image_viewer_field(
         self,
         app_id: str,
         section_index: int,
@@ -3265,10 +2767,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add an image field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3282,24 +2781,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_image_viewer_field(
+    async def _update_image_viewer_field(
         self,
         app_id: str,
         field_name: str,
@@ -3309,10 +2802,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update an image field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3322,24 +2812,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                        error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_rich_text_editor_field(
+    async def _add_rich_text_editor_field(
         self,
         app_id: str,
         section_index: int,
@@ -3352,10 +2836,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a rich text editor field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3369,24 +2850,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_rich_text_editor_field(
+    async def _update_rich_text_editor_field(
         self,
         app_id: str,
         field_name: str,
@@ -3396,10 +2871,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a rich text editor field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3409,24 +2881,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_nfc_reader_field(
+    async def _add_nfc_reader_field(
         self,
         app_id: str,
         section_index: int,
@@ -3439,10 +2905,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add an NFC reader field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-                return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3456,24 +2919,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_nfc_reader_field(
+    async def _update_nfc_reader_field(
         self,
         app_id: str,
         field_name: str,
@@ -3483,10 +2940,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update an NFC reader field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3496,24 +2950,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_number_field(
+    async def _add_number_field(
         self,
         app_id: str,
         section_index: int,
@@ -3526,10 +2974,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a number field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3543,24 +2988,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_number_field(
+    async def _update_number_field(
         self,
         app_id: str,
         field_name: str,
@@ -3570,10 +3009,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a number field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3583,24 +3019,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_pdf_viewer_field(
+    async def _add_pdf_viewer_field(
         self,
         app_id: str,
         section_index: int,
@@ -3613,10 +3043,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a PDF viewer field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3630,37 +3057,28 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_pdf_viewer_field(
+    async def _update_pdf_viewer_field(
         self,
         app_id: str,
         field_name: str,
         request: UpsertFieldPdfViewerRequest,
         version_variable_name: str | None = None,
-            ) -> ClientResponse:
+    ) -> ClientResponse:
         """Update a PDF viewer field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-                    return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3670,24 +3088,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_read_only_file_field(
+    async def _add_read_only_file_field(
         self,
         app_id: str,
         section_index: int,
@@ -3700,10 +3112,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a read only field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3717,24 +3126,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_read_only_file_field(
+    async def _update_read_only_file_field(
         self,
         app_id: str,
         field_name: str,
@@ -3744,10 +3147,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a read only field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3757,24 +3157,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_read_only_text_field(
+    async def _add_read_only_text_field(
         self,
         app_id: str,
         section_index: int,
@@ -3787,10 +3181,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a read only text field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3804,24 +3195,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-                return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_read_only_text_field(
+    async def _update_read_only_text_field(
         self,
         app_id: str,
         field_name: str,
@@ -3831,10 +3216,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a read only text field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3844,24 +3226,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-                data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_tag_field(
+    async def _add_tag_field(
         self,
         app_id: str,
         section_index: int,
@@ -3874,10 +3250,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a tag field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3891,24 +3264,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_tag_field(
+    async def _update_tag_field(
         self,
         app_id: str,
         field_name: str,
@@ -3919,10 +3286,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3932,24 +3296,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-                return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_unique_sequential_field(
+    async def _add_unique_sequential_field(
         self,
         app_id: str,
         section_index: int,
@@ -3962,10 +3320,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a unique sequential field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -3979,24 +3334,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_unique_sequential_field(
+    async def _update_unique_sequential_field(
         self,
         app_id: str,
         field_name: str,
@@ -4006,10 +3355,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a unique sequential field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-                return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4019,24 +3365,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_drop_down_field(
+    async def _add_drop_down_field(
         self,
         app_id: str,
         section_index: int,
@@ -4049,10 +3389,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a drop down field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4066,24 +3403,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_drop_down_field(
+    async def _update_drop_down_field(
         self,
         app_id: str,
         field_name: str,
@@ -4093,10 +3424,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a drop down field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4106,24 +3434,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_radio_field(
+    async def _add_radio_field(
         self,
         app_id: str,
         section_index: int,
@@ -4136,10 +3458,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a radio field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4153,24 +3472,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_radio_field(
+    async def _update_radio_field(
         self,
         app_id: str,
         field_name: str,
@@ -4180,10 +3493,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a radio field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4193,24 +3503,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_url_input_field(
+    async def _add_url_input_field(
         self,
         app_id: str,
         section_index: int,
@@ -4223,10 +3527,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a URL input field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4240,24 +3541,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_url_input_field(
+    async def _update_url_input_field(
         self,
         app_id: str,
         field_name: str,
@@ -4267,10 +3562,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a URL input field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4280,24 +3572,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_checkbox_field(
+    async def _add_checkbox_field(
         self,
         app_id: str,
         section_index: int,
@@ -4310,10 +3596,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a checkbox field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4327,24 +3610,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_checkbox_field(
+    async def _update_checkbox_field(
         self,
         app_id: str,
         field_name: str,
@@ -4354,10 +3631,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a checkbox field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4367,24 +3641,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_razorpay_payment_gateway_field(
+    async def _add_razorpay_payment_gateway_field(
         self,
         app_id: str,
         section_index: int,
@@ -4397,10 +3665,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a razorpay payment gateway field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4414,24 +3679,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_razorpay_payment_gateway_field(
+    async def _update_razorpay_payment_gateway_field(
         self,
         app_id: str,
         field_name: str,
@@ -4441,10 +3700,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a razorpay payment gateway field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4454,7 +3710,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
@@ -4466,12 +3722,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 error=error_message,
             )
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_eazypay_payment_gateway_field(
+    async def _add_eazypay_payment_gateway_field(
         self,
         app_id: str,
         section_index: int,
@@ -4484,10 +3737,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add an eazypay payment gateway field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4501,7 +3751,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
@@ -4513,12 +3763,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 error=error_message,
             )
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_eazypay_payment_gateway_field(
+    async def _update_eazypay_payment_gateway_field(
         self,
         app_id: str,
         field_name: str,
@@ -4528,10 +3775,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update an eazypay payment gateway field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4541,24 +3785,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_paypal_payment_gateway_field(
+    async def _add_paypal_payment_gateway_field(
         self,
         app_id: str,
         section_index: int,
@@ -4571,10 +3809,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a paypal payment gateway field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4588,24 +3823,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_paypal_payment_gateway_field(
+    async def _update_paypal_payment_gateway_field(
         self,
         app_id: str,
         field_name: str,
@@ -4615,10 +3844,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a paypal payment gateway field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4628,7 +3854,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
@@ -4640,12 +3866,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 error=error_message,
             )
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_stripe_payment_gateway_field(
+    async def _add_stripe_payment_gateway_field(
         self,
         app_id: str,
         section_index: int,
@@ -4658,10 +3881,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a stripe payment gateway field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4675,7 +3895,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
@@ -4687,12 +3907,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 error=error_message,
             )
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_stripe_payment_gateway_field(
+    async def _update_stripe_payment_gateway_field(
         self,
         app_id: str,
         field_name: str,
@@ -4702,10 +3919,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a stripe payment gateway field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4715,24 +3929,18 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_button_field(
+    async def _add_button_field(
         self,
         app_id: str,
         section_index: int,
@@ -4745,10 +3953,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Add a button field to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4762,7 +3967,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addField",
             data=payload,
@@ -4774,12 +3979,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 error=error_message,
             )
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_button_field(
+    async def _update_button_field(
         self,
         app_id: str,
         field_name: str,
@@ -4789,10 +3991,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update a button field in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -4802,80 +4001,68 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateField",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def add_page_break(
-        self, request: AddPageBreakRequest
+    async def add_page_break(
+        self,
+        app_id: str,
+        request: AddPageBreakRequest,
+        version_variable_name: str | None = None,
     ) -> ClientResponse:
         """Add a page break to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
-            "appId": request.app_id,
+            "appId": app_id,
             "pageIndex": request.page_index,
             "sectionIndex": request.section_index,
             "pageMetadata": request.page_metadata.to_json(),
         }
-        if request.version_variable_name is not None:
-            payload["versionVariableName"] = request.version_variable_name
+        if version_variable_name is not None:
+            payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addPageBreak",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def update_page(
-        self, request: UpdatePageBreakRequest
+    async def update_page(
+        self,
+        app_id: str,
+        request: UpdatePageBreakRequest,
+        version_variable_name: str | None = None,
     ) -> ClientResponse:
         """Update page break settings in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
-            "appId": request.app_id.strip(),
+            "appId": app_id,
             "pageIndex": request.page_index,
             "pageMetadata": request.page_metadata.to_json(),
         }
-        if request.version_variable_name is not None:
-            payload["versionVariableName"] = request.version_variable_name
+        if version_variable_name is not None:
+            payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updatePageBreak",
             data=payload,
@@ -4888,36 +4075,37 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 data=response_data,
             )
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def reorder_section(
-        self, request: ReorderSectionRequest
+    async def reorder_section(
+        self,
+        app_id: str,
+        section_index: int,
+        page_index: int,
+        source_section_index: int,
+        target_section_index: int,
+        source_page_index: int,
+        target_page_index: int,
+        version_variable_name: str | None = None,
     ) -> ClientResponse:
         """Reorder a section within an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
-            "appId": request.app_id.strip(),
-            "sourceSectionIndex": request.source_section_index,
-            "targetSectionIndex": request.target_section_index,
+            "appId": app_id,
+            "sectionIndex": section_index,
+            "pageIndex": page_index,
+            "sourceSectionIndex": source_section_index,
+            "targetSectionIndex": target_section_index,
+            "sourcePageIndex": source_page_index,
+            "targetPageIndex": target_page_index,
         }
-        if request.version_variable_name is not None:
-            payload["versionVariableName"] = request.version_variable_name
+        if version_variable_name is not None:
+            payload["versionVariableName"] = version_variable_name
 
-        if request.source_page_index is not None:
-            payload["sourcePageIndex"] = request.source_page_index
-        if request.target_page_index is not None:
-            payload["targetPageIndex"] = request.target_page_index
-
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/reorderSection",
             data=payload,
@@ -4930,27 +4118,31 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 data=response_data,
             )
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def add_section(
-        self, request: UpsertSectionRequest
+    async def add_section(
+        self,
+        app_id: str,
+        page_index: int,
+        section_index: int,
+        request: UpsertSectionRequest,
+        version_variable_name: str | None = None,
     ) -> ClientResponse:
         """Add a section to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
-        payload = request.to_json()
-        if request.version_variable_name is not None:
-            payload["versionVariableName"] = request.version_variable_name
+        payload = {
+            "appId": app_id,
+            "pageIndex": page_index,
+            "sectionIndex": section_index,
+            **request.to_json(),
+        }
+        if version_variable_name is not None:
+            payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addSection",
             data=payload,
@@ -4963,27 +4155,31 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 data=response_data,
             )
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def update_section(
-        self, request: UpsertSectionRequest
+    async def update_section(
+        self,
+        app_id: str,
+        section_index: int,
+        page_index: int,
+        request: UpsertSectionRequest,
+        version_variable_name: str | None = None,
     ) -> ClientResponse:
         """Update a section in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
-        payload = request.to_json()
-        if request.version_variable_name is not None:
-            payload["versionVariableName"] = request.version_variable_name
+        payload = {
+            "appId": app_id,
+            "sectionIndex": section_index,
+            "pageIndex": page_index,
+            **request.to_json(),
+        }
+        if version_variable_name is not None:
+            payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateSection",
             data=payload,
@@ -4996,84 +4192,60 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 data=response_data,
             )
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def get_app_versions(self, app_id: str) -> ClientResponse:
+    async def get_app_versions(self, app_id: str) -> ClientResponse:
         """Get an app version."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         params = {
             "appId": app_id,
         }
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="GET",
             endpoint="/getAppVersions",
             params=params,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def create_new_app_version(
+    async def create_new_app_version(
         self, app_id: str, version_name: str
     ) -> ClientResponse:
         """Create a new app version."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
             "versionName": version_name,
         }
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/createNewAppVersion",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def update_app_version(
+    async def update_app_version(
         self, app_id: str, initial_version_name: str, new_version_name: str
     ) -> ClientResponse:
         """Update an app version."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -5081,57 +4253,42 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             "newVersionName": new_version_name,
         }
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateAppVersion",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def update_live_version(
+    async def update_live_version(
         self, app_id: str, version_variable_name: str
     ) -> ClientResponse:
         """Update the live app version."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
             "versionVariableName": version_variable_name,
         }
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateLiveVersion",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def update_app_metadata(
+    async def update_app_metadata(
         self,
         app_id: str,
         request: UpdateAppMetadataRequest,
@@ -5140,10 +4297,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         """Update app metadata."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -5152,22 +4306,20 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateAppMetadata",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
+
+    async def close(self) -> None:
+        """Close the underlying HTTP client and clean up resources."""
+        await self.api_utils.close()
 
 
 class AppDefinitionAPIKeyClient(BaseAPIKeyClient, AppDefinitionClient):
@@ -5190,7 +4342,7 @@ class AppDefinitionAPIKeyClient(BaseAPIKeyClient, AppDefinitionClient):
 
 
 class AppDefinitionAuthTokenClient(BaseAuthTokenClient, AppDefinitionClient):
-    """Client for managing Clappia app definitions with auth token authentication. """
+    """Client for managing Clappia app definitions with auth token authentication."""
 
     def __init__(
         self,

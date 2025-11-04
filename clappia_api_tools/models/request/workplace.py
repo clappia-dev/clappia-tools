@@ -2,20 +2,18 @@ import re
 from typing import Any
 
 from pydantic import (
-    BaseModel,
     EmailStr,
     Field,
     field_validator,
     model_validator,
 )
 
-from clappia_api_tools.models.permissions import Permission
-from clappia_api_tools.utils.utils import Utils
+from ...utils import Utils
+from ..base_model import BaseFieldComponent
+from ..workplace import Permission
 
-utils = Utils()
 
-
-class BaseWorkplaceRequest(BaseModel):
+class BaseWorkplaceRequest(BaseFieldComponent):
     """Base class for workplace request models with common fields"""
 
     email_address: EmailStr | None = Field(
@@ -31,6 +29,7 @@ class BaseWorkplaceRequest(BaseModel):
     @classmethod
     def validate_phone_number(cls, v: str | None) -> str | None:
         if v is not None:
+            utils = Utils()
             return utils.validate_phone_number(v)
         return v
 

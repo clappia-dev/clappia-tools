@@ -1,7 +1,4 @@
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
 repos:
-  # Standard pre-commit hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -11,31 +8,24 @@ repos:
       - id: check-yaml
       - id: check-toml
       - id: check-json
-      - id: check-xml
       - id: check-merge-conflict
       - id: check-added-large-files
-        args: ['--maxkb=1000']
+        args: ["--maxkb=1000"]
       - id: check-case-conflict
       - id: check-docstring-first
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
       - id: debug-statements
       - id: mixed-line-ending
-        args: ['--fix=lf']
-      - id: name-tests-test
-        args: ['--pytest-test-first']
+        args: ["--fix=lf"]
 
-  # Ruff linter and formatter (replaces flake8, isort, black)
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.6
     hooks:
-      # Run the linter
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
-      # Run the formatter
       - id: ruff-format
 
-  # MyPy type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.7.1
     hooks:
@@ -45,81 +35,14 @@ repos:
           - pydantic
         args: [--strict, --ignore-missing-imports]
 
-  # Security scanning with bandit
   - repo: https://github.com/PyCQA/bandit
     rev: 1.7.5
     hooks:
       - id: bandit
-        args: ['-c', 'pyproject.toml']
-        additional_dependencies: ['bandit[toml]']
+        args: ["-c", "pyproject.toml"]
+        additional_dependencies: ["bandit[toml]"]
 
-  # Check for common security issues
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
-    hooks:
-      - id: detect-secrets
-        args: ['--baseline', '.secrets.baseline']
-        exclude: |
-          (?x)^(
-            .*\.lock$|
-            .*\.min\.js$|
-            .*\.min\.css$
-          )$
-
-  # Documentation checks
-  - repo: https://github.com/pycqa/doc8
-    rev: v1.1.1
-    hooks:
-      - id: doc8
-        args: ['--max-line-length=88']
-
-  # Check requirements files
   - repo: https://github.com/PyCQA/pip-audit
     rev: v2.6.1
     hooks:
       - id: pip-audit
-
-  # Dockerfile linting (if you have Docker files)
-  - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0
-    hooks:
-      - id: hadolint
-        args: ['--ignore', 'DL3008', '--ignore', 'DL3009']
-
-  # YAML formatting
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.3
-    hooks:
-      - id: prettier
-        types_or: [yaml]
-        exclude: |
-          (?x)^(
-            \.pre-commit-config\.yaml$|
-            \.github/.*\.yml$
-          )$
-
-  # Shell script checking
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.6
-    hooks:
-      - id: shellcheck
-
-  # Commit message formatting
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: v3.12.0
-    hooks:
-      - id: commitizen
-        stages: [commit-msg]
-
-# Configuration for the pre-commit framework
-ci:
-  autofix_prs: true
-  autofix_commit_msg: |
-    [pre-commit.ci] auto fixes from pre-commit hooks
-
-    for more information, see https://pre-commit.ci
-  autoupdate_branch: ''
-  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
-  autoupdate_schedule: weekly
-  skip: []
-  submodules: false

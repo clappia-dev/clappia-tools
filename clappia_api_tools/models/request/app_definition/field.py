@@ -1,11 +1,77 @@
 import json
 import re
-from typing import Any, Literal
+from typing import Literal
 
-from pydantic import EmailStr, Field, field_validator, model_validator
+from pydantic import (
+    EmailStr,
+    Field,
+    field_validator,
+    model_validator,
+)
 
-from ..base import BaseUpsertFieldRequest, UniqueListValidator, ValidatedString
-from ..model import FilterField, RestApiOutputField, SortField
+from ....utils import Utils
+from ...base_model import BaseFieldComponent
+from ...definition import (
+    ActionDetails,
+    FilterField,
+)
+from ...resapi_output import RestApiOutputField
+from ...sort_field import SortField
+from ...static_attachment import StaticAttachment
+
+
+class BaseUpsertFieldRequest(BaseFieldComponent):
+    label: str = Field(description="Display label for the field")
+    new_field_name: str | None = Field(
+        None,
+        description="New field variable name for the field, mandatory if field name needs to be changed",
+    )
+    description: str | None = Field(
+        None,
+        description="Field description, Example: This is a description for the field",
+    )
+    placeholder: str | None = Field(default=None, description="Field placeholder")
+    dependency_app_id: str | None = Field(
+        None, description="Dependency app ID, must be a valid Clappia app ID"
+    )
+    server_url: str | None = Field(
+        None, description="Server URL, mandatory if field type is getDataFromRestApis"
+    )
+    display_condition: str | None = Field(
+        None,
+        description=(
+            "Display condition Example: {field_name} == 'value'. Clappia supports multiple "
+            "arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, "
+            "AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME "
+            "operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. "
+            "Example: '=SUM({field_name1,field_name2}) + IF({field_name3}>10, 'Yes', 'No')'"
+        ),
+    )
+    required: bool = Field(default=False, description="Whether field is required")
+    hidden: bool = Field(default=False, description="Whether field is hidden")
+    is_editable: bool = Field(default=True, description="Whether field is editable")
+    editability_condition: str | None = Field(
+        None,
+        description=(
+            "Editability condition, Example: {field_name} == 'value'. Clappia supports multiple "
+            "arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, "
+            "AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME "
+            "operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. "
+            "Example: '=SUM({field_name1,field_name2}) + IF({field_name3}>10, 'Yes', 'No')'"
+        ),
+    )
+    default_value: str | None = Field(
+        None, description="Default value, Example: 'value'"
+    )
+    block_width_percentage_desktop: int = Field(default=50, description="Desktop width")
+    block_width_percentage_mobile: int = Field(default=100, description="Mobile width")
+    retain_values: bool = Field(default=True, description="Retain values when hidden")
+
+    @field_validator("label")
+    @classmethod
+    def validate_label(cls, v: str) -> str | None:
+        return Utils.non_empty_string_validator(v, "Label")
+
 
 VALID_EMOJIS = [
     "⭐",
@@ -72,7 +138,13 @@ class UpsertFieldTextRequest(BaseUpsertFieldRequest):
     )
     custom_validation_condition: str | None = Field(
         None,
-        description="Custom validation condition, supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: {field_name} <> 'value' or {field_name} > 10",
+        description=(
+            "Custom validation condition, supports multiple arithmetic operations (SUM, DIFF, "
+            "PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations "
+            "(CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) "
+            "that are supported by Microsoft Excel. Example: {field_name} <> 'value' or "
+            "{field_name} > 10"
+        ),
     )
     custom_validation_error_message: str | None = Field(
         None, description="Custom validation error message"
@@ -140,12 +212,12 @@ class UpsertFieldDependencyAppRequest(BaseUpsertFieldRequest):
     @field_validator("key_field_names")
     @classmethod
     def validate_unique_key_fields(cls, v: list[str]) -> list[str] | None:
-        return UniqueListValidator.validate_unique_strings(v, "Key field names")
+        return Utils.validate_unique_strings(v, "Key field names")
 
     @field_validator("other_field_names")
     @classmethod
     def validate_unique_other_fields(cls, v: list[str] | None) -> list[str] | None:
-        return UniqueListValidator.validate_unique_strings(v, "Other field names")
+        return Utils.validate_unique_strings(v, "Other field names")
 
     @field_validator("sort_fields")
     @classmethod
@@ -189,7 +261,7 @@ class UpsertFieldRestApiRequest(BaseUpsertFieldRequest):
     @field_validator("headers", "body")
     @classmethod
     def validate_json_strings(cls, v: str | None) -> str | None:
-        return ValidatedString.json_string_validator(v)
+        return Utils.json_string_validator(v)
 
     @field_validator("response_mapping")
     @classmethod
@@ -243,15 +315,7 @@ class UpsertFieldAddressRequest(BaseUpsertFieldRequest):
     @field_validator("countries_list")
     @classmethod
     def validate_countries_list(cls, v: list[str] | None) -> list[str] | None:
-        if v is not None:
-            if len(set(v)) != len(v):
-                raise ValueError("Countries list must contain unique country codes")
-            for country_code in v:
-                if not country_code or not country_code.strip():
-                    raise ValueError("Country codes cannot be empty")
-                if not re.match(r"^[A-Z]{2}$", country_code.strip()):
-                    raise ValueError("Country codes must be 2-letter uppercase codes")
-        return v
+        return Utils.validate_countries_list(v)
 
 
 class UpsertFieldDatabaseRequest(BaseUpsertFieldRequest):
@@ -282,23 +346,17 @@ class UpsertFieldDatabaseRequest(BaseUpsertFieldRequest):
     @field_validator("database_port")
     @classmethod
     def validate_database_port(cls, v: str) -> str:
-        if not v.isdigit() or not (1 <= int(v) <= 65535):
-            raise ValueError(
-                "Database port must be a valid port number between 1 and 65535"
-            )
-        return v
+        return Utils.validate_database_port(v)
 
     @field_validator("database_host")
     @classmethod
     def validate_database_host(cls, v: str) -> str:
-        if not re.match(r"^[a-zA-Z0-9.-]+$", v):
-            raise ValueError("Database host must be a valid hostname or IP Upsertress")
-        return v
+        return Utils.validate_database_host(v)
 
     @field_validator("database_output_fields")
     @classmethod
     def validate_unique_output_fields(cls, v: list[str]) -> list[str] | None:
-        return UniqueListValidator.validate_unique_strings(v, "Database output fields")
+        return Utils.validate_unique_strings(v, "Database output fields")
 
 
 class UpsertFieldDateRequest(BaseUpsertFieldRequest):
@@ -313,17 +371,26 @@ class UpsertFieldDateRequest(BaseUpsertFieldRequest):
     )
     start_date: str | None = Field(
         None,
-        description="Start date for date range restriction (YYYY-MM-DD format) or {start_date}, Example: '2021-01-01' or {start_date}",
+        description=(
+            "Start date for date range restriction (YYYY-MM-DD format) or {start_date}, "
+            "Example: '2021-01-01' or {start_date}"
+        ),
     )
     end_date: str | None = Field(
         None,
-        description="End date for date range restriction (YYYY-MM-DD format) or {end_date}, Example: '2021-01-01' or {end_date}",
+        description=(
+            "End date for date range restriction (YYYY-MM-DD format) or {end_date}, "
+            "Example: '2021-01-01' or {end_date}"
+        ),
     )
 
 
 class UpsertFieldAIRequest(BaseUpsertFieldRequest):
     instructions: str = Field(
-        description="Instructions for the AI model, Example: 'Analyze the sentiment of {customerFeedback} and provide a summary'",
+        description=(
+            "Instructions for the AI model, Example: 'Analyze the sentiment of "
+            "{customerFeedback} and provide a summary'"
+        ),
     )
     model: str = Field(description="Specific AI model to use")
     llm: Literal["OpenAI", "Claude", "Gemini"] = Field(
@@ -397,7 +464,7 @@ class UpsertFieldCodeRequest(BaseUpsertFieldRequest):
     @field_validator("output_fields")
     @classmethod
     def validate_unique_output_fields(cls, v: list[str]) -> list[str] | None:
-        return UniqueListValidator.validate_unique_strings(v, "Code output fields")
+        return Utils.validate_unique_strings(v, "Code output fields")
 
 
 class UpsertFieldGpsLocationRequest(BaseUpsertFieldRequest):
@@ -467,27 +534,12 @@ class UpsertFieldManualAddressRequest(BaseUpsertFieldRequest):
     @field_validator("countries_list")
     @classmethod
     def validate_countries_list(cls, v: list[str] | None) -> list[str] | None:
-        if v is not None:
-            if len(set(v)) != len(v):
-                raise ValueError("Countries list must contain unique country codes")
-            for country_code in v:
-                if not country_code or not country_code.strip():
-                    raise ValueError("Country codes cannot be empty")
-                if not re.match(r"^[A-Z]{2}$", country_code.strip()):
-                    raise ValueError("Country codes must be 2-letter uppercase codes")
-        return v
+        return Utils.validate_countries_list(v)
 
     @field_validator("default_country")
     @classmethod
     def validate_default_country(cls, v: str | None) -> str | None:
-        if v is not None:
-            if not v.strip():
-                raise ValueError("Default country code cannot be empty")
-            if not re.match(r"^[A-Z]{2}$", v.strip()):
-                raise ValueError(
-                    "Default country code must be a 2-letter uppercase code"
-                )
-        return v
+        return Utils.validate_country_code(v)
 
 
 class UpsertFieldPhoneNumberRequest(BaseUpsertFieldRequest):
@@ -504,18 +556,16 @@ class UpsertFieldPhoneNumberRequest(BaseUpsertFieldRequest):
     @field_validator("default_country_code")
     @classmethod
     def validate_country_code(cls, v: str | None) -> str | None:
-        if v is not None:
-            if not v.strip():
-                raise ValueError("Country code cannot be empty")
-            if not re.match(r"^[A-Z]{2}$", v.strip()):
-                raise ValueError("Country code must be a 2-letter uppercase code")
-        return v
+        return Utils.validate_country_code(v)
 
 
 class UpsertFieldProgressBarRequest(BaseUpsertFieldRequest):
     progress_formula: str | None = Field(
         None,
-        description="Formula to calculate progress percentage, Example: {progress_field_name} / {total_field_name} * 100",
+        description=(
+            "Formula to calculate progress percentage, Example: {progress_field_name} / "
+            "{total_field_name} * 100"
+        ),
     )
     progress_text: str | None = Field(
         None, description="Text to display with progress, Example: 'Progress'"
@@ -630,7 +680,13 @@ class UpsertFieldValidationRequest(BaseUpsertFieldRequest):
     )
     validation_condition: str | None = Field(
         None,
-        description="Custom validation condition, supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: {field_name} <> 'value' or {field_name} > 10",
+        description=(
+            "Custom validation condition, supports multiple arithmetic operations (SUM, DIFF, "
+            "PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations "
+            "(CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) "
+            "that are supported by Microsoft Excel. Example: {field_name} <> 'value' or "
+            "{field_name} > 10"
+        ),
     )
     validation_level: Literal["success", "warning", "error"] = Field(
         "success", description="Level of validation result"
@@ -640,7 +696,7 @@ class UpsertFieldValidationRequest(BaseUpsertFieldRequest):
     @classmethod
     def validate_unique_field_names(cls, v: list[str] | None) -> list[str] | None:
         if v is not None:
-            return UniqueListValidator.validate_unique_strings(v, "Unique field names")
+            return Utils.validate_unique_strings(v, "Unique field names")
         return v
 
     @model_validator(mode="after")
@@ -668,20 +724,9 @@ class UpsertFieldValidationRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldReadOnlyFileRequest(BaseUpsertFieldRequest):
-    static_attachment: dict[str, str] = Field(
+    static_attachment: StaticAttachment = Field(
         description="Static attachment object with base64, contentType and fileName"
     )
-
-    @field_validator("static_attachment")
-    @classmethod
-    def validate_static_attachment(cls, v: dict[str, str]) -> dict[str, str]:
-        required_keys = ["base64", "contentType", "fileName"]
-        for key in required_keys:
-            if key not in v:
-                raise ValueError(f"Static attachment must contain '{key}'")
-            if not v[key] or not str(v[key]).strip():
-                raise ValueError(f"Static attachment '{key}' cannot be empty")
-        return v
 
 
 class UpsertFieldVideoViewerRequest(UpsertFieldReadOnlyFileRequest):
@@ -726,7 +771,13 @@ class UpsertFieldVoiceRequest(BaseUpsertFieldRequest):
 class UpsertFieldFormulaRequest(BaseUpsertFieldRequest):
     formula: str = Field(
         "",
-        description="Formula expression with field references. Clappia supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: '=SUM({field_name1,field_name2}) + IF({field_name3}>10, 'Yes', 'No')'",
+        description=(
+            "Formula expression with field references. Clappia supports multiple arithmetic "
+            "operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, "
+            "...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations "
+            "(TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: "
+            "'=SUM({field_name1,field_name2}) + IF({field_name3}>10, 'Yes', 'No')'"
+        ),
     )
 
     @field_validator("formula")
@@ -768,7 +819,7 @@ class UpsertFieldCodeReaderRequest(BaseUpsertFieldRequest):
     @field_validator("other_field_names")
     @classmethod
     def validate_unique_other_fields(cls, v: list[str] | None) -> list[str] | None:
-        return UniqueListValidator.validate_unique_strings(v, "Other field names")
+        return Utils.validate_unique_strings(v, "Other field names")
 
     @field_validator("other_field_names")
     @classmethod
@@ -820,23 +871,20 @@ class UpsertFieldNumberInputRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldReadOnlyTextRequest(BaseUpsertFieldRequest):
-    rich_text: str | None = Field(
-        None,
+    rich_text: str = Field(
         description="Rich text content for display, can include field references. Example: 'Hello {field_name}'",
     )
 
 
 class UpsertFieldTagsRequest(BaseUpsertFieldRequest):
-    tag_names: list[str] = Field(default_factory=list, description="Array of tag names")
+    tag_names: list[str] = Field(description="Array of tag names", min_length=1)
 
     @field_validator("tag_names")
     @classmethod
-    def validate_tag_names(cls, v: list[str]) -> list[str] | None:
-        if v:
-            for tag in v:
-                if not tag or not str(tag).strip():
-                    raise ValueError("Tag names cannot be empty")
-        return UniqueListValidator.validate_unique_strings(v, "Tag names")
+    def validate_unique_tag_names(cls, v: list[str]) -> list[str]:
+        result = Utils.validate_unique_strings(v, "Tag names")
+        assert result is not None
+        return result
 
 
 class UpsertFieldDropdownRequest(BaseUpsertFieldRequest):
@@ -900,16 +948,11 @@ class UpsertFieldRadioRequest(BaseUpsertFieldRequest):
         ),
     )
 
-    number_of_cols: int | None = Field(
-        None,
-        description=(
-            "Number of columns to display radio buttons in (1-3).\n"
-            "Controls the grid layout of radio button options.\n\n"
-            "Examples:\n"
-            "• 1 = Vertical single column\n"
-            "• 2 = Two-column grid\n"
-            "• 3 = Three-column grid"
-        ),
+    number_of_cols: int = Field(
+        default=1,
+        description="Number of columns to display radio buttons in (1-3).",
+        ge=1,
+        le=3,
     )
 
     style: Literal["Standard", "Chips"] = Field(
@@ -969,9 +1012,11 @@ class UpsertFieldCheckboxRequest(BaseUpsertFieldRequest):
         default_factory=lambda: ["value one", "value two"],
         description="Array of checkbox options, Example: ['value one', 'value two']",
     )
-    number_of_cols: int | None = Field(
-        None,
+    number_of_cols: int = Field(
+        default=1,
         description="Number of columns for checkbox layout (1-3), Example: 1 or 2 or 3",
+        ge=1,
+        le=3,
     )
     style: Literal["Standard", "Chips"] = Field(
         "Chips",
@@ -993,13 +1038,6 @@ class UpsertFieldCheckboxRequest(BaseUpsertFieldRequest):
             raise ValueError("All options must be non-empty strings")
         return v
 
-    @field_validator("number_of_cols")
-    @classmethod
-    def validate_number_of_cols(cls, v: int | None) -> int | None:
-        if v is not None and (v < 1 or v > 3):
-            raise ValueError("Number of columns must be between 1 and 3")
-        return v
-
 
 class UpsertFieldPaymentGatewayRequest(BaseUpsertFieldRequest):
     payment_gateway: Literal["Razorpay", "Stripe", "Paypal", "Eazypay"] = Field(
@@ -1011,20 +1049,6 @@ class UpsertFieldPaymentGatewayRequest(BaseUpsertFieldRequest):
     amount: str = Field(
         description="Payment amount. Can include field references, Example: '100' or {amount}"
     )
-
-    @field_validator("currency")
-    @classmethod
-    def validate_currency(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Currency is required and must be a string")
-        return v
-
-    @field_validator("amount")
-    @classmethod
-    def validate_amount(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Amount is required and must be a string")
-        return v
 
 
 class UpsertFieldRazorpayPaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
@@ -1040,28 +1064,12 @@ class UpsertFieldRazorpayPaymentGatewayRequest(UpsertFieldPaymentGatewayRequest)
         None, description="Array of key-value pairs for Upsertitional metadata"
     )
 
-    @field_validator("key_id")
-    @classmethod
-    def validate_key_id(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Razorpay Key ID is required and must be a string")
-        return v
-
-    @field_validator("key_secret")
-    @classmethod
-    def validate_key_secret(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Razorpay Key Secret is required and must be a string")
-        return v
-
     @field_validator("metadata")
     @classmethod
     def validate_metadata(
         cls, v: list[dict[str, str]] | None
     ) -> list[dict[str, str]] | None:
         if v is not None:
-            if not isinstance(v, list):
-                raise ValueError("Metadata must be an array")
             keys = [item.get("key") for item in v if item.get("key")]
             if len(keys) != len(set(keys)):
                 raise ValueError("Metadata must have unique keys")
@@ -1086,36 +1094,6 @@ class UpsertFieldEazypayPaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
         description="Array of mandatory field names, Example: ['{field_name1}', '{field_name2}']"
     )
     encryption_key: str = Field(description="Encryption key for secure payments")
-
-    @field_validator("merchant_id")
-    @classmethod
-    def validate_merchant_id(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Eazypay Merchant ID is required and must be a string")
-        return v
-
-    @field_validator("submerchant_id")
-    @classmethod
-    def validate_submerchant_id(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Eazypay Submerchant ID is required and must be a string")
-        return v
-
-    @field_validator("reference_no")
-    @classmethod
-    def validate_reference_no(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError(
-                "Eazypay Reference Number is required and must be a string"
-            )
-        return v
-
-    @field_validator("encryption_key")
-    @classmethod
-    def validate_encryption_key(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Eazypay Encryption Key is required and must be a string")
-        return v
 
     @field_validator("optional_fields")
     @classmethod
@@ -1142,20 +1120,6 @@ class UpsertFieldPaypalPaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
         description="PayPal client secret for API authentication"
     )
 
-    @field_validator("paypal_client_id")
-    @classmethod
-    def validate_paypal_client_id(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("PayPal Client ID is required and must be a string")
-        return v
-
-    @field_validator("paypal_client_secret")
-    @classmethod
-    def validate_paypal_client_secret(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("PayPal Client Secret is required and must be a string")
-        return v
-
 
 class UpsertFieldStripePaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
     publishable_key: str = Field(
@@ -1165,20 +1129,6 @@ class UpsertFieldStripePaymentGatewayRequest(UpsertFieldPaymentGatewayRequest):
     metadata: list[dict[str, str]] | None = Field(
         None, description="Array of key-value pairs for Upsertitional metadata"
     )
-
-    @field_validator("publishable_key")
-    @classmethod
-    def validate_publishable_key(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Stripe Publishable Key is required and must be a string")
-        return v
-
-    @field_validator("secret_key")
-    @classmethod
-    def validate_secret_key(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Stripe Secret Key is required and must be a string")
-        return v
 
     @field_validator("metadata")
     @classmethod
@@ -1206,64 +1156,10 @@ class UpsertFieldButtonRequest(BaseUpsertFieldRequest):
     open_link: Literal["sameTab", "newTab", "modalTab"] = Field(
         description="How to open links"
     )
-    placement: str | None = Field(None, description="Button placement on the form")
-    action_details: dict[str, Any] = Field(
-        description="Action details for button click behavior"
+    action_details: ActionDetails = Field(
+        description="Action details for button click behavior",
+        discriminator="action_type",
     )
-
-    @field_validator("action_details")
-    @classmethod
-    def validate_action_details(cls, v: dict[str, Any]) -> dict[str, Any]:
-        if not v:
-            raise ValueError("Action details are required")
-
-        action_type = v.get("actionType")
-        if not action_type or action_type not in [
-            "openClappiaApp",
-            "openLink",
-            "timer",
-            "code",
-        ]:
-            raise ValueError(
-                "Action type is required and must be one of: openClappiaApp, openLink, timer, code"
-            )
-
-        if action_type == "openClappiaApp":
-            if not v.get("appId"):
-                raise ValueError("App ID is required for OpenClappiaApp action")
-            if not v.get("viewType") or v.get("viewType") not in [
-                "home",
-                "submissions",
-                "analytics",
-            ]:
-                raise ValueError(
-                    "View type is required and must be one of: home, submissions, analytics"
-                )
-            if v.get("viewType") == "home":
-                if not v.get("navigationType") or v.get("navigationType") not in [
-                    "section",
-                    "page",
-                    "field",
-                ]:
-                    raise ValueError(
-                        "Navigation type is required for Home view and must be one of: section, page, field"
-                    )
-                if not v.get("idToNavigate"):
-                    raise ValueError("ID to navigate is required for Home view")
-
-        elif action_type == "openLink":
-            if not v.get("redirectLink"):
-                raise ValueError("Redirect link is required for OpenLink action")
-
-        elif action_type == "timer":
-            if not v.get("waitForSeconds"):
-                raise ValueError("Wait for seconds is required for Timer action")
-
-        elif action_type == "code":
-            if not v.get("code"):
-                raise ValueError("Code is required for Code action")
-
-        return v
 
 
 class UpsertFieldUniqueSequentialRequest(BaseUpsertFieldRequest):
@@ -1277,20 +1173,6 @@ class UpsertFieldUniqueSequentialRequest(BaseUpsertFieldRequest):
     starting_sequence_number: int = Field(
         1, description="Starting number for the sequence"
     )
-
-    @field_validator("minimum_length")
-    @classmethod
-    def validate_minimum_length(cls, v: int) -> int:
-        if v < 1:
-            raise ValueError("Minimum length must be at least 1")
-        return v
-
-    @field_validator("starting_sequence_number")
-    @classmethod
-    def validate_starting_sequence_number(cls, v: int) -> int:
-        if v < 0:
-            raise ValueError("Starting sequence number must be non-negative")
-        return v
 
 
 class UpsertFieldEmailInputRequest(BaseUpsertFieldRequest):
@@ -1319,7 +1201,9 @@ class UpsertFieldEmojiRequest(BaseUpsertFieldRequest):
     not_applicable_value: str = Field(
         "0", description="Value for the not applicable option"
     )
-    emoji_size: int = Field(1, description="Size multiplier for emoji display (1-3)")
+    emoji_size: int = Field(
+        1, le=3, ge=1, description="Size multiplier for emoji display (1-3)"
+    )
 
     @field_validator("emojis")
     @classmethod
@@ -1349,13 +1233,6 @@ class UpsertFieldEmojiRequest(BaseUpsertFieldRequest):
                     f"Score '{emoji['score']}' must be a valid number"
                 ) from err
 
-        return v
-
-    @field_validator("emoji_size")
-    @classmethod
-    def validate_emoji_size(cls, v: int) -> int:
-        if not (1 <= v <= 3):
-            raise ValueError("Emoji size must be between 1 and 3")
         return v
 
 

@@ -165,7 +165,7 @@ cython_debug/
 # Sublime Text
 *.sublime-project
 *.sublime-workspace
-
+*.cursor/
 # Vim
 *.swp
 *.swo

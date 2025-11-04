@@ -1,10 +1,5 @@
-from .app_metadata import (
-    UpdateAppMetadataRequest,
-)
-from .definition import (
-    CreateAppRequest,
-)
 from .field import (
+    BaseUpsertFieldRequest,
     UpsertFieldAddressRequest,
     UpsertFieldAIRequest,
     UpsertFieldButtonRequest,
@@ -27,6 +22,7 @@ from .field import (
     UpsertFieldManualAddressRequest,
     UpsertFieldNfcReaderRequest,
     UpsertFieldNumberInputRequest,
+    UpsertFieldPaymentGatewayRequest,
     UpsertFieldPaypalPaymentGatewayRequest,
     UpsertFieldPdfViewerRequest,
     UpsertFieldPhoneNumberRequest,
@@ -52,19 +48,16 @@ from .field import (
     UpsertFieldVideoViewerRequest,
     UpsertFieldVoiceRequest,
 )
-from .page import (
-    AddPageBreakRequest,
-    UpdatePageBreakRequest,
-)
-from .section import (
-    ReorderSectionRequest,
-    UpsertSectionRequest,
-)
+from .metadata import UpdateAppMetadataRequest
+from .page import AddPageBreakRequest, UpdatePageBreakRequest
+from .section import UpsertSectionRequest
 
 __all__ = [
+    # Page requests
     "AddPageBreakRequest",
-    "CreateAppRequest",
-    "ReorderSectionRequest",
+    # Base classes
+    "BaseUpsertFieldRequest",
+    # Metadata requests
     "UpdateAppMetadataRequest",
     "UpdatePageBreakRequest",
     "UpsertFieldAIRequest",
@@ -89,6 +82,7 @@ __all__ = [
     "UpsertFieldManualAddressRequest",
     "UpsertFieldNfcReaderRequest",
     "UpsertFieldNumberInputRequest",
+    "UpsertFieldPaymentGatewayRequest",
     "UpsertFieldPaypalPaymentGatewayRequest",
     "UpsertFieldPdfViewerRequest",
     "UpsertFieldPhoneNumberRequest",
@@ -105,6 +99,7 @@ __all__ = [
     "UpsertFieldStripePaymentGatewayRequest",
     "UpsertFieldTagsRequest",
     "UpsertFieldTextAreaRequest",
+    # Field requests
     "UpsertFieldTextRequest",
     "UpsertFieldTimeRequest",
     "UpsertFieldToggleRequest",

@@ -2,8 +2,27 @@ from typing import Literal
 
 from pydantic import Field, field_validator
 
-from ..base import BaseUpsertChartRequest
-from ..model import ExternalAggregation, ExternalChartDimension
+from ...models.analytics import (
+    ExternalAggregation,
+    ExternalChartDimension,
+    ExternalFilter,
+)
+from ...utils.utils import Utils
+from ..base_model import BaseFieldComponent
+
+
+class BaseUpsertChartRequest(BaseFieldComponent):
+    """Base class for all chart definition requests with common fields."""
+
+    width: int = Field(
+        default=50,
+        ge=1,
+        le=100,
+        description="Width of the chart, 1-100 allowed and divisible by 25",
+    )
+    filters: list[ExternalFilter] | None = Field(
+        default=None, description="Filters for the chart"
+    )
 
 
 class UpsertBarChartDefinitionRequest(BaseUpsertChartRequest):
@@ -36,27 +55,23 @@ class UpsertBarChartDefinitionRequest(BaseUpsertChartRequest):
     def validate_aggregation_dimensions(
         cls, v: list[ExternalAggregation]
     ) -> list[ExternalAggregation]:
-        if not v or len(v) == 0:
-            raise ValueError(
-                "aggregation_dimensions must contain at least one aggregation"
-            )
-        return v
+        result = Utils.validate_non_empty_list(v, field_name="aggregation_dimensions")
+        assert result is not None
+        return result
 
     @field_validator("dimensions")
     @classmethod
     def validate_dimensions(
         cls, v: list[ExternalChartDimension]
     ) -> list[ExternalChartDimension]:
-        if not v or len(v) == 0:
-            raise ValueError("dimensions must contain at least one dimension")
-        return v
+        result = Utils.validate_non_empty_list(v, field_name="dimensions")
+        assert result is not None
+        return result
 
     @field_validator("is_stacked")
     @classmethod
     def validate_is_stacked(cls, v: bool | None) -> bool | None:
-        if v is not None and not isinstance(v, bool):
-            raise ValueError("is_stacked should be a boolean if provided")
-        return v
+        return Utils.validate_boolean(v, field_name="is_stacked")
 
 
 class UpsertDataTableChartDefinitionRequest(BaseUpsertChartRequest):
@@ -79,15 +94,13 @@ class UpsertDataTableChartDefinitionRequest(BaseUpsertChartRequest):
     def validate_aggregation_dimensions_dt(
         cls, v: list[ExternalAggregation]
     ) -> list[ExternalAggregation]:
-        if not v or len(v) == 0:
-            raise ValueError(
-                "aggregation_dimensions must contain at least one aggregation"
-            )
-        if len(v) > 4:
-            raise ValueError(
-                "aggregation_dimensions cannot exceed 4 aggregations for data table charts"
-            )
-        return v
+        result = Utils.validate_non_empty_list(v, field_name="aggregation_dimensions")
+        assert result is not None
+        result = Utils.validate_max_count(
+            result, max_count=4, field_name="aggregation_dimensions"
+        )
+        assert result is not None
+        return result
 
 
 class UpsertDoughnutChartDefinitionRequest(BaseUpsertChartRequest):
@@ -115,42 +128,25 @@ class UpsertDoughnutChartDefinitionRequest(BaseUpsertChartRequest):
     def validate_aggregation_dimensions_doughnut(
         cls, v: list[ExternalAggregation]
     ) -> list[ExternalAggregation]:
-        if not v or len(v) == 0:
-            raise ValueError(
-                "aggregation_dimensions must contain exactly one aggregation"
-            )
-        if len(v) > 1:
-            raise ValueError(
-                "Only one aggregation dimension is allowed for doughnut charts"
-            )
-        return v
+        result = Utils.validate_exact_count(
+            v, count=1, field_name="aggregation_dimensions"
+        )
+        assert result is not None
+        return result
 
     @field_validator("dimensions")
     @classmethod
     def validate_dimensions_doughnut(
         cls, v: list[ExternalChartDimension]
     ) -> list[ExternalChartDimension]:
-        if not v or len(v) == 0:
-            raise ValueError("dimensions must contain exactly one dimension")
-        if len(v) > 1:
-            raise ValueError("Only one dimension is allowed for doughnut charts")
-        return v
+        result = Utils.validate_exact_count(v, count=1, field_name="dimensions")
+        assert result is not None
+        return result
 
     @field_validator("show_legend")
     @classmethod
     def validate_show_legend(cls, v: bool | None) -> bool | None:
-        if v is not None and not isinstance(v, bool):
-            raise ValueError("show_legend should be a boolean if provided")
-        return v
-
-    @field_validator("dimensions")
-    @classmethod
-    def validate_dimensions_dt(
-        cls, v: list[ExternalChartDimension]
-    ) -> list[ExternalChartDimension]:
-        if not v or len(v) == 0:
-            raise ValueError("dimensions must contain at least one dimension")
-        return v
+        return Utils.validate_boolean(v, field_name="show_legend")
 
 
 class UpsertGanttChartDefinitionRequest(BaseUpsertChartRequest):
@@ -186,11 +182,13 @@ class UpsertGanttChartDefinitionRequest(BaseUpsertChartRequest):
     def validate_gantt_dimensions(
         cls, v: list[ExternalChartDimension]
     ) -> list[ExternalChartDimension]:
-        if not v or len(v) != 5:
-            raise ValueError(
-                "dimensions must be an array of exactly 5 items: task Id, resource, task name, start date and end date"
-            )
-        return v
+        result = Utils.validate_exact_count(
+            v,
+            count=5,
+            field_name="dimensions",
+        )
+        assert result is not None
+        return result
 
 
 class UpsertLineChartDefinitionRequest(BaseUpsertChartRequest):
@@ -218,11 +216,9 @@ class UpsertLineChartDefinitionRequest(BaseUpsertChartRequest):
     def validate_line_aggregation_dimensions(
         cls, v: list[ExternalAggregation]
     ) -> list[ExternalAggregation]:
-        if not v or len(v) == 0:
-            raise ValueError(
-                "aggregation_dimensions must contain at least one aggregation"
-            )
-        return v
+        result = Utils.validate_non_empty_list(v, field_name="aggregation_dimensions")
+        assert result is not None
+        return result
 
 
 class UpsertMapChartDefinitionRequest(BaseUpsertChartRequest):
@@ -243,11 +239,9 @@ class UpsertMapChartDefinitionRequest(BaseUpsertChartRequest):
     def validate_map_dimensions(
         cls, v: list[ExternalChartDimension]
     ) -> list[ExternalChartDimension]:
-        if not v or len(v) != 2:
-            raise ValueError(
-                "dimensions must be an array of exactly 2 items: gps location and label"
-            )
-        return v
+        result = Utils.validate_exact_count(v, count=2, field_name="dimensions")
+        assert result is not None
+        return result
 
 
 class UpsertPieChartDefinitionRequest(BaseUpsertChartRequest):
@@ -275,31 +269,25 @@ class UpsertPieChartDefinitionRequest(BaseUpsertChartRequest):
     def validate_pie_aggregation_dimensions(
         cls, v: list[ExternalAggregation]
     ) -> list[ExternalAggregation]:
-        if not v or len(v) == 0:
-            raise ValueError(
-                "aggregation_dimensions must contain exactly one aggregation"
-            )
-        if len(v) > 1:
-            raise ValueError("Only one aggregation dimension is allowed for pie charts")
-        return v
+        result = Utils.validate_exact_count(
+            v, count=1, field_name="aggregation_dimensions"
+        )
+        assert result is not None
+        return result
 
     @field_validator("dimensions")
     @classmethod
     def validate_pie_dimensions(
         cls, v: list[ExternalChartDimension]
     ) -> list[ExternalChartDimension]:
-        if not v or len(v) == 0:
-            raise ValueError("dimensions must contain exactly one dimension")
-        if len(v) > 1:
-            raise ValueError("Only one dimension is allowed for pie charts")
-        return v
+        result = Utils.validate_exact_count(v, count=1, field_name="dimensions")
+        assert result is not None
+        return result
 
     @field_validator("show_legend")
     @classmethod
     def validate_pie_show_legend(cls, v: bool | None) -> bool | None:
-        if v is not None and not isinstance(v, bool):
-            raise ValueError("show_legend should be a boolean if provided")
-        return v
+        return Utils.validate_boolean(v, field_name="show_legend")
 
 
 class UpsertSummaryChartDefinitionRequest(BaseUpsertChartRequest):
@@ -318,12 +306,8 @@ class UpsertSummaryChartDefinitionRequest(BaseUpsertChartRequest):
     def validate_summary_aggregation_dimensions(
         cls, v: list[ExternalAggregation]
     ) -> list[ExternalAggregation]:
-        if not v or len(v) == 0:
-            raise ValueError(
-                "aggregation_dimensions must contain exactly one aggregation"
-            )
-        if len(v) > 1:
-            raise ValueError(
-                "Only one aggregation dimension is allowed for summary charts"
-            )
-        return v
+        result = Utils.validate_exact_count(
+            v, count=1, field_name="aggregation_dimensions"
+        )
+        assert result is not None
+        return result

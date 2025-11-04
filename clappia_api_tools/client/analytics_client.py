@@ -23,6 +23,7 @@ class ClientResponse(BaseModel):
     data: Any | None = None
     error: str | None = None
 
+
 ChartDefinitionRequestUnion = (
     UpsertSummaryChartDefinitionRequest
     | UpsertBarChartDefinitionRequest
@@ -35,7 +36,6 @@ ChartDefinitionRequestUnion = (
 )
 
 
-
 class AnalyticsClient(BaseClappiaClient, ABC):
     """Abstract client for managing Clappia analytics and charts.
 
@@ -43,7 +43,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
     adding charts, removing charts, updating charts, and reordering charts.
     """
 
-    def add(
+    async def add(
         self,
         app_id: str,
         chart_index: int,
@@ -53,39 +53,71 @@ class AnalyticsClient(BaseClappiaClient, ABC):
     ) -> ClientResponse:
         """Add a chart to an app."""
         if isinstance(request, UpsertSummaryChartDefinitionRequest):
-            return self._add_summary_chart(
-                app_id, chart_index, chart_title, request, version_variable_name
+            return await self._add_summary_chart(
+                app_id,
+                chart_index,
+                chart_title,
+                request,
+                version_variable_name,
             )
         elif isinstance(request, UpsertBarChartDefinitionRequest):
-            return self._add_bar_chart(
-                app_id, chart_index, chart_title, request, version_variable_name
+            return await self._add_bar_chart(
+                app_id,
+                chart_index,
+                chart_title,
+                request,
+                version_variable_name,
             )
         elif isinstance(request, UpsertPieChartDefinitionRequest):
-            return self._add_pie_chart(
-                app_id, chart_index, chart_title, request, version_variable_name
+            return await self._add_pie_chart(
+                app_id,
+                chart_index,
+                chart_title,
+                request,
+                version_variable_name,
             )
         elif isinstance(request, UpsertDoughnutChartDefinitionRequest):
-            return self._add_doughnut_chart(
-                app_id, chart_index, chart_title, request, version_variable_name
+            return await self._add_doughnut_chart(
+                app_id,
+                chart_index,
+                chart_title,
+                request,
+                version_variable_name,
             )
         elif isinstance(request, UpsertLineChartDefinitionRequest):
-            return self._add_line_chart(
-                app_id, chart_index, chart_title, request, version_variable_name
+            return await self._add_line_chart(
+                app_id,
+                chart_index,
+                chart_title,
+                request,
+                version_variable_name,
             )
         elif isinstance(request, UpsertDataTableChartDefinitionRequest):
-            return self._add_data_table_chart(
-                app_id, chart_index, chart_title, request, version_variable_name
+            return await self._add_data_table_chart(
+                app_id,
+                chart_index,
+                chart_title,
+                request,
+                version_variable_name,
             )
         elif isinstance(request, UpsertMapChartDefinitionRequest):
-            return self._add_map_chart(
-                app_id, chart_index, chart_title, request, version_variable_name
+            return await self._add_map_chart(
+                app_id,
+                chart_index,
+                chart_title,
+                request,
+                version_variable_name,
             )
         elif isinstance(request, UpsertGanttChartDefinitionRequest):
-            return self._add_gantt_chart(
-                app_id, chart_index, chart_title, request, version_variable_name
+            return await self._add_gantt_chart(
+                app_id,
+                chart_index,
+                chart_title,
+                request,
+                version_variable_name,
             )
 
-    def update(
+    async def update(
         self,
         app_id: str,
         chart_index: int,
@@ -94,38 +126,39 @@ class AnalyticsClient(BaseClappiaClient, ABC):
     ) -> ClientResponse:
         """Update a chart in an app."""
         if isinstance(request, UpsertSummaryChartDefinitionRequest):
-            return self._update_summary_chart(
+            return await self._update_summary_chart(
                 app_id, chart_index, request, version_variable_name
             )
         elif isinstance(request, UpsertBarChartDefinitionRequest):
-            return self._update_bar_chart(
+            return await self._update_bar_chart(
                 app_id, chart_index, request, version_variable_name
             )
         elif isinstance(request, UpsertPieChartDefinitionRequest):
-            return self._update_pie_chart(
+            return await self._update_pie_chart(
                 app_id, chart_index, request, version_variable_name
             )
         elif isinstance(request, UpsertDoughnutChartDefinitionRequest):
-            return self._update_doughnut_chart(
+            return await self._update_doughnut_chart(
                 app_id, chart_index, request, version_variable_name
             )
         elif isinstance(request, UpsertLineChartDefinitionRequest):
-            return self._update_line_chart(
+            return await self._update_line_chart(
                 app_id, chart_index, request, version_variable_name
             )
         elif isinstance(request, UpsertDataTableChartDefinitionRequest):
-            return self._update_data_table_chart(
+            return await self._update_data_table_chart(
                 app_id, chart_index, request, version_variable_name
             )
         elif isinstance(request, UpsertMapChartDefinitionRequest):
-            return self._update_map_chart(
+            return await self._update_map_chart(
                 app_id, chart_index, request, version_variable_name
             )
         elif isinstance(request, UpsertGanttChartDefinitionRequest):
-            return self._update_gantt_chart(
+            return await self._update_gantt_chart(
                 app_id, chart_index, request, version_variable_name
             )
-    def _add_summary_chart(
+
+    async def _add_summary_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -136,10 +169,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         """Add a summary chart to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -151,22 +181,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_summary_chart(
+    async def _update_summary_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -176,10 +200,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         """Update a summary chart in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -190,22 +211,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_bar_chart(
+    async def _add_bar_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -217,10 +232,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -232,22 +244,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_bar_chart(
+    async def _update_bar_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -257,10 +263,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         """Update a bar chart in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -271,22 +274,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_pie_chart(
+    async def _add_pie_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -297,10 +294,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         """Add a pie chart to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -312,22 +306,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_pie_chart(
+    async def _update_pie_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -337,10 +325,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         """Update a pie chart in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -351,22 +336,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_doughnut_chart(
+    async def _add_doughnut_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -378,10 +357,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -393,22 +369,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_doughnut_chart(
+    async def _update_doughnut_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -418,10 +388,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         """Update a doughnut chart in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -432,22 +399,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_line_chart(
+    async def _add_line_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -459,10 +420,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -474,22 +432,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_line_chart(
+    async def _update_line_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -499,10 +451,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         """Update a line chart in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -513,22 +462,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_data_table_chart(
+    async def _add_data_table_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -539,10 +482,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         """Add a data table chart to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -554,22 +494,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_data_table_chart(
+    async def _update_data_table_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -579,10 +513,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         """Update a data table chart in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -593,22 +524,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_map_chart(
+    async def _add_map_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -620,10 +545,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -635,22 +557,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_map_chart(
+    async def _update_map_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -660,10 +576,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         """Update a map chart in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -674,22 +587,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_gantt_chart(
+    async def _add_gantt_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -700,10 +607,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         """Add a Gantt chart to an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -715,22 +619,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/addChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_gantt_chart(
+    async def _update_gantt_chart(
         self,
         app_id: str,
         chart_index: int,
@@ -740,10 +638,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         """Update a Gantt chart in an app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -754,22 +649,16 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/updateChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def reorder_chart(
+    async def reorder_chart(
         self,
         app_id: str,
         source_index: int,
@@ -778,10 +667,7 @@ class AnalyticsClient(BaseClappiaClient, ABC):
     ) -> ClientResponse:
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload = {
             "appId": app_id,
@@ -791,50 +677,39 @@ class AnalyticsClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/reorderChart", data=payload
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def get_charts(
+    async def get_charts(
         self, app_id: str, version_variable_name: str | None = None
     ) -> ClientResponse:
         """Get all charts for a specific app."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
         params = {
             "appId": app_id,
         }
         if version_variable_name is not None:
             params["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="GET", endpoint="/getAppCharts", params=params
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+            return ClientResponse(success=False, error=error_message)
+        return ClientResponse(success=True, data=response_data)
+
+    async def close(self) -> None:
+        """Close the underlying HTTP client and clean up resources."""
+        await self.api_utils.close()
 
 
 class AnalyticsAPIKeyClient(BaseAPIKeyClient, AnalyticsClient):

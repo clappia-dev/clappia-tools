@@ -2,17 +2,10 @@ from typing import Literal
 
 from pydantic import Field
 
-from ..base import BaseUpsertSectionRequest
+from ...base_model import BaseFieldComponent
 
 
-class ReorderSectionRequest(BaseUpsertSectionRequest):
-    source_section_index: int = Field(ge=0, description="Source section index")
-    target_section_index: int = Field(ge=0, description="Target section index")
-    source_page_index: int = Field(ge=0, description="Source page index")
-    target_page_index: int = Field(ge=0, description="Target page index")
-
-
-class UpsertSectionRequest(BaseUpsertSectionRequest):
+class UpsertSectionRequest(BaseFieldComponent):
     name: str = Field(description="Name of the section")
     description: str | None = Field(None, description="Description of the section")
     add_section_text: str = Field(

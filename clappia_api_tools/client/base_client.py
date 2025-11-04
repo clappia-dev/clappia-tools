@@ -39,7 +39,7 @@ class BaseAPIKeyClient(BaseClappiaClient):
 
 
 class BaseAuthTokenClient(BaseClappiaClient):
-    """Base client for auth token authentication. """
+    """Base client for auth token authentication."""
 
     def __init__(
         self,

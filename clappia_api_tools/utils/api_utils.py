@@ -1,7 +1,7 @@
 import json
 from typing import Any
 
-import requests
+import httpx
 
 
 class ClappiaAPIUtils:
@@ -14,6 +14,23 @@ class ClappiaAPIUtils:
     ):
         self.base_url = base_url
         self.timeout = timeout
+        self._client: httpx.AsyncClient | None = None
+
+    async def get_client(self) -> httpx.AsyncClient:
+        if self._client is None:
+            self._client = httpx.AsyncClient(
+                timeout=self.timeout,
+                limits=httpx.Limits(
+                    max_keepalive_connections=20,
+                    max_connections=100,
+                ),
+            )
+        return self._client
+
+    async def close(self) -> None:
+        if self._client:
+            await self._client.aclose()
+            self._client = None
 
     def validate_environment(self) -> tuple[bool, str]:
         if not self.base_url:
@@ -30,8 +47,8 @@ class ClappiaAPIUtils:
     ) -> dict[str, str]:
         return {"Content-Type": "application/json"}
 
-    def handle_response(
-        self, response: requests.Response
+    def _handle_response(
+        self, response: httpx.Response
     ) -> tuple[bool, str | None, dict[str, Any] | None]:
         if response.status_code == 200:
             try:
@@ -42,7 +59,7 @@ class ClappiaAPIUtils:
         error_message = self._format_error_message(response)
         return False, error_message, None
 
-    def _format_error_message(self, response: requests.Response) -> str:
+    def _format_error_message(self, response: httpx.Response) -> str:
         if response.status_code in [400, 401, 403, 404]:
             try:
                 error_data = response.json()
@@ -52,7 +69,7 @@ class ClappiaAPIUtils:
         else:
             return f"Unexpected API response ({response.status_code}): {response.text}"
 
-    def make_request(
+    async def make_request(
         self,
         method: str,
         endpoint: str,
@@ -65,20 +82,21 @@ class ClappiaAPIUtils:
 
         url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
         headers = self.get_headers(data, params)
+
         try:
-            response = requests.request(
+            client = await self.get_client()
+            response = await client.request(
                 method=method,
                 url=url,
                 headers=headers,
                 json=data,
                 params=params,
-                timeout=self.timeout,
             )
-            return self.handle_response(response)
+            return self._handle_response(response)
 
-        except requests.exceptions.Timeout:
+        except httpx.TimeoutException:
             return False, f"Request timeout after {self.timeout} seconds", None
-        except requests.exceptions.ConnectionError:
+        except httpx.ConnectError:
             return False, "Connection error - unable to reach Clappia API", None
         except Exception as e:
             return False, f"Unexpected error: {e!s}", None
@@ -151,7 +169,6 @@ class ClappiaAuthTokenUtils(ClappiaAPIUtils):
         headers["Authorization"] = self.auth_token
         headers["workplaceId"] = self.workplace_id
 
-        # Add appId header if present in request data or params
         if params and "appId" in params:
             headers["appId"] = params["appId"]
         elif data and "appId" in data:

@@ -1,30 +1,12 @@
-import re
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import Field, field_validator, model_validator
 
-from ....json_serialized import JsonSerializableMixin
-
-HEX_COLOR_REGEX = re.compile(r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
-
-
-class ExternalStatusDefinition(BaseModel, JsonSerializableMixin):
-    name: str = Field(..., min_length=1, description="Name of the status")
-    color: str = Field(
-        ..., min_length=1, description="Color of the status in hex format"
-    )
-
-    @field_validator("color")
-    @classmethod
-    def validate_color(cls, v: str) -> str:
-        if not HEX_COLOR_REGEX.match(v):
-            raise ValueError(
-                "Status color must be a valid hex code (e.g. #000000 or #FFF)"
-            )
-        return v
+from ...base_model import BaseFieldComponent
+from ...definition import ExternalStatusDefinition
 
 
-class UpdateAppMetadataRequest(BaseModel, JsonSerializableMixin):
+class UpdateAppMetadataRequest(BaseFieldComponent):
     app_name: str | None = Field(
         default=None, description="Name of the app, < 30 chars"
     )
@@ -51,12 +33,13 @@ class UpdateAppMetadataRequest(BaseModel, JsonSerializableMixin):
     )
     statuses: list[ExternalStatusDefinition] | None = Field(
         default=None,
-        min_length=1,
-        description="Statuses of the app, they can be used to review submissions. Example: [{'name': 'Pending', 'color': '#000000'}, {'name': 'Approved', 'color': '#000000'}]",
+        description="Statuses of the app, they can be used to review submissions. "
+        "Example: [{'name': 'Pending', 'color': '#000000'}, {'name': 'Approved', 'color': '#000000'}]",
     )
     post_submission_message_text: str | None = Field(
         default=None,
-        description="Post submission message text, can contain field references. Example: 'Thank you for submitting your form. The submission id is {submissionId}.'",
+        description="Post submission message text, can contain field references. "
+        "Example: 'Thank you for submitting your form. The submission id is {submissionId}.'",
     )
     submit_button_label: str | None = Field(
         default=None, description="Submit button label"

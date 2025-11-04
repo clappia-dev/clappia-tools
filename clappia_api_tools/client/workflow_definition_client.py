@@ -32,6 +32,7 @@ class ClientResponse(BaseModel):
     data: Any | None = None
     error: str | None = None
 
+
 WorkflowStepRequestUnion = (
     UpsertAiWorkflowStepRequest
     | UpsertApprovalWorkflowStepRequest
@@ -53,8 +54,6 @@ WorkflowStepRequestUnion = (
 )
 
 
-
-
 class WorkflowDefinitionClient(BaseClappiaClient, ABC):
     """Abstract client for managing Clappia workflow definitions.
 
@@ -66,7 +65,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
     Use WorkflowDefinitionAPIKeyClient or WorkflowDefinitionAuthTokenClient for actual usage.
     """
 
-    def get_workflow(
+    async def get_workflow(
         self,
         app_id: str,
         trigger_type: str,
@@ -76,16 +75,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         params = {
             "appId": app_id,
@@ -94,23 +87,16 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name:
             params["versionVariableName"] = version_variable_name
 
-
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="GET", endpoint="/getWorkflow", params=params
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def add(
+    async def add(
         self,
         app_id: str,
         trigger_type: str,
@@ -132,7 +118,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             dict: Simple response with success and data fields
         """
         if isinstance(request, UpsertAiWorkflowStepRequest):
-            return self._add_ai_step(
+            return await self._add_ai_step(
                 app_id,
                 trigger_type,
                 request,
@@ -141,7 +127,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertApprovalWorkflowStepRequest):
-            return self._add_approval_step(
+            return await self._add_approval_step(
                 app_id,
                 trigger_type,
                 request,
@@ -150,7 +136,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertCodeWorkflowStepRequest):
-            return self._add_code_step(
+            return await self._add_code_step(
                 app_id,
                 trigger_type,
                 request,
@@ -159,7 +145,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertConditionWorkflowStepRequest):
-            return self._add_condition_step(
+            return await self._add_condition_step(
                 app_id,
                 trigger_type,
                 request,
@@ -168,7 +154,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertDatabaseWorkflowStepRequest):
-            return self._add_database_step(
+            return await self._add_database_step(
                 app_id,
                 trigger_type,
                 request,
@@ -177,7 +163,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertEmailWorkflowStepRequest):
-            return self._add_email_step(
+            return await self._add_email_step(
                 app_id,
                 trigger_type,
                 request,
@@ -186,7 +172,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertLoopWorkflowStepRequest):
-            return self._add_loop_step(
+            return await self._add_loop_step(
                 app_id,
                 trigger_type,
                 request,
@@ -195,7 +181,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertMobileNotificationWorkflowStepRequest):
-            return self._add_mobile_notification_step(
+            return await self._add_mobile_notification_step(
                 app_id,
                 trigger_type,
                 request,
@@ -204,7 +190,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertRestApiWorkflowStepRequest):
-            return self._add_rest_api_step(
+            return await self._add_rest_api_step(
                 app_id,
                 trigger_type,
                 request,
@@ -213,7 +199,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertSlackWorkflowStepRequest):
-            return self._add_slack_step(
+            return await self._add_slack_step(
                 app_id,
                 trigger_type,
                 request,
@@ -222,7 +208,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertSmsWorkflowStepRequest):
-            return self._add_sms_step(
+            return await self._add_sms_step(
                 app_id,
                 trigger_type,
                 request,
@@ -231,7 +217,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertWaitWorkflowStepRequest):
-            return self._add_wait_step(
+            return await self._add_wait_step(
                 app_id,
                 trigger_type,
                 request,
@@ -240,7 +226,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertWhatsAppWorkflowStepRequest):
-            return self._add_whatsapp_step(
+            return await self._add_whatsapp_step(
                 app_id,
                 trigger_type,
                 request,
@@ -249,7 +235,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertCreateSubmissionWorkflowStepRequest):
-            return self._add_create_submission_step(
+            return await self._add_create_submission_step(
                 app_id,
                 trigger_type,
                 request,
@@ -258,7 +244,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertDeleteSubmissionWorkflowStepRequest):
-            return self._add_delete_submission_step(
+            return await self._add_delete_submission_step(
                 app_id,
                 trigger_type,
                 request,
@@ -267,7 +253,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertFindSubmissionWorkflowStepRequest):
-            return self._add_find_submission_step(
+            return await self._add_find_submission_step(
                 app_id,
                 trigger_type,
                 request,
@@ -276,7 +262,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
         elif isinstance(request, UpsertEditSubmissionWorkflowStepRequest):
-            return self._add_edit_submission_step(
+            return await self._add_edit_submission_step(
                 app_id,
                 trigger_type,
                 request,
@@ -285,7 +271,7 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
                 version_variable_name,
             )
 
-    def update(
+    async def update(
         self,
         app_id: str,
         trigger_type: str,
@@ -305,74 +291,75 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
             dict: Simple response with success and data fields
         """
         if isinstance(request, UpsertAiWorkflowStepRequest):
-            return self._update_ai_step(
+            return await self._update_ai_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertApprovalWorkflowStepRequest):
-            return self._update_approval_step(
+            return await self._update_approval_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertCodeWorkflowStepRequest):
-            return self._update_code_step(
+            return await self._update_code_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertConditionWorkflowStepRequest):
-            return self._update_condition_step(
+            return await self._update_condition_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertDatabaseWorkflowStepRequest):
-            return self._update_database_step(
+            return await self._update_database_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertEmailWorkflowStepRequest):
-            return self._update_email_step(
+            return await self._update_email_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertLoopWorkflowStepRequest):
-            return self._update_loop_step(
+            return await self._update_loop_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertMobileNotificationWorkflowStepRequest):
-            return self._update_mobile_notification_step(
+            return await self._update_mobile_notification_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertRestApiWorkflowStepRequest):
-            return self._update_rest_api_step(
+            return await self._update_rest_api_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertSlackWorkflowStepRequest):
-            return self._update_slack_step(
+            return await self._update_slack_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertSmsWorkflowStepRequest):
-            return self._update_sms_step(
+            return await self._update_sms_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertWaitWorkflowStepRequest):
-            return self._update_wait_step(
+            return await self._update_wait_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertWhatsAppWorkflowStepRequest):
-            return self._update_whatsapp_step(
+            return await self._update_whatsapp_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertCreateSubmissionWorkflowStepRequest):
-            return self._update_create_submission_step(
+            return await self._update_create_submission_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertDeleteSubmissionWorkflowStepRequest):
-            return self._update_delete_submission_step(
+            return await self._update_delete_submission_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertFindSubmissionWorkflowStepRequest):
-            return self._update_find_submission_step(
+            return await self._update_find_submission_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
         elif isinstance(request, UpsertEditSubmissionWorkflowStepRequest):
-            return self._update_edit_submission_step(
+            return await self._update_edit_submission_step(
                 app_id, trigger_type, step_variable_name, request, version_variable_name
             )
-    def reorder_step(
+
+    async def reorder_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -384,16 +371,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -404,24 +385,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/reorderWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_ai_step(
+    async def _add_ai_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -434,16 +409,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -458,24 +427,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_ai_step(
+    async def _update_ai_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -487,16 +450,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -507,24 +464,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _add_approval_step(
+    async def _add_approval_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -537,16 +488,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -561,25 +506,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_approval_step(
+    async def _update_approval_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -591,16 +529,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -611,26 +543,19 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Code Workflow Step Methods
-    def _add_code_step(
+    async def _add_code_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -643,16 +568,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -667,25 +586,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_code_step(
+    async def _update_code_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -697,16 +609,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -717,26 +623,19 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Condition Workflow Step Methods
-    def _add_condition_step(
+    async def _add_condition_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -749,16 +648,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -773,24 +666,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_condition_step(
+    async def _update_condition_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -802,16 +689,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -822,26 +703,19 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Database Workflow Step Methods
-    def _add_database_step(
+    async def _add_database_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -854,16 +728,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -878,24 +746,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_database_step(
+    async def _update_database_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -907,16 +769,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -927,25 +783,19 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Email Workflow Step Methods
-    def _add_email_step(
+    async def _add_email_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -958,16 +808,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -982,24 +826,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_email_step(
+    async def _update_email_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1011,16 +849,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1031,25 +863,19 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Loop Workflow Step Methods
-    def _add_loop_step(
+    async def _add_loop_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1062,16 +888,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1086,24 +906,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_loop_step(
+    async def _update_loop_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1115,16 +929,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1135,25 +943,19 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Mobile Notification Workflow Step Methods
-    def _add_mobile_notification_step(
+    async def _add_mobile_notification_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1166,16 +968,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1190,24 +986,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_mobile_notification_step(
+    async def _update_mobile_notification_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1219,16 +1009,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1239,25 +1023,19 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # REST API Workflow Step Methods
-    def _add_rest_api_step(
+    async def _add_rest_api_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1270,16 +1048,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1294,24 +1066,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_rest_api_step(
+    async def _update_rest_api_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1323,16 +1089,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1343,25 +1103,19 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Slack Workflow Step Methods
-    def _add_slack_step(
+    async def _add_slack_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1374,16 +1128,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1398,24 +1146,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_slack_step(
+    async def _update_slack_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1427,16 +1169,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1447,25 +1183,19 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # SMS Workflow Step Methods
-    def _add_sms_step(
+    async def _add_sms_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1478,16 +1208,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1502,24 +1226,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_sms_step(
+    async def _update_sms_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1531,16 +1249,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1551,25 +1263,19 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Wait Workflow Step Methods
-    def _add_wait_step(
+    async def _add_wait_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1582,16 +1288,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1606,24 +1306,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_wait_step(
+    async def _update_wait_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1635,16 +1329,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1655,25 +1343,19 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # WhatsApp Workflow Step Methods
-    def _add_whatsapp_step(
+    async def _add_whatsapp_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1686,16 +1368,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1710,24 +1386,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_whatsapp_step(
+    async def _update_whatsapp_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1739,16 +1409,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1759,25 +1423,19 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Create Submission Workflow Step Methods
-    def _add_create_submission_step(
+    async def _add_create_submission_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1790,16 +1448,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1814,24 +1466,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_create_submission_step(
+    async def _update_create_submission_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1843,16 +1489,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1863,25 +1503,19 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Delete Submission Workflow Step Methods
-    def _add_delete_submission_step(
+    async def _add_delete_submission_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1894,16 +1528,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1918,24 +1546,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_delete_submission_step(
+    async def _update_delete_submission_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1947,16 +1569,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -1967,25 +1583,19 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Find Submission Workflow Step Methods
-    def _add_find_submission_step(
+    async def _add_find_submission_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -1998,16 +1608,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -2022,24 +1626,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_find_submission_step(
+    async def _update_find_submission_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -2051,16 +1649,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -2071,25 +1663,19 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
     # Edit Submission Workflow Step Methods
-    def _add_edit_submission_step(
+    async def _add_edit_submission_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -2102,16 +1688,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -2126,24 +1706,18 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/addWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def _update_edit_submission_step(
+    async def _update_edit_submission_step(
         self,
         app_id: str,
         trigger_type: str,
@@ -2155,16 +1729,10 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         if trigger_type not in [t.value for t in TriggerType]:
-            return ClientResponse(
-                success=False,
-                error="Invalid trigger type"
-            )
+            return ClientResponse(success=False, error="Invalid trigger type")
 
         payload = {
             "appId": app_id,
@@ -2175,22 +1743,20 @@ class WorkflowDefinitionClient(BaseClappiaClient, ABC):
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="/updateWorkflowStep",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
+
+    async def close(self) -> None:
+        """Close the underlying HTTP client and clean up resources."""
+        await self.api_utils.close()
 
 
 class WorkflowDefinitionAPIKeyClient(BaseAPIKeyClient, WorkflowDefinitionClient):

@@ -1,16 +1,15 @@
 from abc import ABC
 from typing import Any, Literal
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr
 
-from clappia_api_tools.models.permissions import Permission
 from clappia_api_tools.models.request import (
     AddUserToWorkplaceRequest,
     UpdateWorkplaceUserAttributesRequest,
     UpdateWorkplaceUserDetailsRequest,
 )
-from clappia_api_tools.models.workplace_user import WorkplaceUser
 
+from ..models.workplace import AppMetaData, AppUserMetaData, Permission, WorkplaceUser
 from .base_client import BaseAPIKeyClient, BaseAuthTokenClient, BaseClappiaClient
 
 
@@ -18,46 +17,6 @@ class ClientResponse(BaseModel):
     success: bool
     data: Any | None = None
     error: str | None = None
-
-class AppMetaData(BaseModel):
-    """Response model for app metadata"""
-
-    app_id: str = Field(description="App ID")
-    name: str = Field(description="App name")
-    created_at: int = Field(description="App created at")
-    created_by: dict[str, Any] = Field(description="App created by")
-    updated_at: int = Field(description="App updated at")
-    updated_by: dict[str, Any] = Field(description="App updated by")
-
-    @classmethod
-    def from_json(cls, json_data: dict[str, Any]) -> "AppMetaData":
-        """Create AppMetaData instance from JSON data with proper field mapping"""
-        mapped_data = {
-            "app_id": json_data.get("appId", ""),
-            "name": json_data.get("name", ""),
-            "created_at": json_data.get("createdAt", 0),
-            "created_by": json_data.get("createdBy", {}),
-            "updated_at": json_data.get("lastUpdatedAt", 0),
-            "updated_by": json_data.get("lastUpdatedBy", {}),
-        }
-        return cls(**mapped_data)
-
-
-# For get workplace user apps
-class AppUserMetaData(BaseModel):
-    """Response model for app metadata"""
-
-    app_id: str = Field(description="App ID")
-    name: str = Field(description="App name")
-
-    @classmethod
-    def from_json(cls, json_data: dict[str, Any]) -> "AppUserMetaData":
-        """Create AppUserMetaData instance from JSON data with proper field mapping"""
-        mapped_data = {
-            "app_id": json_data.get("appId", ""),
-            "name": json_data.get("name", ""),
-        }
-        return cls(**mapped_data)
 
 
 class WorkplaceClient(BaseClappiaClient, ABC):
@@ -76,48 +35,18 @@ class WorkplaceClient(BaseClappiaClient, ABC):
         """Validate email/phone number requirements."""
         if email_address is None and phone_number is None:
             return ClientResponse(
-                success=False,
-                error="One of email address or phone number is required"
+                success=False, error="One of email address or phone number is required"
             )
 
         if email_address is not None and phone_number is not None:
             return ClientResponse(
                 success=False,
-                error="Only one of email address or phone number is required"
+                error="Only one of email address or phone number is required",
             )
 
         return None
 
-    def _validate_environment(self) -> ClientResponse | None:
-        """Validate environment configuration."""
-        env_valid, env_error = self.api_utils.validate_environment()
-        if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
-        return None
-
-    def _build_user_identifier_payload(
-        self,
-        email_address: EmailStr | None,
-        phone_number: str | None,
-        base_payload: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        """Build payload with user identifier (email or phone)."""
-        if base_payload is None:
-            payload: dict[str, Any] = {}
-        else:
-            payload = base_payload.copy()
-
-        if email_address is not None:
-            payload["emailAddress"] = email_address
-        if phone_number is not None:
-            payload["phoneNumber"] = phone_number
-
-        return payload
-
-    def add_user_to_workplace(
+    async def add_user_to_workplace(
         self,
         request: AddUserToWorkplaceRequest,
     ) -> ClientResponse:
@@ -125,10 +54,7 @@ class WorkplaceClient(BaseClappiaClient, ABC):
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload: dict[str, Any] = {
             "firstName": request.first_name,
@@ -142,43 +68,38 @@ class WorkplaceClient(BaseClappiaClient, ABC):
         if request.phone_number is not None:
             payload["phoneNumber"] = request.phone_number
 
-
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="workplace/addUserToWorkplace",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def update_workplace_user_details(
+    async def update_workplace_user_details(
         self,
         request: UpdateWorkplaceUserDetailsRequest,
     ) -> ClientResponse:
         """Update workplace user details."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
+
+        updated_details: dict[str, Any] = {}
+        if "first_name" in request.updated_details:
+            updated_details["firstName"] = request.updated_details["first_name"]
+        if "last_name" in request.updated_details:
+            updated_details["lastName"] = request.updated_details["last_name"]
+        if "email_address" in request.updated_details:
+            updated_details["emailAddress"] = request.updated_details["email_address"]
+        if "phone_number" in request.updated_details:
+            updated_details["phoneNumber"] = request.updated_details["phone_number"]
 
         payload: dict[str, Any] = {
-            "updatedDetails": {
-                "firstName": request.updated_details.get("first_name"),
-                "lastName": request.updated_details.get("last_name"),
-                "emailAddress": request.updated_details.get("email_address"),
-                "phoneNumber": request.updated_details.get("phone_number"),
-            }
+            "updatedDetails": updated_details,
         }
 
         if request.email_address is not None:
@@ -186,34 +107,25 @@ class WorkplaceClient(BaseClappiaClient, ABC):
         if request.phone_number is not None:
             payload["phoneNumber"] = request.phone_number
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="workplace/updateWorkplaceUserDetails",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def update_workplace_user_attributes(
+    async def update_workplace_user_attributes(
         self,
         request: UpdateWorkplaceUserAttributesRequest,
     ) -> ClientResponse:
         """Update workplace user attributes."""
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload: dict[str, Any] = {
             "attributes": request.attributes,
@@ -224,24 +136,18 @@ class WorkplaceClient(BaseClappiaClient, ABC):
         if request.phone_number is not None:
             payload["phoneNumber"] = request.phone_number
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="workplace/updateWorkplaceUserAttributes",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def update_workplace_user_role(
+    async def update_workplace_user_role(
         self,
         email_address: EmailStr | None = None,
         phone_number: str | None = None,
@@ -254,38 +160,34 @@ class WorkplaceClient(BaseClappiaClient, ABC):
         if validation_error:
             return validation_error
 
-        env_error = self._validate_environment()
-        if env_error:
-            return env_error
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return ClientResponse(success=False, error=env_error)
 
-        payload = self._build_user_identifier_payload(
-            email_address, phone_number, {"role": role}
-        )
+        payload: dict[str, Any] = {"role": role}
+        if email_address is not None:
+            payload["emailAddress"] = email_address
+        if phone_number is not None:
+            payload["phoneNumber"] = phone_number
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="workplace/updateWorkplaceUserRole",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def update_workplace_user_groups(
+    async def update_workplace_user_groups(
         self,
         email_address: EmailStr | None = None,
         phone_number: str | None = None,
         group_names: list[str] | None = None,
     ) -> ClientResponse:
-        """Update workplace user groups. """
+        """Update workplace user groups."""
         validation_error = self._validate_email_phone_requirements(
             email_address, phone_number
         )
@@ -293,47 +195,39 @@ class WorkplaceClient(BaseClappiaClient, ABC):
             return validation_error
 
         if not group_names or len(group_names) == 0:
-            return ClientResponse(
-                success=False,
-                error="Validation failed"
-            )
+            return ClientResponse(success=False, error="Validation failed")
 
         unique_groups = list(
             {name.strip() for name in group_names if name and name.strip()}
         )
 
         if unique_groups != group_names:
-            return ClientResponse(
-                success=False,
-                error="Validation failed"
-            )
+            return ClientResponse(success=False, error="Validation failed")
 
-        env_error = self._validate_environment()
-        if env_error:
-            return env_error
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return ClientResponse(success=False, error=env_error)
 
-        payload = self._build_user_identifier_payload(
-            email_address, phone_number, {"groupNames": unique_groups}
-        )
+        payload: dict[str, Any] = {
+            "groupNames": unique_groups,
+        }
+        if email_address is not None:
+            payload["emailAddress"] = email_address
+        if phone_number is not None:
+            payload["phoneNumber"] = phone_number
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="workplace/updateWorkplaceUserGroups",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def add_user_to_app(
+    async def add_user_to_app(
         self,
         app_id: str,
         permissions: Permission,
@@ -347,59 +241,45 @@ class WorkplaceClient(BaseClappiaClient, ABC):
         if validation_error:
             return validation_error
 
-        env_error = self._validate_environment()
-        if env_error:
-            return env_error
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return ClientResponse(success=False, error=env_error)
 
         dict_permissions = permissions.to_dict()
 
-        payload = self._build_user_identifier_payload(
-            email_address,
-            phone_number,
-            {
-                "appId": app_id,
-                "permissions": dict_permissions,
-            },
-        )
+        payload: dict[str, Any] = {
+            "appId": app_id,
+            "permissions": dict_permissions,
+        }
+        if email_address is not None:
+            payload["emailAddress"] = email_address
+        if phone_number is not None:
+            payload["phoneNumber"] = phone_number
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="app/addUserToApp",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
-        return ClientResponse(
-            success=True,
-            data=response_data
-        )
+        return ClientResponse(success=True, data=response_data)
 
-    def get_workplace_apps(self) -> ClientResponse:
-        """Get all apps in the workplace. """
+    async def get_workplace_apps(self) -> ClientResponse:
+        """Get all apps in the workplace."""
 
         env_valid, env_error = self.api_utils.validate_environment()
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
-
-
-        success, error_message, response_data = self.api_utils.make_request(
+            return ClientResponse(success=False, error=env_error)
+        success, error_message, response_data = await self.api_utils.make_request(
             method="GET",
             endpoint="workplace/getApps",
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
         apps: list[AppMetaData] = []
         if response_data:
@@ -412,16 +292,10 @@ class WorkplaceClient(BaseClappiaClient, ABC):
                     apps.append(app)
                 except Exception as e:
                     print(f"Failed to parse app data: {e}")
-            return ClientResponse(
-                success=True,
-                data=apps
-            )
-        return ClientResponse(
-            success=False,
-            error="Failed to retrieve workplace apps"
-        )
+            return ClientResponse(success=True, data=apps)
+        return ClientResponse(success=False, error="Failed to retrieve workplace apps")
 
-    def get_workplace_user_apps(
+    async def get_workplace_user_apps(
         self,
         email_address: EmailStr | None = None,
         phone_number: str | None = None,
@@ -433,23 +307,24 @@ class WorkplaceClient(BaseClappiaClient, ABC):
         if validation_error:
             return validation_error
 
-        env_error = self._validate_environment()
-        if env_error:
-            return env_error
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return ClientResponse(success=False, error=env_error)
 
-        params = self._build_user_identifier_payload(email_address, phone_number)
+        params: dict[str, Any] = {}
+        if email_address is not None:
+            params["emailAddress"] = email_address
+        if phone_number is not None:
+            params["phoneNumber"] = phone_number
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="GET",
             endpoint="workplace/getUserApps",
-            params=params,
+            params=params if params else None,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
         apps: list[AppUserMetaData] = []
         if response_data:
@@ -462,16 +337,12 @@ class WorkplaceClient(BaseClappiaClient, ABC):
                     apps.append(app)
                 except Exception as e:
                     print(f"Failed to parse app data: {e}")
-            return ClientResponse(
-                success=True,
-                data=apps
-            )
+            return ClientResponse(success=True, data=apps)
         return ClientResponse(
-            success=False,
-            error="Failed to retrieve workplace user apps"
+            success=False, error="Failed to retrieve workplace user apps"
         )
 
-    def get_workplace_users(
+    async def get_workplace_users(
         self,
         page_size: int = 50,
         token: str | None = None,
@@ -480,10 +351,7 @@ class WorkplaceClient(BaseClappiaClient, ABC):
         env_valid, env_error = self.api_utils.validate_environment()
 
         if not env_valid:
-            return ClientResponse(
-                success=False,
-                error=env_error
-            )
+            return ClientResponse(success=False, error=env_error)
 
         payload: dict[str, Any] = {
             "pageSize": page_size,
@@ -492,17 +360,14 @@ class WorkplaceClient(BaseClappiaClient, ABC):
         if token is not None:
             payload["token"] = token
 
-        success, error_message, response_data = self.api_utils.make_request(
+        success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
             endpoint="workplace/getWorkplaceUsers",
             data=payload,
         )
 
         if not success:
-            return ClientResponse(
-                success=False,
-                error=error_message
-            )
+            return ClientResponse(success=False, error=error_message)
 
         users = []
         next_token = None
@@ -519,10 +384,11 @@ class WorkplaceClient(BaseClappiaClient, ABC):
                     except Exception as e:
                         print(f"Failed to parse user data: {e}")
 
-        return ClientResponse(
-            success=True,
-            data={"users": users, "token": next_token}
-        )
+        return ClientResponse(success=True, data={"users": users, "token": next_token})
+
+    async def close(self) -> None:
+        """Close the underlying HTTP client and clean up resources."""
+        await self.api_utils.close()
 
 
 class WorkplaceAPIKeyClient(BaseAPIKeyClient, WorkplaceClient):

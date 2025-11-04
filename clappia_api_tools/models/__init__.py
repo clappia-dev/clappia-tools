@@ -2,20 +2,18 @@
 Models for the Clappia API.
 """
 
+from .definition import ExternalPageDefinition
 from .json_serialized import JsonSerializableMixin
-from .permissions import Permission
 from .request import (
     AddPageBreakRequest,
     AddUserToAppRequest,
     AddUserToWorkplaceRequest,
-    CreateAppRequest,
     CreateSubmissionRequest,
     EditSubmissionRequest,
     GetSubmissionsAggregationRequest,
     GetSubmissionsCountRequest,
     GetSubmissionsInExcelRequest,
     GetSubmissionsRequest,
-    ReorderSectionRequest,
     UpdateAppMetadataRequest,
     UpdatePageBreakRequest,
     UpdateSubmissionOwnersRequest,
@@ -102,7 +100,7 @@ from .submission import (
     FilterCondition,
     SubmissionQuery,
 )
-from .workplace_user import WorkplaceUser
+from .workplace import AppMetaData, AppUserMetaData, Permission, WorkplaceUser
 
 __all__ = [
     "AddPageBreakRequest",
@@ -111,19 +109,18 @@ __all__ = [
     "AggregationDimension",
     "AggregationMetric",
     "AggregationOperand",
-    "CreateAppRequest",
+    "AppMetaData",
+    "AppUserMetaData",
     "CreateSubmissionRequest",
     "EditSubmissionRequest",
+    "ExternalPageDefinition",
     "FilterCondition",
     "GetSubmissionsAggregationRequest",
     "GetSubmissionsCountRequest",
     "GetSubmissionsInExcelRequest",
     "GetSubmissionsRequest",
-    "GetWorkplaceUserAppsRequest",
-    "GetWorkplaceUsersRequest",
     "JsonSerializableMixin",
     "Permission",
-    "ReorderSectionRequest",
     "SubmissionQuery",
     "UpdateAppMetadataRequest",
     "UpdatePageBreakRequest",
@@ -131,8 +128,6 @@ __all__ = [
     "UpdateSubmissionStatusRequest",
     "UpdateWorkplaceUserAttributesRequest",
     "UpdateWorkplaceUserDetailsRequest",
-    "UpdateWorkplaceUserGroupsRequest",
-    "UpdateWorkplaceUserRoleRequest",
     "UpsertAiWorkflowStepRequest",
     "UpsertApprovalWorkflowStepRequest",
     "UpsertBarChartDefinitionRequest",

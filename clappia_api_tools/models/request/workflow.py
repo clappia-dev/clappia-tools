@@ -2,9 +2,30 @@ import json
 import re
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import Field, field_validator, model_validator
 
-from ..base import BaseUpsertWorkflowStepRequest
+from ...utils.utils import Utils
+from ..base_model import BaseFieldComponent
+from ..resapi_output import RestApiOutputField
+from ..sort_field import SortField
+from ..static_attachment import StaticAttachment
+
+
+class BaseUpsertWorkflowStepRequest(BaseFieldComponent):
+    name: str = Field(description="Name of the workflow step")
+    field_name: str | None = Field(None, description="Field name of the workflow step")
+    enabled: bool = Field(
+        default=True, description="Whether the workflow step is enabled"
+    )
+    public_urls_expiry: int | None = Field(
+        default=None, description="Public URLs expiry"
+    )
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: str) -> str | None:
+        return Utils.non_empty_string_validator(v, "Name")
+
 
 WHATSAPP_LANGUAGE_CODES = [
     "af",
@@ -155,16 +176,18 @@ class UpsertAiWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """
 
     instructions: str = Field(
-        description="Instructions for the AI model to process. Can include field references for dynamic content. Example: 'Analyze the sentiment of {customerFeedback} and provide a summary'"
+        description="Instructions for the AI model to process. Can include field references for dynamic content."
+        "Example: 'Analyze the sentiment of {customerFeedback} and provide a summary'"
     )
     model: str = Field(
-        description="The AI model to use for processing. Must match one of the allowed models listed in the class docstring."
+        description="The AI model to use for processing. "
+        "Example: 'gpt-4', 'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo-preview', 'o1-mini', 'o1-preview', 'gpt-3.5-turbo'"
     )
     llm: Literal["OpenAI", "Claude", "Gemini"] = Field(
-        description="The Large Language Model provider to use. Allowed values: 'OpenAI', 'Claude', 'Gemini'."
+        description="The Large Language Model provider to use. "
+        "Allowed values: 'OpenAI', 'Claude', 'Gemini'."
     )
 
-    @model_validator(mode="after")
     def validate_ai_configuration(self) -> "UpsertAiWorkflowStepRequest":
         model_options_map = {
             "OpenAI": [
@@ -212,16 +235,21 @@ class UpsertApprovalWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for approval workflow step configuration"""
 
     approvers: list[str] = Field(
-        description="Array of email addresses of approvers. Can include actual emails or field references. Example: ['manager@company.com', '{supervisorField}', 'finance@company.com']"
+        description="Array of email addresses of approvers. Can include actual emails or field references. "
+        "Example: ['manager@company.com', '{supervisorField}', 'finance@company.com']"
     )
     allowed_approval_statuses: list[str] = Field(
-        description="Array of allowed approval statuses. Example: ['approved', 'rejected', 'pending']. This should be as same as the status present the definition of the app. Hence before using this field, you should check the statuses present in the app definition."
+        description="Array of allowed approval statuses. Example: ['approved', 'rejected', 'pending']. "
+        "This should be as same as the status present the definition of the app. Hence before using this field, "
+        "you should check the statuses present in the app definition."
     )
     subject: str = Field(
-        description="Subject line for the approval email. Can include field references. Example: 'Approval required for {requestType}'"
+        description="Subject line for the approval email. Can include field references. "
+        "Example: 'Approval required for {requestType}'"
     )
     body: str = Field(
-        description="Body content for the approval email. Can include field references and HTML formatting. Example: 'Please review and approve the {requestType} for {amount}'"
+        description="Body content for the approval email. Can include field references and HTML formatting. "
+        "Example: 'Please review and approve the {requestType} for {amount}'"
     )
     expiry: int = Field(
         ge=1, le=50, description="Expiry time in days (1-50). Example: 7 for 7 days"
@@ -234,29 +262,14 @@ class UpsertApprovalWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     @field_validator("approvers")
     @classmethod
     def validate_approvers(cls, v: list[str]) -> list[str]:
-        email_regex = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
-        field_name_regex = re.compile(r"^\{[a-zA-Z_][a-zA-Z0-9_]*\}$")
-
-        for approver in v:
-            trimmed = approver.strip()
-            is_valid_email = email_regex.match(trimmed)
-            is_valid_field = field_name_regex.match(trimmed)
-
-            if not (is_valid_email or is_valid_field):
-                raise ValueError(
-                    f"Approver '{approver}' must be a valid email address or field reference. "
-                    f"Example: 'manager@company.com' or '{{supervisorField}}'"
-                )
-
-        return v
+        return Utils.validate_email_or_field_reference_list(v, "Approver")
 
     @field_validator("allowed_approval_statuses")
     @classmethod
     def validate_allowed_approval_statuses(cls, v: list[str]) -> list[str]:
-        if len(set(v)) != len(v):
-            raise ValueError("Allowed approval statuses must be unique")
-
-        return v
+        result = Utils.validate_unique_list(v, "Allowed approval statuses")
+        assert result is not None
+        return result
 
 
 class UpsertCodeWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
@@ -281,17 +294,19 @@ class UpsertCodeWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     @field_validator("output_fields")
     @classmethod
     def validate_output_fields(cls, v: list[str]) -> list[str]:
-        if len(set(v)) != len(v):
-            raise ValueError("Output fields must be unique")
-
-        return v
+        result = Utils.validate_unique_list(v, "Output fields")
+        assert result is not None
+        return result
 
 
 class UpsertConditionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for condition workflow step configuration"""
 
     condition: str = Field(
-        description="Condition expression to evaluate, supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: {field_name} <> 'value' or {field_name} > 10"
+        description="Condition expression to evaluate, supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), "
+        "logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations "
+        "that are supported by Microsoft Excel. "
+        "Example: {field_name} <> 'value' or {field_name} > 10"
     )
 
 
@@ -317,180 +332,92 @@ class UpsertDatabaseWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
         description="Name of the database to connect to. Example: 'myapp_db'"
     )
     database_query: str = Field(
-        description="SQL query to execute. Can include field references for dynamic queries. Example: 'SELECT * FROM users WHERE id = {userIdField}'"
+        description="SQL query to execute. Can include field references for dynamic queries. "
+        "Example: 'SELECT * FROM users WHERE id = {userIdField}'"
     )
     database_output_fields: list[str] | None = Field(
         None,
-        description="Array of field names where query results will be stored. Can include field references. Example: ['resultField']",
+        description="Array of field names where query results will be stored. Can include field references. "
+        "Example: ['resultField', 'nameField', 'emailField']",
     )
 
     @field_validator("database_port")
     @classmethod
     def validate_database_port(cls, v: str) -> str:
-        v = v.strip()
-        try:
-            port_num = int(v)
-        except ValueError as err:
-            raise ValueError("Database port must be a valid number") from err
-
-        if not (1 <= port_num <= 65535):
-            raise ValueError("Database port must be between 1 and 65535")
-
-        return v
+        return Utils.validate_database_port(v)
 
     @field_validator("database_host")
     @classmethod
     def validate_database_host(cls, v: str) -> str:
-        # Basic hostname/IP validation
-        host = v.strip()
-        if not re.match(r"^[a-zA-Z0-9.-]+$", host):
-            raise ValueError("Database host must be a valid hostname or IP address")
-
-        return host
+        return Utils.validate_database_host(v)
 
     @field_validator("database_output_fields")
     @classmethod
     def validate_database_output_fields(cls, v: list[str] | None) -> list[str] | None:
-        if v is not None:
-            # Check for duplicates
-            if len(set(v)) != len(v):
-                raise ValueError("Database output fields must be unique")
-
-        return v
-
-
-class StaticAttachment(BaseModel):
-    """Model for static file attachments"""
-
-    base64: str = Field(
-        description="Base64 encoded file data. Example: 'data:image/jpeg;base64,/9j/4AAQ...'"
-    )
-    content_type: str = Field(
-        description="MIME type of the file. Example: 'image/jpeg', 'application/pdf'"
-    )
-    file_name: str = Field(
-        description="Name of the file. Example: 'document.pdf', 'image.jpg'"
-    )
-
-    @field_validator("base64")
-    @classmethod
-    def validate_base64(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Base64 data cannot be empty")
-        return v.strip()
-
-    @field_validator("content_type")
-    @classmethod
-    def validate_content_type(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Content type cannot be empty")
-        return v.strip()
-
-    @field_validator("file_name")
-    @classmethod
-    def validate_file_name(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("File name cannot be empty")
-        return v.strip()
+        return Utils.validate_unique_list(v, "Database output fields")
 
 
 class UpsertEmailWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for email workflow step configuration"""
 
     to_email_addresses: list[str] = Field(
-        description="Array of email addresses to send the email to. Can include actual email addresses or field references. Example: ['user@example.com', '{fieldName}', 'admin@company.com']"
+        description="Array of email addresses to send the email to. Can include actual email addresses or field references. "
+        "Example: ['user@example.com', '{fieldName}', 'admin@company.com']"
     )
     cc_email_addresses: list[str] | None = Field(
         None,
-        description="Array of email addresses to CC. Can include actual email addresses or field references. Example: ['manager@example.com', '{supervisorField}']",
+        description="Array of email addresses to CC. Can include actual email addresses or field references. "
+        "Example: ['manager@example.com', '{supervisorField}']",
     )
     bcc_email_addresses: list[str] | None = Field(
         None,
-        description="Array of email addresses to BCC. Can include actual email addresses or field references. Example: ['hr@example.com', '{hrField}']",
+        description="Array of email addresses to BCC. Can include actual email addresses or field references. "
+        "Example: ['hr@example.com', '{hrField}']",
     )
     subject: str = Field(
-        description="Email subject line. Can include field references for dynamic content. Example: 'Order Confirmation for {orderNumber}' or 'Welcome {customerName}'"
+        description="Email subject line. Can include field references for dynamic content. "
+        "Example: 'Order Confirmation for {orderNumber}' or 'Welcome {customerName}'"
     )
     body: str = Field(
-        description="Email body content. Can include HTML formatting and field references. Example: 'Dear {customerName}, your order {orderId} has been confirmed.'"
+        description="Email body content. Can include HTML formatting and field references. "
+        "Example: 'Dear {customerName}, your order {orderId} has been confirmed.'"
     )
     static_attachments: list[StaticAttachment] | None = Field(
         None, description="Array of static file attachments. Maximum 10 attachments."
     )
     print_template_indices: list[int] | None = Field(
         None,
-        description="Array of template indices to include as attachments. Indices correspond to templates in the app. Example: [0, 2] for first and third templates",
+        description="Array of template indices to include as attachments. Indices correspond to templates in the app. "
+        "Example: [0, 2] for first and third templates",
     )
     dynamic_attachments: list[str] | None = Field(
         None,
-        description="Array of file field names that contain file attachments to include. Only works when app has file fields. Example: ['documentField', 'imageField']",
+        description="Array of file field names that contain file attachments to include. Only works when app has file fields. "
+        "Example: ['documentField', 'imageField']",
     )
     reply_to: str | None = Field(
         None,
-        description="Reply-to email address. Can be an actual email or field reference. Example: 'noreply@company.com' or '{supportField}'",
+        description="Reply-to email address. Can be an actual email or field reference. "
+        "Example: 'noreply@company.com' or '{supportField}'",
     )
 
     @field_validator("to_email_addresses")
     @classmethod
     def validate_to_email_addresses(cls, v: list[str]) -> list[str]:
-        email_regex = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
-        field_name_regex = re.compile(r"^\{[a-zA-Z_][a-zA-Z0-9_]*\}$")
-
-        for email in v:
-            trimmed = email.strip()
-            is_valid_email = email_regex.match(trimmed)
-            is_valid_field = field_name_regex.match(trimmed)
-
-            if not (is_valid_email or is_valid_field):
-                raise ValueError(
-                    f"Email address '{email}' must be a valid email address or field reference. "
-                    f"Example: 'user@example.com' or '{{fieldName}}'"
-                )
-
-        return v
+        return Utils.validate_email_or_field_reference_list(v, "Email address")
 
     @field_validator("cc_email_addresses")
     @classmethod
     def validate_cc_email_addresses(cls, v: list[str] | None) -> list[str] | None:
         if v is not None:
-            email_regex = re.compile(
-                r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-            )
-            field_name_regex = re.compile(r"^\{[a-zA-Z_][a-zA-Z0-9_]*\}$")
-
-            for email in v:
-                trimmed = email.strip()
-                is_valid_email = email_regex.match(trimmed)
-                is_valid_field = field_name_regex.match(trimmed)
-
-                if not (is_valid_email or is_valid_field):
-                    raise ValueError(
-                        f"CC email address '{email}' must be a valid email address or field reference. "
-                        f"Example: 'manager@example.com' or '{{supervisorField}}'"
-                    )
-
+            return Utils.validate_email_or_field_reference_list(v, "CC email address")
         return v
 
     @field_validator("bcc_email_addresses")
     @classmethod
     def validate_bcc_email_addresses(cls, v: list[str] | None) -> list[str] | None:
         if v is not None:
-            email_regex = re.compile(
-                r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-            )
-            field_name_regex = re.compile(r"^\{[a-zA-Z_][a-zA-Z0-9_]*\}$")
-
-            for email in v:
-                trimmed = email.strip()
-                is_valid_email = email_regex.match(trimmed)
-                is_valid_field = field_name_regex.match(trimmed)
-
-                if not (is_valid_email or is_valid_field):
-                    raise ValueError(
-                        f"BCC email address '{email}' must be a valid email address or field reference. "
-                        f"Example: 'hr@example.com' or '{{hrField}}'"
-                    )
-
+            return Utils.validate_email_or_field_reference_list(v, "BCC email address")
         return v
 
     @field_validator("static_attachments")
@@ -532,21 +459,7 @@ class UpsertEmailWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     @classmethod
     def validate_reply_to(cls, v: str | None) -> str | None:
         if v is not None:
-            email_regex = re.compile(
-                r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-            )
-            field_name_regex = re.compile(r"^\{[a-zA-Z_][a-zA-Z0-9_]*\}$")
-
-            trimmed = v.strip()
-            is_valid_email = email_regex.match(trimmed)
-            is_valid_field = field_name_regex.match(trimmed)
-
-            if not (is_valid_email or is_valid_field):
-                raise ValueError(
-                    f"Reply-to '{v}' must be a valid email address or field reference. "
-                    f"Example: 'noreply@company.com' or '{{supportField}}'"
-                )
-
+            return Utils.validate_email_or_field_reference(v, "Reply-to")
         return v
 
 
@@ -554,10 +467,13 @@ class UpsertLoopWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for loop workflow step configuration"""
 
     no_of_times: int | str = Field(
-        description="Number of times to execute the loop or field reference containing the count. Can be a number or field name. Example: 5 or {loopCountField}"
+        description="Number of times to execute the loop or field reference containing the count. Can be a number or field name. "
+        "Example: 5 or {loopCountField}"
     )
     break_condition: str = Field(
-        description="Condition to break the loop early, supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations (IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations (TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: {field_name} <> 'value' or {field_name} > 10"
+        description="Condition to break the loop early, supports multiple arithmetic operations (SUM, DIFF, PRODUCT, LOG...), logical operations "
+        "(IF/ELSE, AND, OR, XOR, ...), string operations (CONCATENATE, LEN, TRIM, ...) and DATE/TIME operations "
+        "(TODAY, NOW, DATEDIF, FORMAT) that are supported by Microsoft Excel. Example: {field_name} <> 'value' or {field_name} > 10"
     )
     allow_system_workflow_triggered_execution: bool = Field(
         False,
@@ -572,14 +488,7 @@ class UpsertLoopWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
                 raise ValueError("Number of times must be at least 1")
             return v
         elif isinstance(v, str):
-            # Check if it's a valid field reference
-            field_name_regex = re.compile(r"^\{[a-zA-Z_][a-zA-Z0-9_]*\}$")
-            if not field_name_regex.match(v.strip()):
-                raise ValueError(
-                    f"Field reference '{v}' must be a valid field name. "
-                    f"Example: '{{loopCountField}}'"
-                )
-            return v.strip()
+            return Utils.validate_field_reference(v, "Field reference")
         else:
             raise ValueError(
                 "Number of times must be either a number or a field reference string"
@@ -597,91 +506,41 @@ class UpsertMobileNotificationWorkflowStepRequest(BaseUpsertWorkflowStepRequest)
     """Request model for mobile notification workflow step configuration"""
 
     users: list[str] = Field(
-        description="Array of users to send mobile notifications to. Can include phone numbers, email addresses, or field references. Example: ['+91 1234567890', '{userField}', 'user@example.com', '{$allUsers}']"
+        description="Array of users to send mobile notifications to. Can include phone numbers, email addresses, or field references. "
+        "Example: ['+91 1234567890', '{userField}', 'user@example.com', '{$allUsers}']"
     )
     subject: str = Field(
-        description="Subject/title of the mobile notification. Can include field references. Example: 'Alert: {alertType}' or 'Order Update'"
+        description="Subject/title of the mobile notification. Can include field references. "
+        "Example: 'Alert: {alertType}' or 'Order Update'"
     )
     body: str = Field(
-        description="Body content of the mobile notification. Can include field references. Example: 'Your order {orderId} has been {status}'"
+        description="Body content of the mobile notification. Can include field references. "
+        "Example: 'Your order {orderId} has been {status}'"
     )
 
     @field_validator("users")
     @classmethod
     def validate_users(cls, v: list[str]) -> list[str]:
-        email_regex = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
-        field_name_regex = re.compile(r"^\{[a-zA-Z_][a-zA-Z0-9_]*\}$")
-        phone_regex = re.compile(r"^\+?[1-9]\d{1,14}$")  # E.164 format
-        special_user_regex = re.compile(
-            r"^\{\$[a-zA-Z_][a-zA-Z0-9_]*\}$"
-        )  # Special users like {$allUsers}
+        # Check for special users like {$allUsers} or validate as email/phone/field
+        special_user_regex = re.compile(r"^\{\$[a-zA-Z_][a-zA-Z0-9_]*\}$")
 
         for user in v:
             trimmed = user.strip()
-            is_valid_email = email_regex.match(trimmed)
-            is_valid_field = field_name_regex.match(trimmed)
-            is_valid_phone = phone_regex.match(trimmed)
-            is_valid_special = special_user_regex.match(trimmed)
-
-            if not (
-                is_valid_email or is_valid_field or is_valid_phone or is_valid_special
-            ):
-                raise ValueError(
-                    f"User '{user}' must be a valid phone number, email address, field reference, or special user. "
-                    f"Example: '+91 1234567890', 'user@example.com', '{{userField}}', or '{{$allUsers}}'"
-                )
+            # If it's a special user, skip further validation
+            if special_user_regex.match(trimmed):
+                continue
+            # Otherwise validate as email/phone/field reference
+            Utils.validate_email_phone_or_field_reference(user, "User")
 
         return v
-
-
-class RestApiOutputField(BaseModel):
-    """Model for REST API output field mapping"""
-
-    name: str = Field(description="Name of the output field")
-    json_path_query: str = Field(
-        description="JSONPath query to extract data from response"
-    )
-    x_path_query: str = Field(
-        description="XPath query to extract data from XML response"
-    )
-    data_type: str = Field(
-        description="Data type of the field (TEXT, DATE, LOCATION, etc.)"
-    )
-
-    @field_validator("name")
-    @classmethod
-    def validate_name(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Output field name cannot be empty")
-        return v.strip()
-
-    @field_validator("json_path_query")
-    @classmethod
-    def validate_json_path_query(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("JSONPath query cannot be empty")
-        return v.strip()
-
-    @field_validator("x_path_query")
-    @classmethod
-    def validate_x_path_query(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("XPath query cannot be empty")
-        return v.strip()
-
-    @field_validator("data_type")
-    @classmethod
-    def validate_data_type(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Data type cannot be empty")
-        return v.strip()
 
 
 class UpsertRestApiWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for REST API workflow step configuration"""
 
     server_url: str = Field(
-        description="URL of the REST API endpoint. Example: 'https://api.example.com/data' or 'https://api.example.com/data/{id}' or {server_url}"
+        description="URL of the REST API endpoint. "
+        "Example: 'https://api.example.com/data' or 'https://api.example.com/data/{id}' or {server_url}"
     )
     method_type: Literal["GET", "POST", "PATCH", "DELETE"] = Field(
         description="HTTP method type"
@@ -717,12 +576,7 @@ class UpsertRestApiWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     @field_validator("headers", "body")
     @classmethod
     def validate_json_strings(cls, v: str | None) -> str | None:
-        if v is not None:
-            try:
-                json.loads(v)
-            except json.JSONDecodeError as e:
-                raise ValueError("Must be valid JSON string") from e
-        return v
+        return Utils.json_string_validator(v)
 
     @field_validator("response_mapping")
     @classmethod
@@ -776,7 +630,8 @@ class UpsertSlackWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for Slack workflow step configuration"""
 
     slack_channel_id: str = Field(
-        description="Slack webhook URL for the channel. Must be in the format https://hooks.slack.com/services/T123ABC456/B789DEF012/XYZ123WEBHOOK456"
+        pattern=r"https://hooks\.slack\.com/services/[A-Za-z0-9]+/[A-Za-z0-9]+/[A-Za-z0-9]+",
+        description="Slack webhook URL for the channel. Must be in the format https://hooks.slack.com/services/T123ABC456/B789DEF012/XYZ123WEBHOOK456",
     )
     subject: str = Field(
         description="Subject/title of the Slack message. Can include field references for dynamic content. Example: 'Alert: {alertType}' or 'Order Update for {orderId}'"
@@ -785,67 +640,34 @@ class UpsertSlackWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
         description="Body content of the Slack message. Can include field references and formatting. Example: 'Order {orderId} has been {status} by {customerName}'"
     )
 
-    @field_validator("slack_channel_id")
-    @classmethod
-    def validate_slack_channel_id(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Slack channel ID cannot be empty")
-
-        # Slack webhook URL validation
-        slack_webhook_regex = re.compile(
-            r"https://hooks\.slack\.com/services/[A-Za-z0-9]+/[A-Za-z0-9]+/[A-Za-z0-9]+"
-        )
-        if not slack_webhook_regex.match(v.strip()):
-            raise ValueError(
-                "Slack channel ID must be a valid Slack webhook URL in the format "
-                "https://hooks.slack.com/services/T123ABC456/B789DEF012/XYZ123WEBHOOK456"
-            )
-
-        return v.strip()
-
 
 class UpsertSmsWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for SMS workflow step configuration"""
 
     phone_numbers: list[str] = Field(
-        description="Array of phone numbers to send SMS to. Can include actual phone numbers or field references. Maximum 1 phone number. Example: ['+91 1234567890', '{phoneField}']"
+        description="Array of phone numbers to send SMS to. Can include actual phone numbers or field references. Maximum 1 phone number. "
+        "Example: ['+91 1234567890', '{phoneField}']"
     )
     sms_template_variables: list[dict[str, str]] | None = Field(
         None, description="Array of template variables for SMS template"
     )
     sms_template_id: str | None = Field(
         None,
-        description="SMS template ID for non-India workplaces. Required for non-India, not needed for India. Example: 'template_12345'",
+        description="SMS template ID for non-India workplaces. Required for non-India, not needed for India. "
+        "You need to ask to the user to provide the template ID. Example: 'template_12345'",
     )
     body: str | None = Field(
         None,
-        description="SMS body content for India workplaces. Required for India, not needed for non-India. Can include field references. Example: 'Your order {orderId} has been confirmed'",
+        description="SMS body content for India workplaces. Required for India, not needed for non-India. Can include field references for dynamic content. "
+        "Example: 'Your order {orderId} has been confirmed'",
     )
 
     @field_validator("phone_numbers")
     @classmethod
     def validate_phone_numbers(cls, v: list[str]) -> list[str]:
-        if not v or len(v) == 0:
-            raise ValueError("Phone numbers are required")
-
-        if len(v) > 1:
-            raise ValueError("Phone numbers can only have one phone number")
-
-        phone_regex = re.compile(r"^\+?[1-9]\d{1,14}$")  # E.164 format
-        field_name_regex = re.compile(r"^\{[a-zA-Z_][a-zA-Z0-9_]*\}$")
-
-        for phone in v:
-            trimmed = phone.strip()
-            is_valid_phone = phone_regex.match(trimmed)
-            is_valid_field = field_name_regex.match(trimmed)
-
-            if not (is_valid_phone or is_valid_field):
-                raise ValueError(
-                    f"Phone number '{phone}' must be a valid phone number or field reference. "
-                    f"Example: '+91 1234567890' or '{{phoneField}}'"
-                )
-
-        return v
+        Utils.validate_non_empty_list(v, "Phone numbers")
+        Utils.validate_exact_count(v, count=1, field_name="Phone numbers")
+        return Utils.validate_phone_or_field_reference_list(v, "Phone number")
 
     @field_validator("sms_template_variables")
     @classmethod
@@ -888,15 +710,18 @@ class UpsertWaitWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
 
     wait_till_date: str | None = Field(
         None,
-        description="Date to wait until (when using wait_till_date and wait_till_time). Can include field references. Example: '2024-12-31' or '{targetDateField}'",
+        description="Date to wait until (when using wait_till_date and wait_till_time). Can include field references for dynamic content. "
+        "Example: '2024-12-31' or '{targetDateField}'",
     )
     wait_for: str | None = Field(
         None,
-        description="Duration to wait for in seconds. Can include field references. Example: '5000', '7200', '86400' or '{no_of_seconds}'",
+        description="Duration to wait for in seconds. Can include field references for dynamic content. "
+        "Example: '5000', '7200', '86400' or '{no_of_seconds}'",
     )
     wait_till_time: str | None = Field(
         None,
-        description="Time to wait until (when using wait_till_date and wait_till_time). Can include field references. Example: '14:30' or '{targetTimeField}'",
+        description="Time to wait until (when using wait_till_date and wait_till_time). Can include field references for dynamic content. "
+        "Example: '14:30' or '{targetTimeField}'",
     )
 
     @model_validator(mode="after")
@@ -912,13 +737,14 @@ class UpsertWhatsAppWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     """Request model for WhatsApp workflow step configuration"""
 
     phone_numbers: list[str] = Field(
-        description="Array of phone numbers to send WhatsApp messages to. Can include actual phone numbers or field references. Example: ['+91 1234567890', '{phoneField}', '+911234567890', '{phoneField}']"
+        description="Array of phone numbers to send WhatsApp messages to. Can include actual phone numbers or field references. "
+        "Example: ['+91 1234567890', '{phoneField}', '+911234567890', '{phoneField}']"
     )
     whatsapp_template_variables: list[dict[str, str]] | None = Field(
         None, description="Array of template variables for WhatsApp template"
     )
     whatsapp_template_id: str = Field(
-        description="WhatsApp template ID. Example: 'template_12345'"
+        description="WhatsApp template ID. You need to ask to the user to provide the template ID. Example: 'template_12345'"
     )
     static_attachments: list[StaticAttachment] | None = Field(
         None, description="Array of static file attachments. Maximum 1 attachment."
@@ -943,27 +769,9 @@ class UpsertWhatsAppWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     @field_validator("phone_numbers")
     @classmethod
     def validate_phone_numbers(cls, v: list[str]) -> list[str]:
-        if not v or len(v) == 0:
-            raise ValueError("Phone numbers are required")
-
-        if len(v) > 1:
-            raise ValueError("Phone numbers can have at most 1 phone number")
-
-        phone_regex = re.compile(r"^\+?[1-9]\d{1,14}$")  # E.164 format
-        field_name_regex = re.compile(r"^\{[a-zA-Z_][a-zA-Z0-9_]*\}$")
-
-        for phone in v:
-            trimmed = phone.strip()
-            is_valid_phone = phone_regex.match(trimmed)
-            is_valid_field = field_name_regex.match(trimmed)
-
-            if not (is_valid_phone or is_valid_field):
-                raise ValueError(
-                    f"Phone number '{phone}' must be a valid phone number or field reference. "
-                    f"Example: '+91 1234567890' or '{{phoneField}}'"
-                )
-
-        return v
+        Utils.validate_non_empty_list(v, "Phone numbers")
+        Utils.validate_max_count(v, max_count=1, field_name="Phone numbers")
+        return Utils.validate_phone_or_field_reference_list(v, "Phone number")
 
     @field_validator("whatsapp_template_variables")
     @classmethod
@@ -1099,27 +907,11 @@ class UpsertCreateSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     @classmethod
     def validate_submission_owners(cls, v: list[str] | None) -> list[str] | None:
         if v is not None:
-            email_regex = re.compile(
-                r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-            )
-            phone_regex = re.compile(r"^\+?[1-9]\d{1,14}$")  # E.164 format
-            field_name_regex = re.compile(r"^\{[a-zA-Z_][a-zA-Z0-9_]*\}$")
-
             # Remove duplicates while preserving order
             unique_owners = list(dict.fromkeys(v))
-
-            for owner in unique_owners:
-                trimmed = owner.strip()
-                is_valid_email = email_regex.match(trimmed)
-                is_valid_phone = phone_regex.match(trimmed)
-                is_valid_field = field_name_regex.match(trimmed)
-
-                if not (is_valid_email or is_valid_phone or is_valid_field):
-                    raise ValueError(
-                        f"Submission owner '{owner}' must be a valid email address, phone number, or field reference. "
-                        f"Example: 'manager@company.com', '+911234567890', or '{{ownerField}}'"
-                    )
-
+            return Utils.validate_email_phone_or_field_reference_list(
+                unique_owners, "Submission owner"
+            )
         return v
 
 
@@ -1161,17 +953,6 @@ class UpsertDeleteSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
                 raise ValueError(f"Filter field '{key}' value cannot be empty")
 
         return v
-
-
-class SortField(BaseModel):
-    """Model for sort field configuration"""
-
-    sort_by: str = Field(
-        description="Field name to sort by. Example: 'createdAt', 'name', 'status'"
-    )
-    direction: Literal["asc", "desc"] = Field(
-        description="Sort direction. Must be 'asc' or 'desc'. Example: 'desc' for descending order"
-    )
 
 
 class UpsertFindSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
@@ -1246,22 +1027,26 @@ class UpsertEditSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
         description="ID of the target app where submissions will be edited. Example: 'app_12345'"
     )
     filters: dict[str, Any] = Field(
-        description="Filters to find submissions to edit. Contains the keys value where the key is the field name of the target app and the value to be matched. Can include field references. Example: {'status': 'pending', 'userId': '{currentUserId}'}"
+        description="Filters to find submissions to edit. Contains the keys value where the key is the field name of the target app and the value to be matched."
+        "Can include field references for dynamic content. Example: {'status': 'pending', 'userId': '{currentUserId}'}"
     )
     field_values_map: dict[str, Any] = Field(
-        description="Map of field names to new values, where the key is the field name of the target app and the value is the value to be set. Can include field references and cross-app references. Example: {'status': 'approved', 'approvedBy': '{sourceAppId_#_approverField}', 'name': '{sourceAppId_#_customerName}', 'email': '{targetAppId_#_customerEmail}'}"
+        description="Map of field names to new values, where the key is the field name of the target app and "
+        "the value is the value to be set. Can include field references for dynamic content and cross-app references. "
+        "Example: {'status': 'approved', 'approvedBy': '{sourceAppId_#_approverField}', 'name': '{sourceAppId_#_customerName}', 'email': '{targetAppId_#_customerEmail}'}"
     )
     submission_status: str | None = Field(
         None,
-        description="New status for the submission. Can include field references. Example: 'approved' or '{newStatusField}'",
+        description="New status for the submission. Can include field references for dynamic content. Example: 'approved' or '{newStatusField}'",
     )
     comments: str | None = Field(
         None,
-        description="Comments to add to the submission. Can include field references. Example: 'Approved by {approverName}'",
+        description="Comments to add to the submission. Can include field references for dynamic content. Example: 'Approved by {approverName}'",
     )
     submission_owners: list[str] | None = Field(
         None,
-        description="Array of email addresses or phone numbers for new submission owners. Can include field references. Example: ['manager@company.com', '{ownerField}', '+911234567890', '{phoneField}']",
+        description="Array of email addresses or phone numbers for new submission owners. "
+        "Can include field references for dynamic content. Example: ['manager@company.com', '{ownerField}', '+911234567890', '{phoneField}']",
     )
     keep_existing_owners: bool = Field(
         True,
@@ -1315,25 +1100,8 @@ class UpsertEditSubmissionWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     @classmethod
     def validate_submission_owners(cls, v: list[str] | None) -> list[str] | None:
         if v is not None:
-            email_regex = re.compile(
-                r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-            )
-            phone_regex = re.compile(r"^\+?[1-9]\d{1,14}$")  # E.164 format
-            field_name_regex = re.compile(r"^\{[a-zA-Z_][a-zA-Z0-9_]*\}$")
-
-            # Remove duplicates while preserving order
             unique_owners = list(dict.fromkeys(v))
-
-            for owner in unique_owners:
-                trimmed = owner.strip()
-                is_valid_email = email_regex.match(trimmed)
-                is_valid_phone = phone_regex.match(trimmed)
-                is_valid_field = field_name_regex.match(trimmed)
-
-                if not (is_valid_email or is_valid_phone or is_valid_field):
-                    raise ValueError(
-                        f"Submission owner '{owner}' must be a valid email address, phone number, or field reference. "
-                        f"Example: 'manager@company.com', '+911234567890', or '{{ownerField}}'"
-                    )
-
+            return Utils.validate_email_phone_or_field_reference_list(
+                unique_owners, "Submission owner"
+            )
         return v

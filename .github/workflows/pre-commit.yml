@@ -1,32 +1,32 @@
-name: Publish to PyPI
+name: Pre-commit Checks
 
 on:
   push:
-    branches: [master]
-  workflow_dispatch:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
 
 jobs:
-  publish:
-    name: Publish to PyPI
+  pre-commit:
     runs-on: ubuntu-latest
-    environment: release
     permissions:
-      id-token: write
       contents: read
+      pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          enable-cache: true
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
           cache: "pip"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
 
       - name: Install pre-commit
         run: |
@@ -36,12 +36,6 @@ jobs:
         run: |
           pre-commit install-hooks
 
-      - name: Run pre-commit checks
+      - name: Run pre-commit
         run: |
           pre-commit run --all-files
-
-      - name: Build package
-        run: uv build
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1

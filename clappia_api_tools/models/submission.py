@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
-# Define standard fields as a module-level constant
 STANDARD_FIELDS = {
     "$submissionId",
     "$owner",
@@ -58,38 +57,97 @@ class FilterCondition(BaseModel):
 
     @classmethod
     def from_json(cls, json_data: dict[str, Any]) -> FilterCondition:
-        """Create FilterCondition from JSON data"""
-        # Validate and extract required fields
         key = json_data.get("key")
         if not key or not isinstance(key, str):
             raise ValueError(
                 "Parameter 'key' must be present and be a non-empty string"
             )
 
-        operator = json_data.get("operator", "EQ")
-        if not isinstance(operator, str):
-            operator = "EQ"
+        operator_str = json_data.get("operator", "EQ")
+        if not isinstance(operator_str, str):
+            operator_str = "EQ"
 
-        filter_key_type = json_data.get("filterKeyType", "CUSTOM")
-        if not isinstance(filter_key_type, str):
-            filter_key_type = "CUSTOM"
+        valid_operators = [
+            "CONTAINS",
+            "NOT_IN",
+            "EQ",
+            "NEQ",
+            "EMPTY",
+            "NON_EMPTY",
+            "STARTS_WITH",
+            "BETWEEN",
+            "GT",
+            "LT",
+            "GTE",
+            "LTE",
+            "ENDS_WITH",
+        ]
+        operator = cast(
+            Literal[
+                "CONTAINS",
+                "NOT_IN",
+                "EQ",
+                "NEQ",
+                "EMPTY",
+                "NON_EMPTY",
+                "STARTS_WITH",
+                "BETWEEN",
+                "GT",
+                "LT",
+                "GTE",
+                "LTE",
+                "ENDS_WITH",
+            ],
+            operator_str if operator_str in valid_operators else "EQ",
+        )
+
+        filter_key_type_str = json_data.get("filterKeyType", "CUSTOM")
+        if not isinstance(filter_key_type_str, str):
+            filter_key_type_str = "CUSTOM"
+
+        filter_key_type = cast(
+            Literal["STANDARD", "CUSTOM"],
+            (
+                filter_key_type_str
+                if filter_key_type_str in ["STANDARD", "CUSTOM"]
+                else "CUSTOM"
+            ),
+        )
 
         return cls(
-            operator=operator,  # type: ignore[arg-type]
-            filter_key_type=filter_key_type,  # type: ignore[arg-type]
+            operator=operator,
+            filter_key_type=filter_key_type,
             key=key,
             value=json_data.get("value"),
         )
 
     def assign_from_json(self, json_data: dict[str, Any] | None) -> None:
-        """In-place assignment from JSON"""
         if not json_data:
             return
 
         if "operator" in json_data and isinstance(json_data["operator"], str):
-            self.operator = json_data["operator"]  # type: ignore[assignment]
+            operator_str = json_data["operator"]
+            valid_operators = [
+                "CONTAINS",
+                "NOT_IN",
+                "EQ",
+                "NEQ",
+                "EMPTY",
+                "NON_EMPTY",
+                "STARTS_WITH",
+                "BETWEEN",
+                "GT",
+                "LT",
+                "GTE",
+                "LTE",
+                "ENDS_WITH",
+            ]
+            if operator_str in valid_operators:
+                self.operator = operator_str  # type: ignore[assignment]
         if "filterKeyType" in json_data and isinstance(json_data["filterKeyType"], str):
-            self.filter_key_type = json_data["filterKeyType"]  # type: ignore[assignment]
+            filter_key_type_str = json_data["filterKeyType"]
+            if filter_key_type_str in ["STANDARD", "CUSTOM"]:
+                self.filter_key_type = filter_key_type_str  # type: ignore[assignment]
         if "key" in json_data and isinstance(json_data["key"], str):
             self.key = json_data["key"]
         if "value" in json_data:
@@ -117,30 +175,28 @@ class SubmissionQuery(BaseModel):
 
     @model_validator(mode="after")
     def validate_queries_or_conditions(self) -> SubmissionQuery:
-        """Ensure at least one of queries or conditions is provided"""
         if not self.queries and not self.conditions:
             raise ValueError("Either queries or conditions must be provided")
         return self
 
     @classmethod
     def from_json(cls, json_data: dict[str, Any]) -> SubmissionQuery:
-        """Create SubmissionQuery from JSON data"""
         if not json_data:
             return cls()
 
-        operator = json_data.get("operator", "AND")
-        if not isinstance(operator, str) or operator not in ["AND", "OR"]:
-            operator = "AND"
+        operator_str = json_data.get("operator", "AND")
+        if not isinstance(operator_str, str) or operator_str not in ["AND", "OR"]:
+            operator_str = "AND"
 
-        query = cls(operator=operator)  # type: ignore[arg-type]
+        operator = cast(Literal["AND", "OR"], operator_str)
 
-        # Handle nested queries
+        query = cls(operator=operator)
+
         if json_data.get("queries") and isinstance(json_data["queries"], list):
             query.queries = [
                 cls.from_json(q) for q in json_data["queries"] if isinstance(q, dict)
             ]
 
-        # Handle conditions
         if json_data.get("conditions") and isinstance(json_data["conditions"], list):
             query.conditions = [
                 FilterCondition.from_json(c)
@@ -151,16 +207,14 @@ class SubmissionQuery(BaseModel):
         return query
 
     def assign_from_json(self, json_data: dict[str, Any] | None) -> None:
-        """In-place assignment from JSON (matches JavaScript method signature)"""
         if not json_data:
             return
 
-        # Handle operator
         if "operator" in json_data and isinstance(json_data["operator"], str):
-            if json_data["operator"] in ["AND", "OR"]:
-                self.operator = json_data["operator"]  # type: ignore[assignment]
+            operator_str = json_data["operator"]
+            if operator_str in ["AND", "OR"]:
+                self.operator = operator_str  # type: ignore[assignment]
 
-        # Handle nested queries
         if json_data.get("queries") and isinstance(json_data["queries"], list):
             self.queries = []
             for q in json_data["queries"]:
@@ -169,7 +223,6 @@ class SubmissionQuery(BaseModel):
                     query.assign_from_json(q)
                     self.queries.append(query)
 
-        # Handle conditions
         if json_data.get("conditions") and isinstance(json_data["conditions"], list):
             self.conditions = []
             for c in json_data["conditions"]:
@@ -178,11 +231,9 @@ class SubmissionQuery(BaseModel):
                         condition = FilterCondition.from_json(c)
                         self.conditions.append(condition)
                     except (ValueError, TypeError):
-                        # Skip invalid conditions
                         continue
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary for JSON serialization"""
         result: dict[str, Any] = {"operator": self.operator}
 
         if self.queries:
