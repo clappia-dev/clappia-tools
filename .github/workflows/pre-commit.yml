@@ -32,7 +32,16 @@ jobs:
         run: |
           uv pip install --system pre-commit
 
+      - name: Configure git for pre-commit
+        run: |
+          git config --global --add safe.directory '*'
+          git config --global url."https://github.com/".insteadOf git@github.com:
+          git config --global credential.helper ''
+          git config --global http.https://github.com/.extraheader ''
+
       - name: Set up pre-commit hooks
+        env:
+          GIT_TERMINAL_PROMPT: 0
         run: |
           pre-commit install-hooks
 
