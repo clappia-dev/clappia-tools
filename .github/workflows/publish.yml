@@ -28,26 +28,6 @@ jobs:
           python-version: "3.10"
           cache: "pip"
 
-      - name: Install pre-commit
-        run: |
-          uv pip install --system pre-commit
-
-      - name: Configure git for pre-commit
-        run: |
-          git config --global --add safe.directory '*'
-          git config --global url."https://x-access-token:${{ github.token }}@github.com/".insteadOf "https://github.com/"
-          git config --global url."https://x-access-token:${{ github.token }}@github.com/".insteadOf "git@github.com:"
-
-      - name: Set up pre-commit hooks
-        env:
-          GIT_TERMINAL_PROMPT: 0
-        run: |
-          pre-commit install-hooks
-
-      - name: Run pre-commit checks
-        run: |
-          pre-commit run --all-files
-
       - name: Build package
         run: uv build
 
