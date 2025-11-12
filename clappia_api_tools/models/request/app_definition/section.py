@@ -40,7 +40,7 @@ class UpsertSectionRequest(BaseFieldComponent):
     )
     retain_values: bool = Field(False, description="Retain values when hidden")
     keep_section_collapsed: bool = Field(False, description="Keep section collapsed")
-    section_type: Literal["Section", "Table"] = Field(
-        "Section", description="Type of the section"
+    section_type: Literal["section", "table"] = Field(
+        "section", description="Type of the section"
     )
     initial_rows: int = Field(5, description="Initial number of rows")
