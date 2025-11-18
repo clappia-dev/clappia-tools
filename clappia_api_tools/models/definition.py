@@ -204,3 +204,17 @@ ActionDetails = (
     | OpenLinkActionDetails
     | CodeActionDetails
 )
+
+
+class ExternalTemplateDefinition(BaseFieldComponent):
+    type: str = Field(
+        default="HTML", description="Print type, allowed values: HTML. Default is HTML"
+    )
+    template_name: str = Field(description="Template name, Example: 'Template 1'")
+    pdf_name: str = Field(
+        description="PDF name, can contain field references, Example: '{$app_id}_{$submission_id}.pdf'"
+    )
+    print_mode: Literal["portrait", "landscape"] = Field(description="Print mode")
+    file_type: Literal["pdf", "xlsx"] = Field(
+        description="File type, allowed values: pdf, xlsx. Default is pdf"
+    )

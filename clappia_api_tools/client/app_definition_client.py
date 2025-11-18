@@ -1,10 +1,17 @@
 from abc import ABC
+from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
+import asyncio
 from pydantic import BaseModel, EmailStr
 
+from clappia_api_tools.client.file_management_client import FileManagementClient
 from clappia_api_tools.enums import FieldType
-from clappia_api_tools.models.definition import ExternalPageDefinition
+from clappia_api_tools.models.definition import (
+    ExternalPageDefinition,
+    ExternalTemplateDefinition,
+)
 from clappia_api_tools.models.request import (
     AddPageBreakRequest,
     UpdateAppMetadataRequest,
@@ -56,6 +63,7 @@ from clappia_api_tools.models.request import (
     UpsertFieldVoiceRequest,
     UpsertSectionRequest,
 )
+from clappia_api_tools.utils import FileUtils
 
 from .base_client import BaseAPIKeyClient, BaseAuthTokenClient, BaseClappiaClient
 
@@ -124,6 +132,15 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
     Note: This is an abstract base class that contains business logic but no authentication.
     Use AppDefinitionAPIKeyClient or AppDefinitionAuthTokenClient for actual usage.
     """
+
+    def __init__(
+        self,
+        base_url: str,
+        file_management_client: FileManagementClient,
+        timeout: int = 30,
+    ):
+        super().__init__(base_url, timeout)
+        self.file_management_client = file_management_client
 
     async def create_app(
         self,
@@ -4317,6 +4334,241 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
 
         return ClientResponse(success=True, data=response_data)
 
+    async def update_app_icon(
+        self,
+        app_id: str,
+        icon_public_url: str,
+        version_variable_name: str | None = None,
+    ) -> ClientResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return ClientResponse(success=False, error=env_error)
+
+        try:
+            if not icon_public_url:
+                raise Exception("Icon public URL is required")
+
+            ALLOWED_TYPES = {
+                "image/bmp",
+                "image/jpeg",
+                "image/png",
+                "image/gif",
+                "image/tiff",
+                "image/svg+xml",
+            }
+
+            parsed_url = urlparse(icon_public_url)
+            file_name = parsed_url.path.split("/")[-1] or "icon.png"
+            if not file_name or "." not in file_name:
+                file_name = "icon.png"
+
+            _, public_file_url = await self.file_management_client.upload_file_from_url(
+                app_id=app_id,
+                file_url=icon_public_url,
+                filename=file_name,
+                upload_type="appicon",
+                allowed_mime_types=ALLOWED_TYPES,
+            )
+
+            if not public_file_url:
+                raise Exception("Failed to upload app icon")
+
+            payload = {
+                "appId": app_id,
+                "appIconUrl": public_file_url,
+            }
+            if version_variable_name is not None:
+                payload["versionVariableName"] = version_variable_name
+
+            success, error_message, response_data = await self.api_utils.make_request(
+                method="POST",
+                endpoint="/updateAppMetadata",
+                data=payload,
+            )
+
+            if not success:
+                return ClientResponse(success=False, error=error_message)
+
+            return ClientResponse(success=True, data=response_data)
+        except Exception as e:
+            return ClientResponse(success=False, error=str(e))
+
+    async def get_app_templates(
+        self, app_id: str, version_variable_name: str | None = None
+    ) -> ClientResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return ClientResponse(success=False, error=env_error)
+
+        params = {
+            "appId": app_id,
+        }
+        if version_variable_name is not None:
+            params["versionVariableName"] = version_variable_name
+
+        success, error_message, response_data = await self.api_utils.make_request(
+            method="GET",
+            endpoint="/getAppTemplates",
+            params=params,
+        )
+
+        if not success:
+            return ClientResponse(success=False, error=error_message)
+
+        return ClientResponse(success=True, data=response_data)
+
+    async def add_new_app_template(
+        self,
+        app_id: str,
+        definition: ExternalTemplateDefinition,
+        body_html: str,
+        header_html: str | None = None,
+        footer_html: str | None = None,
+        version_variable_name: str | None = None,
+    ) -> ClientResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return ClientResponse(success=False, error=env_error)
+
+        try:
+            upload_tasks = [
+                ("body", body_html, "body.html"),
+            ]
+            if header_html is not None:
+                upload_tasks.append(("header", header_html, "header.html"))
+            if footer_html is not None:
+                upload_tasks.append(("footer", footer_html, "footer.html"))
+
+            upload_results = await asyncio.gather(
+                *[
+                    self.file_management_client.upload_html_file(
+                        app_id=app_id,
+                        html_content=html_content,
+                        filename=filename,
+                        upload_type="printtemplate",
+                    )
+                    for _, html_content, filename in upload_tasks
+                ]
+            )
+
+            file_paths = [result[0] for result in upload_results]
+            with FileUtils.temporary_files(*file_paths):
+                file_ids = {}
+                for (file_type, _, _), (_, file_id, _) in zip(
+                    upload_tasks, upload_results
+                ):
+                    file_ids[file_type] = file_id
+
+                definition_json = definition.to_json()
+                payload = {
+                    "appId": app_id,
+                    "templateDefinition": {
+                        **definition_json,
+                        "bodyKey": file_ids["body"],
+                    },
+                }
+
+                if "header" in file_ids:
+                    payload["templateDefinition"]["headerKey"] = file_ids["header"]
+                if "footer" in file_ids:
+                    payload["templateDefinition"]["footerKey"] = file_ids["footer"]
+
+                if version_variable_name is not None:
+                    payload["versionVariableName"] = version_variable_name
+
+                success, error_message, response_data = (
+                    await self.api_utils.make_request(
+                        method="POST",
+                        endpoint="/addNewAppTemplate",
+                        data=payload,
+                    )
+                )
+
+                if not success:
+                    return ClientResponse(success=False, error=error_message)
+
+                return ClientResponse(success=True, data=response_data)
+
+        except Exception as e:
+            return ClientResponse(success=False, error=str(e))
+
+    async def update_app_template(
+        self,
+        app_id: str,
+        index: int,
+        definition: ExternalTemplateDefinition,
+        body_html: str,
+        header_html: str | None = None,
+        footer_html: str | None = None,
+        version_variable_name: str | None = None,
+    ) -> ClientResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return ClientResponse(success=False, error=env_error)
+
+        try:
+            upload_tasks = [
+                ("body", body_html, "body.html"),
+            ]
+            if header_html is not None:
+                upload_tasks.append(("header", header_html, "header.html"))
+            if footer_html is not None:
+                upload_tasks.append(("footer", footer_html, "footer.html"))
+
+            upload_results = await asyncio.gather(
+                *[
+                    self.file_management_client.upload_html_file(
+                        app_id=app_id,
+                        html_content=html_content,
+                        filename=filename,
+                        upload_type="printtemplate",
+                    )
+                    for _, html_content, filename in upload_tasks
+                ]
+            )
+
+            file_paths = [result[0] for result in upload_results]
+            with FileUtils.temporary_files(*file_paths):
+                file_ids = {}
+                for (file_type, _, _), (_, file_id, _) in zip(
+                    upload_tasks, upload_results
+                ):
+                    file_ids[file_type] = file_id
+
+                definition_json = definition.to_json()
+                payload = {
+                    "appId": app_id,
+                    "index": index,
+                    "templateDefinition": {
+                        **definition_json,
+                        "bodyKey": file_ids["body"],
+                    },
+                }
+
+                if "header" in file_ids:
+                    payload["templateDefinition"]["headerKey"] = file_ids["header"]
+                if "footer" in file_ids:
+                    payload["templateDefinition"]["footerKey"] = file_ids["footer"]
+
+                if version_variable_name is not None:
+                    payload["versionVariableName"] = version_variable_name
+
+                success, error_message, response_data = (
+                    await self.api_utils.make_request(
+                        method="POST",
+                        endpoint="/updateAppTemplate",
+                        data=payload,
+                    )
+                )
+
+                if not success:
+                    return ClientResponse(success=False, error=error_message)
+
+                return ClientResponse(success=True, data=response_data)
+
+        except Exception as e:
+            return ClientResponse(success=False, error=str(e))
+
     async def close(self) -> None:
         """Close the underlying HTTP client and clean up resources."""
         await self.api_utils.close()
@@ -4329,6 +4581,7 @@ class AppDefinitionAPIKeyClient(BaseAPIKeyClient, AppDefinitionClient):
         self,
         api_key: str,
         base_url: str,
+        file_management_client: FileManagementClient,
         timeout: int = 30,
     ):
         """Initialize app definition client with API key.
@@ -4336,9 +4589,11 @@ class AppDefinitionAPIKeyClient(BaseAPIKeyClient, AppDefinitionClient):
         Args:
             api_key: Clappia API key.
             base_url: API base URL.
+            file_management_client: File management client.
             timeout: Request timeout in seconds.
         """
         BaseAPIKeyClient.__init__(self, api_key, base_url, timeout)
+        self.file_management_client = file_management_client
 
 
 class AppDefinitionAuthTokenClient(BaseAuthTokenClient, AppDefinitionClient):
@@ -4349,6 +4604,7 @@ class AppDefinitionAuthTokenClient(BaseAuthTokenClient, AppDefinitionClient):
         auth_token: str,
         workplace_id: str,
         base_url: str,
+        file_management_client: FileManagementClient,
         timeout: int = 30,
     ):
         """Initialize app definition client with auth token.
@@ -4357,6 +4613,8 @@ class AppDefinitionAuthTokenClient(BaseAuthTokenClient, AppDefinitionClient):
             auth_token: Clappia Auth token.
             workplace_id: Clappia Workplace ID.
             base_url: API base URL.
+            file_management_client: File management client.
             timeout: Request timeout in seconds.
         """
         BaseAuthTokenClient.__init__(self, auth_token, workplace_id, base_url, timeout)
+        self.file_management_client = file_management_client

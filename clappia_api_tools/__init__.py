@@ -30,6 +30,11 @@ from .client.workplace_client import (
     WorkplaceAuthTokenClient,
     WorkplaceClient,
 )
+from .client.file_management_client import (
+    FileManagementAPIKeyClient,
+    FileManagementAuthTokenClient,
+    FileManagementClient,
+)
 
 __version__ = "1.0.2"
 __all__ = [
@@ -38,6 +43,9 @@ __all__ = [
     "AppDefinitionAuthTokenClient",
     "AppDefinitionClient",
     "BaseClappiaClient",
+    "FileManagementAPIKeyClient",
+    "FileManagementAuthTokenClient",
+    "FileManagementClient",
     "SubmissionAPIKeyClient",
     "SubmissionAuthTokenClient",
     "SubmissionClient",

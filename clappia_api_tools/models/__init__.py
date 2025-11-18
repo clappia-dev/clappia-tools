@@ -2,7 +2,7 @@
 Models for the Clappia API.
 """
 
-from .definition import ExternalPageDefinition
+from .definition import ExternalPageDefinition, ExternalTemplateDefinition
 from .json_serialized import JsonSerializableMixin
 from .request import (
     AddPageBreakRequest,
@@ -114,6 +114,7 @@ __all__ = [
     "CreateSubmissionRequest",
     "EditSubmissionRequest",
     "ExternalPageDefinition",
+    "ExternalTemplateDefinition",
     "FilterCondition",
     "GetSubmissionsAggregationRequest",
     "GetSubmissionsCountRequest",

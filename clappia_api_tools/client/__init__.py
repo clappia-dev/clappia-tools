@@ -9,6 +9,11 @@ from .app_definition_client import (
     AppDefinitionClient,
 )
 from .base_client import BaseAPIKeyClient, BaseAuthTokenClient, BaseClappiaClient
+from .file_management_client import (
+    FileManagementAPIKeyClient,
+    FileManagementAuthTokenClient,
+    FileManagementClient,
+)
 from .submission_client import (
     SubmissionAPIKeyClient,
     SubmissionAuthTokenClient,
@@ -35,6 +40,9 @@ __all__ = [
     "BaseAPIKeyClient",
     "BaseAuthTokenClient",
     "BaseClappiaClient",
+    "FileManagementAPIKeyClient",
+    "FileManagementAuthTokenClient",
+    "FileManagementClient",
     "SubmissionAPIKeyClient",
     "SubmissionAuthTokenClient",
     "SubmissionClient",
