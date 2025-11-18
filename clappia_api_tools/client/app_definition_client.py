@@ -4497,7 +4497,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         index: int,
         definition: ExternalTemplateDefinition,
-        body_html: str,
+        body_html: str | None = None,
         header_html: str | None = None,
         footer_html: str | None = None,
         version_variable_name: str | None = None,
@@ -4507,9 +4507,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             return ClientResponse(success=False, error=env_error)
 
         try:
-            upload_tasks = [
-                ("body", body_html, "body.html"),
-            ]
+            upload_tasks = []
+            if body_html is not None:
+                upload_tasks.append(("body", body_html, "body.html"))
             if header_html is not None:
                 upload_tasks.append(("header", header_html, "header.html"))
             if footer_html is not None:
@@ -4541,10 +4541,11 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                     "index": index,
                     "templateDefinition": {
                         **definition_json,
-                        "bodyKey": file_ids["body"],
                     },
                 }
 
+                if "body" in file_ids:
+                    payload["templateDefinition"]["bodyKey"] = file_ids["body"]
                 if "header" in file_ids:
                     payload["templateDefinition"]["headerKey"] = file_ids["header"]
                 if "footer" in file_ids:
