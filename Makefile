@@ -7,6 +7,9 @@ install: ## Install the package in production mode
 install-dev: ## Install the package with development dependencies
 	uv sync --all-extras
 
+install-hooks: ## Install pre-commit hooks
+	uv run pre-commit install
+
 # Code Formatting & Linting
 format: ## Format code with ruff
 	uv run ruff format .
