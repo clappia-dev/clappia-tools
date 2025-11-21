@@ -1,6 +1,5 @@
 from abc import ABC
 from pathlib import Path
-from urllib.parse import urlparse
 
 import httpx
 
@@ -19,13 +18,13 @@ class FileManagementClient(BaseClappiaClient, ABC):
         self,
         app_id: str,
         file_bytes: bytes,
-        filename: str,
+        file_name: str,
         mime_type: str,
         upload_category: str,
     ) -> tuple[str, str]:
         payload: dict[str, str] = {
             "appId": app_id,
-            "fileName": filename,
+            "fileName": file_name,
             "mimeType": mime_type,
             "uploadCategory": upload_category,
         }
@@ -47,12 +46,12 @@ class FileManagementClient(BaseClappiaClient, ABC):
         public_file_url = response_data.get("publicFileUrl")
 
         if not file_upload_url or not file_id:
-            raise Exception(f"Failed to generate {filename} file upload URL")
+            raise Exception(f"Failed to generate {file_name} file upload URL")
 
         async with httpx.AsyncClient() as client:
             response = await client.put(file_upload_url, content=file_bytes)
             if response.status_code != 200:
-                raise Exception(f"Failed to upload {filename} file")
+                raise Exception(f"Failed to upload {file_name} file")
 
         return file_id, public_file_url
 
@@ -60,29 +59,61 @@ class FileManagementClient(BaseClappiaClient, ABC):
         self,
         app_id: str,
         html_content: str,
-        filename: str,
+        file_name: str,
         upload_category: str = "printtemplate",
     ) -> tuple[Path, str, str]:
         file_path, detected_mime_type = FileUtils.save_text_file(
-            text_content=html_content, filename=filename, mime_type="text/html"
+            text_content=html_content, file_name=file_name, mime_type="text/html"
         )
 
         file_id, public_file_url = await self.upload_file(
             app_id=app_id,
             file_bytes=file_path.read_bytes(),
-            filename=filename,
+            file_name=file_name,
             mime_type=detected_mime_type,
             upload_category=upload_category,
         )
 
         return file_path, file_id, public_file_url
 
-    async def upload_file_from_url(
+    async def upload_app_icon_file(
         self,
         app_id: str,
         file_url: str,
-        filename: str | None = None,
+        file_name: str,
         upload_category: str = "appicon",
+    ) -> tuple[str, str]:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(file_url)
+            if response.status_code != 200:
+                raise Exception(
+                    f"Failed to download file from URL: {response.status_code}"
+                )
+
+            file_bytes = response.content
+            content_type: str | None = response.headers.get("Content-Type")
+            if not content_type:
+                raise Exception("Content type not found in response headers")
+
+            if not content_type.startswith("image/"):
+                raise Exception(f"Content type is not an image: {content_type}")
+
+        file_id, public_file_url = await self.upload_file(
+            app_id=app_id,
+            file_bytes=file_bytes,
+            file_name=file_name,
+            mime_type=content_type,
+            upload_category=upload_category,
+        )
+
+        return file_id, public_file_url
+
+    async def upload_public_file(
+        self,
+        app_id: str,
+        file_url: str,
+        file_name: str,
+        upload_category: str = "attachedfile",
     ) -> tuple[str, str]:
         async with httpx.AsyncClient() as client:
             response = await client.get(file_url)
@@ -96,21 +127,140 @@ class FileManagementClient(BaseClappiaClient, ABC):
                 "Content-Type", "application/octet-stream"
             )
 
-        if not filename:
-            parsed_url = urlparse(file_url)
-            filename = parsed_url.path.split("/")[-1] or "file"
-            if "." not in filename:
-                filename = "file"
-
         file_id, public_file_url = await self.upload_file(
             app_id=app_id,
             file_bytes=file_bytes,
-            filename=filename,
+            file_name=file_name,
             mime_type=content_type,
             upload_category=upload_category,
         )
 
         return file_id, public_file_url
+
+    async def upload_public_video_file(
+        self,
+        app_id: str,
+        file_url: str,
+        file_name: str,
+        upload_category: str = "attachedfile",
+    ) -> tuple[str, str]:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(file_url)
+            if response.status_code != 200:
+                raise Exception(
+                    f"Failed to download file from URL: {response.status_code}"
+                )
+
+            file_bytes = response.content
+            content_type: str | None = response.headers.get("Content-Type")
+            if not content_type:
+                raise Exception("Content type not found in response headers")
+            if not content_type.startswith("video/"):
+                raise Exception(f"Content type is not a video: {content_type}")
+
+        file_id, public_file_url = await self.upload_file(
+            app_id=app_id,
+            file_bytes=file_bytes,
+            file_name=file_name,
+            mime_type=content_type,
+            upload_category=upload_category,
+        )
+
+        return file_id, public_file_url
+
+    async def upload_public_pdf_file(
+        self,
+        app_id: str,
+        file_url: str,
+        file_name: str,
+        upload_category: str = "attachedfile",
+    ) -> tuple[str, str]:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(file_url)
+            if response.status_code != 200:
+                raise Exception(
+                    f"Failed to download file from URL: {response.status_code}"
+                )
+
+            file_bytes = response.content
+            content_type: str | None = response.headers.get("Content-Type")
+            if not content_type:
+                raise Exception("Content type not found in response headers")
+            if not content_type.startswith("application/pdf"):
+                raise Exception(f"Content type is not a PDF: {content_type}")
+
+        file_id, public_file_url = await self.upload_file(
+            app_id=app_id,
+            file_bytes=file_bytes,
+            file_name=file_name,
+            mime_type=content_type,
+            upload_category=upload_category,
+        )
+
+        return file_id, public_file_url
+
+    async def upload_public_image_file(
+        self,
+        app_id: str,
+        file_url: str,
+        file_name: str,
+        upload_category: str = "attachedfile",
+    ) -> tuple[str, str]:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(file_url)
+            if response.status_code != 200:
+                raise Exception(
+                    f"Failed to download file from URL: {response.status_code}"
+                )
+
+            file_bytes = response.content
+            content_type: str | None = response.headers.get("Content-Type")
+            if not content_type:
+                raise Exception("Content type not found in response headers")
+
+            if not content_type.startswith("image/"):
+                raise Exception(f"Content type is not an image: {content_type}")
+
+        file_id, public_file_url = await self.upload_file(
+            app_id=app_id,
+            file_bytes=file_bytes,
+            file_name=file_name,
+            mime_type=content_type,
+            upload_category=upload_category,
+        )
+
+        return file_id, public_file_url
+
+    async def download_file(self, app_id: str, file_id: str, upload_category: str) -> str:
+        payload: dict[str, str] = {
+            "appId": app_id,
+            "fileId": file_id,
+            "uploadCategory": upload_category,
+        }
+        success, error_message, response_data = await self.api_utils.make_request(
+            method="POST",
+            endpoint="/generateFileDownloadUrl",
+            data=payload,
+        )
+        if not success:
+            raise Exception(error_message)
+
+        if response_data is None or not isinstance(response_data, dict):
+            raise Exception("Invalid response data from API")
+        url: str = response_data["url"]
+        return url
+
+    async def get_app_icon_url(self, app_id: str, file_id: str) -> str:
+        return await self.download_file(app_id, file_id, "appicon")
+
+    async def get_print_template_url(self, app_id: str, file_id: str) -> str:
+        return await self.download_file(app_id, file_id, "printtemplate")
+
+    async def get_attached_file_url(self, app_id: str, file_id: str) -> str:
+        return await self.download_file(app_id, file_id, "attachedfile")
+
+    async def close(self) -> None:
+        await self.api_utils.close()
 
 
 class FileManagementAPIKeyClient(BaseAPIKeyClient, FileManagementClient):

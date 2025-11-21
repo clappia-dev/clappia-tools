@@ -284,14 +284,11 @@ class WorkplaceClient(BaseClappiaClient, ABC):
         apps: list[AppMetaData] = []
         if response_data:
             for app_data in response_data:
-                try:
                     json_data: dict[str, Any] = (
                         app_data if isinstance(app_data, dict) else {}
                     )
                     app = AppMetaData.from_json(json_data)
                     apps.append(app)
-                except Exception as e:
-                    print(f"Failed to parse app data: {e}")
             return ClientResponse(success=True, data=apps)
         return ClientResponse(success=False, error="Failed to retrieve workplace apps")
 
@@ -329,14 +326,11 @@ class WorkplaceClient(BaseClappiaClient, ABC):
         apps: list[AppUserMetaData] = []
         if response_data:
             for app_data in response_data:
-                try:
                     json_data: dict[str, Any] = (
                         app_data if isinstance(app_data, dict) else {}
                     )
                     app = AppUserMetaData.from_json(json_data)
                     apps.append(app)
-                except Exception as e:
-                    print(f"Failed to parse app data: {e}")
             return ClientResponse(success=True, data=apps)
         return ClientResponse(
             success=False, error="Failed to retrieve workplace user apps"
@@ -378,11 +372,8 @@ class WorkplaceClient(BaseClappiaClient, ABC):
 
             if isinstance(users_data, list):
                 for user_data in users_data:
-                    try:
-                        user = WorkplaceUser(**user_data)
-                        users.append(user)
-                    except Exception as e:
-                        print(f"Failed to parse user data: {e}")
+                    user = WorkplaceUser(**user_data)
+                    users.append(user)
 
         return ClientResponse(success=True, data={"users": users, "token": next_token})
 

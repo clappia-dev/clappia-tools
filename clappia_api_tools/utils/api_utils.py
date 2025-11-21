@@ -77,7 +77,6 @@ class ClappiaAPIUtils:
 
         url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
         headers = self.get_headers(data, params)
-        print(f"Making request to {url} with headers: {headers} and data: {data} and params: {params}")
         try:
             client = await self.get_client()
             try:
@@ -88,7 +87,6 @@ class ClappiaAPIUtils:
                     json=data,
                     params=params,
                 )
-                print(f"Response: {response.text}")
                 return self._handle_response(response)
             finally:
                 await client.aclose()

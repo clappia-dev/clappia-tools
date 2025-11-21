@@ -1,8 +1,8 @@
 import asyncio
 from abc import ABC
 from typing import Any
-from urllib.parse import urlparse
 
+import httpx
 from pydantic import BaseModel, EmailStr
 
 from clappia_api_tools.client.file_management_client import FileManagementClient
@@ -2576,6 +2576,14 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
+        file_id, _ = await self.file_management_client.upload_public_video_file(
+            app_id=app_id,
+            file_url=request.public_file_url,
+            file_name=request.file_name,
+        )
+        if not file_id:
+            return ClientResponse(success=False, error="Failed to upload file")
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -2583,7 +2591,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             "pageIndex": page_index,
             "fieldType": FieldType.VIDEO_VIEWER.value,
             "fieldName": field_name,
-            **request.to_json(),
+            "staticAttachment": {
+                "fileId": file_id,
+            },
         }
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
@@ -2611,10 +2621,20 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
+        file_id, _ = await self.file_management_client.upload_public_video_file(
+            app_id=app_id,
+            file_url=request.public_file_url,
+            file_name=request.file_name,
+        )
+        if not file_id:
+            return ClientResponse(success=False, error="Failed to upload file")
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
-            **request.to_json(),
+            "staticAttachment": {
+                "fileId": file_id,
+            },
         }
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
@@ -2785,6 +2805,14 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
+        file_id, _ = await self.file_management_client.upload_public_image_file(
+            app_id=app_id,
+            file_url=request.public_file_url,
+            file_name=request.file_name,
+        )
+        if not file_id:
+            return ClientResponse(success=False, error="Failed to upload file")
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -2792,7 +2820,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             "pageIndex": page_index,
             "fieldType": FieldType.IMAGE_VIEWER.value,
             "fieldName": field_name,
-            **request.to_json(),
+            "staticAttachment": {
+                "fileId": file_id,
+            },
         }
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
@@ -2820,10 +2850,20 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
+        file_id, _ = await self.file_management_client.upload_public_image_file(
+            app_id=app_id,
+            file_url=request.public_file_url,
+            file_name=request.file_name,
+        )
+        if not file_id:
+            return ClientResponse(success=False, error="Failed to upload file")
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
-            **request.to_json(),
+            "staticAttachment": {
+                "fileId": file_id,
+            },
         }
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
@@ -3061,6 +3101,14 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
+        file_id, _ = await self.file_management_client.upload_public_pdf_file(
+            app_id=app_id,
+            file_url=request.public_file_url,
+            file_name=request.file_name,
+        )
+        if not file_id:
+            return ClientResponse(success=False, error="Failed to upload file")
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -3068,7 +3116,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             "pageIndex": page_index,
             "fieldType": FieldType.PDF_VIEWER.value,
             "fieldName": field_name,
-            **request.to_json(),
+            "staticAttachment": {
+                "fileId": file_id,
+            },
         }
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
@@ -3096,10 +3146,20 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
+        file_id, _ = await self.file_management_client.upload_public_pdf_file(
+            app_id=app_id,
+            file_url=request.public_file_url,
+            file_name=request.file_name,
+        )
+        if not file_id:
+            return ClientResponse(success=False, error="Failed to upload file")
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
-            **request.to_json(),
+            "staticAttachment": {
+                "fileId": file_id,
+            },
         }
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
@@ -3130,6 +3190,14 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
+        file_id, _ = await self.file_management_client.upload_public_file(
+            app_id=app_id,
+            file_url=request.public_file_url,
+            file_name=request.file_name,
+        )
+        if not file_id:
+            return ClientResponse(success=False, error="Failed to upload file")
+
         payload = {
             "appId": app_id,
             "sectionIndex": section_index,
@@ -3137,7 +3205,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             "pageIndex": page_index,
             "fieldType": FieldType.ATTACHED_FILES.value,
             "fieldName": field_name,
-            **request.to_json(),
+            "staticAttachment": {
+                "fileId": file_id,
+            },
         }
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
@@ -3165,10 +3235,20 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
+        file_id, _ = await self.file_management_client.upload_public_file(
+            app_id=app_id,
+            file_url=request.public_file_url,
+            file_name=request.file_name,
+        )
+        if not file_id:
+            return ClientResponse(success=False, error="Failed to upload file")
+
         payload = {
             "appId": app_id,
             "fieldName": field_name,
-            **request.to_json(),
+            "staticAttachment": {
+                "fileId": file_id,
+            },
         }
         if version_variable_name is not None:
             payload["versionVariableName"] = version_variable_name
@@ -4337,6 +4417,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         self,
         app_id: str,
         icon_public_url: str,
+        file_name: str,
         version_variable_name: str | None = None,
     ) -> ClientResponse:
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4347,16 +4428,10 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             if not icon_public_url:
                 raise Exception("Icon public URL is required")
 
-            parsed_url = urlparse(icon_public_url)
-            file_name = parsed_url.path.split("/")[-1] or "icon.png"
-            if not file_name or "." not in file_name:
-                file_name = "icon.png"
-
-            _, public_file_url = await self.file_management_client.upload_file_from_url(
+            _, public_file_url = await self.file_management_client.upload_app_icon_file(
                 app_id=app_id,
                 file_url=icon_public_url,
-                filename=file_name,
-                upload_category="appicon",
+                file_name=file_name,
             )
 
             if not public_file_url:
@@ -4433,10 +4508,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                     self.file_management_client.upload_html_file(
                         app_id=app_id,
                         html_content=html_content,
-                        filename=filename,
-                        upload_category="printtemplate",
+                        file_name=file_name,
                     )
-                    for _, html_content, filename in upload_tasks
+                    for _, html_content, file_name in upload_tasks
                 ]
             )
 
@@ -4512,10 +4586,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                     self.file_management_client.upload_html_file(
                         app_id=app_id,
                         html_content=html_content,
-                        filename=filename,
-                        upload_category="printtemplate",
+                        file_name=file_name,
                     )
-                    for _, html_content, filename in upload_tasks
+                    for _, html_content, file_name in upload_tasks
                 ]
             )
 
@@ -4562,6 +4635,44 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
 
                 return ClientResponse(success=True, data=response_data)
 
+        except Exception as e:
+            return ClientResponse(success=False, error=str(e))
+
+    async def get_print_template_content(
+        self,
+        app_id: str,
+        body_file_id: str,
+        header_file_id: str | None = None,
+        footer_file_id: str | None = None,
+    ) -> ClientResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return ClientResponse(success=False, error=env_error)
+
+        async def fetch_content_from_file_id(file_id: str | None) -> str:
+            if not file_id:
+                return ""
+            url = await self.file_management_client.get_print_template_url(app_id, file_id)
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url)
+                response.raise_for_status()
+                return response.text
+
+        try:
+            body_content, header_content, footer_content = await asyncio.gather(
+                fetch_content_from_file_id(body_file_id),
+                fetch_content_from_file_id(header_file_id),
+                fetch_content_from_file_id(footer_file_id),
+            )
+
+            return ClientResponse(
+                success=True,
+                data={
+                    "htmlHeaderContent": header_content,
+                    "htmlBodyContent": body_content,
+                    "htmlFooterContent": footer_content,
+                },
+            )
         except Exception as e:
             return ClientResponse(success=False, error=str(e))
 

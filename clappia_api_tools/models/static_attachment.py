@@ -17,7 +17,3 @@ class Base64StaticAttachment(StaticAttachment):
     file_name: str = Field(
         description="Name of the file. Example: 'document.pdf', 'image.jpg'"
     )
-
-
-class FileIdStaticAttachment(StaticAttachment):
-    file_id: str = Field(description="File ID, Example: 'app_id_file_id.pdf'")

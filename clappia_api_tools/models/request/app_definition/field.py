@@ -17,7 +17,6 @@ from ...definition import (
 )
 from ...resapi_output import RestApiOutputField
 from ...sort_field import SortField
-from ...static_attachment import FileIdStaticAttachment
 
 
 class BaseUpsertFieldRequest(BaseFieldComponent):
@@ -724,10 +723,11 @@ class UpsertFieldValidationRequest(BaseUpsertFieldRequest):
 
 
 class UpsertFieldReadOnlyFileRequest(BaseUpsertFieldRequest):
-    static_attachment: FileIdStaticAttachment = Field(
-        description="Static attachment object with fileId,"
-        "Example: 'app_id_file_id.pdf', the value is obtained from the upload file API,"
-        " hence its important to upload the file first and then use the file ID here"
+    public_file_url: str = Field(
+        description="Public file URL, Example: 'https://example.com/file.pdf'"
+    )
+    file_name: str = Field(
+        description="File name of the file, Example: 'file.pdf' or {file_name}"
     )
 
 
