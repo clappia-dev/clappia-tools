@@ -8,7 +8,7 @@ from ...utils.utils import Utils
 from ..base_model import BaseFieldComponent
 from ..resapi_output import RestApiOutputField
 from ..sort_field import SortField
-from ..static_attachment import StaticAttachment
+from ..static_attachment import Base64StaticAttachment
 
 
 class BaseUpsertWorkflowStepRequest(BaseFieldComponent):
@@ -382,7 +382,7 @@ class UpsertEmailWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
         description="Email body content. Can include HTML formatting and field references. "
         "Example: 'Dear {customerName}, your order {orderId} has been confirmed.'"
     )
-    static_attachments: list[StaticAttachment] | None = Field(
+    static_attachments: list[Base64StaticAttachment] | None = Field(
         None, description="Array of static file attachments. Maximum 10 attachments."
     )
     print_template_indices: list[int] | None = Field(
@@ -423,8 +423,8 @@ class UpsertEmailWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     @field_validator("static_attachments")
     @classmethod
     def validate_static_attachments(
-        cls, v: list[StaticAttachment] | None
-    ) -> list[StaticAttachment] | None:
+        cls, v: list[Base64StaticAttachment] | None
+    ) -> list[Base64StaticAttachment] | None:
         if v is not None:
             if len(v) > 10:
                 raise ValueError("Static attachments can have at most 10 attachments")
@@ -746,7 +746,7 @@ class UpsertWhatsAppWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     whatsapp_template_id: str = Field(
         description="WhatsApp template ID. You need to ask to the user to provide the template ID. Example: 'template_12345'"
     )
-    static_attachments: list[StaticAttachment] | None = Field(
+    static_attachments: list[Base64StaticAttachment] | None = Field(
         None, description="Array of static file attachments. Maximum 1 attachment."
     )
     print_template_index: int | None = Field(
@@ -801,8 +801,8 @@ class UpsertWhatsAppWorkflowStepRequest(BaseUpsertWorkflowStepRequest):
     @field_validator("static_attachments")
     @classmethod
     def validate_static_attachments(
-        cls, v: list[StaticAttachment] | None
-    ) -> list[StaticAttachment] | None:
+        cls, v: list[Base64StaticAttachment] | None
+    ) -> list[Base64StaticAttachment] | None:
         if v is not None:
             if len(v) > 1:
                 raise ValueError("Static attachments can have at most 1 attachment")

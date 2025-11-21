@@ -4410,9 +4410,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         self,
         app_id: str,
         definition: ExternalTemplateDefinition,
-        body_html: str,
-        header_html: str | None = None,
-        footer_html: str | None = None,
+        body_file_id: str,
+        header_file_id: str | None = None,
+        footer_file_id: str | None = None,
         version_variable_name: str | None = None,
     ) -> ClientResponse:
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4421,12 +4421,12 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
 
         try:
             upload_tasks = [
-                ("body", body_html, "body.html"),
+                ("body", body_file_id, "body.html"),
             ]
-            if header_html is not None:
-                upload_tasks.append(("header", header_html, "header.html"))
-            if footer_html is not None:
-                upload_tasks.append(("footer", footer_html, "footer.html"))
+            if header_file_id is not None:
+                upload_tasks.append(("header", header_file_id, "header.html"))
+            if footer_file_id is not None:
+                upload_tasks.append(("footer", footer_file_id, "footer.html"))
 
             upload_results = await asyncio.gather(
                 *[
@@ -4459,9 +4459,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 }
 
                 if "header" in file_ids:
-                    template_definition["headerKey"] = file_ids["header"]
+                    template_definition["headerFileId"] = file_ids["header"]
                 if "footer" in file_ids:
-                    template_definition["footerKey"] = file_ids["footer"]
+                    template_definition["footerFileId"] = file_ids["footer"]
 
                 if version_variable_name is not None:
                     payload["versionVariableName"] = version_variable_name
@@ -4489,9 +4489,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         index: int,
         definition: ExternalTemplateDefinition,
-        body_html: str | None = None,
-        header_html: str | None = None,
-        footer_html: str | None = None,
+        body_file_id: str | None = None,
+        header_file_id: str | None = None,
+        footer_file_id: str | None = None,
         version_variable_name: str | None = None,
     ) -> ClientResponse:
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4500,12 +4500,12 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
 
         try:
             upload_tasks = []
-            if body_html is not None:
-                upload_tasks.append(("body", body_html, "body.html"))
-            if header_html is not None:
-                upload_tasks.append(("header", header_html, "header.html"))
-            if footer_html is not None:
-                upload_tasks.append(("footer", footer_html, "footer.html"))
+            if body_file_id is not None:
+                upload_tasks.append(("body", body_file_id, "body.html"))
+            if header_file_id is not None:
+                upload_tasks.append(("header", header_file_id, "header.html"))
+            if footer_file_id is not None:
+                upload_tasks.append(("footer", footer_file_id, "footer.html"))
 
             upload_results = await asyncio.gather(
                 *[
@@ -4538,11 +4538,11 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 }
 
                 if "body" in file_ids:
-                    template_definition["bodyKey"] = file_ids["body"]
+                    template_definition["bodyFileId"] = file_ids["body"]
                 if "header" in file_ids:
-                    template_definition["headerKey"] = file_ids["header"]
+                    template_definition["headerFileId"] = file_ids["header"]
                 if "footer" in file_ids:
-                    template_definition["footerKey"] = file_ids["footer"]
+                    template_definition["footerFileId"] = file_ids["footer"]
 
                 if version_variable_name is not None:
                     payload["versionVariableName"] = version_variable_name

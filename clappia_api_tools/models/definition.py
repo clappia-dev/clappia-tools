@@ -165,22 +165,10 @@ class OpenClappiaAppActionDetails(BaseActionDetails):
         default="home",
         description="Type of view which should be opened when the action is triggered",
     )
-    navigation_type: Literal["section", "page", "field"] = Field(
-        default="section",
-        description="Type of navigation which should be performed when the action is triggered",
-    )
-    field_to_navigate: str | None = Field(
+    navigation_field_name: str | None = Field(
         default=None,
-        description="Field to navigate to (required if the navigation_type is 'field')",
+        description="Field name to navigate to, Example: 'field_name'",
     )
-
-    @model_validator(mode="after")
-    def validate_navigation(self) -> "OpenClappiaAppActionDetails":
-        if self.navigation_type == "field" and not self.field_to_navigate:
-            raise ValueError(
-                "field_to_navigate is required when navigation_type is 'field'"
-            )
-        return self
 
 
 class OpenLinkActionDetails(BaseActionDetails):
@@ -207,14 +195,14 @@ ActionDetails = (
 
 
 class ExternalTemplateDefinition(BaseFieldComponent):
-    type: str = Field(
-        default="HTML", description="Print type, allowed values: HTML. Default is HTML"
-    )
     template_name: str = Field(description="Template name, Example: 'Template 1'")
-    pdf_name: str = Field(
-        description="PDF name, can contain field references, Example: '{$app_id}_{$submission_id}.pdf'"
+    pdf_name: str | None = Field(
+        default="{$app_id}_{$submission_id}.pdf",
+        description="PDF name, can contain field references. Example: '{$app_id}_{$submission_id}.pdf'",
     )
-    print_mode: Literal["portrait", "landscape"] = Field(description="Print mode")
+    print_mode: Literal["portrait", "landscape"] = Field(
+        default="portrait", description="Print mode"
+    )
     file_type: Literal["pdf", "xlsx"] = Field(
-        description="File type, allowed values: pdf, xlsx. Default is pdf"
+        default="pdf", description="File type, allowed values: pdf, xlsx"
     )
