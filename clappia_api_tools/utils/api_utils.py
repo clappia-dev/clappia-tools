@@ -14,23 +14,18 @@ class ClappiaAPIUtils:
     ):
         self.base_url = base_url
         self.timeout = timeout
-        self._client: httpx.AsyncClient | None = None
 
     async def get_client(self) -> httpx.AsyncClient:
-        if self._client is None:
-            self._client = httpx.AsyncClient(
-                timeout=self.timeout,
-                limits=httpx.Limits(
-                    max_keepalive_connections=20,
-                    max_connections=100,
-                ),
-            )
-        return self._client
+        return httpx.AsyncClient(
+            timeout=self.timeout,
+            limits=httpx.Limits(
+                max_keepalive_connections=20,
+                max_connections=100,
+            ),
+        )
 
     async def close(self) -> None:
-        if self._client:
-            await self._client.aclose()
-            self._client = None
+        pass
 
     def validate_environment(self) -> tuple[bool, str]:
         if not self.base_url:
@@ -82,17 +77,21 @@ class ClappiaAPIUtils:
 
         url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
         headers = self.get_headers(data, params)
-
+        print(f"Making request to {url} with headers: {headers} and data: {data} and params: {params}")
         try:
             client = await self.get_client()
-            response = await client.request(
-                method=method,
-                url=url,
-                headers=headers,
-                json=data,
-                params=params,
-            )
-            return self._handle_response(response)
+            try:
+                response = await client.request(
+                    method=method,
+                    url=url,
+                    headers=headers,
+                    json=data,
+                    params=params,
+                )
+                print(f"Response: {response.text}")
+                return self._handle_response(response)
+            finally:
+                await client.aclose()
 
         except httpx.TimeoutException:
             return False, f"Request timeout after {self.timeout} seconds", None

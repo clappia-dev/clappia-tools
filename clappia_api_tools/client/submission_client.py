@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from clappia_api_tools.models.request import (
     CreateSubmissionRequest,
     EditSubmissionRequest,
+    GetSubmissionRequest,
     GetSubmissionsAggregationRequest,
     GetSubmissionsCountRequest,
     GetSubmissionsInExcelRequest,
@@ -27,8 +28,9 @@ class SubmissionClient(BaseClappiaClient, ABC):
     """Client for managing Clappia submissions.
 
     This client handles retrieving and managing submissions, including
-    getting submissions, getting submissions aggregation, creating submissions,
-    editing submissions, updating submission status, updating submission owners.
+    getting a submission, getting submissions, getting submissions aggregation,
+    creating submissions, editing submissions, updating submission status,
+    updating submission owners.
     """
 
     async def get_submissions(
@@ -111,6 +113,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
         payload: dict[str, Any] = {
             "appId": app_id,
             "data": request.data,
+            "requestingUserEmailAddress": str(request.requesting_user_email_address),
         }
 
         success, error_message, response_data = await self.api_utils.make_request(
@@ -249,6 +252,29 @@ class SubmissionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="submissions/getSubmissionsCount", data=payload
+        )
+
+        if not success:
+            return ClientResponse(success=False, error=error_message)
+
+        return ClientResponse(success=True, data=response_data)
+
+    async def get_submission(
+        self,
+        app_id: str,
+        request: GetSubmissionRequest,
+    ) -> ClientResponse:
+        env_valid, env_error = self.api_utils.validate_environment()
+        if not env_valid:
+            return ClientResponse(success=False, error=env_error)
+
+        params: dict[str, Any] = {
+            "appId": app_id,
+            "submissionId": request.submission_id,
+        }
+
+        success, error_message, response_data = await self.api_utils.make_request(
+            method="GET", endpoint="submissions/getSubmission", params=params
         )
 
         if not success:

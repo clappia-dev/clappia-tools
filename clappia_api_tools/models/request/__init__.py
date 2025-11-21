@@ -74,6 +74,7 @@ from .app_definition import (
 from .submission import (
     CreateSubmissionRequest,
     EditSubmissionRequest,
+    GetSubmissionRequest,
     GetSubmissionsAggregationRequest,
     GetSubmissionsCountRequest,
     GetSubmissionsInExcelRequest,
@@ -128,6 +129,7 @@ __all__ = [
     # Submission
     "CreateSubmissionRequest",
     "EditSubmissionRequest",
+    "GetSubmissionRequest",
     "GetSubmissionsAggregationRequest",
     "GetSubmissionsCountRequest",
     "GetSubmissionsInExcelRequest",
