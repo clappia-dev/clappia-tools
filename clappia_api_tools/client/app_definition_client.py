@@ -4525,7 +4525,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 definition_json = definition.to_json()
                 template_definition: dict[str, Any] = {
                     **definition_json,
-                    "bodyKey": file_ids["body"],
+                    "bodyFileId": file_ids["body"],
                 }
                 payload: dict[str, Any] = {
                     "appId": app_id,
