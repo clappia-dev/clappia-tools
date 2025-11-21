@@ -21,23 +21,26 @@ class FileManagementClient(BaseClappiaClient, ABC):
         file_bytes: bytes,
         filename: str,
         mime_type: str,
-        upload_type: str,
+        upload_category: str,
     ) -> tuple[str, str]:
-        params: dict[str, str] = {
+        payload: dict[str, str] = {
             "appId": app_id,
             "fileName": filename,
-            "fileType": mime_type,
-            "uploadType": upload_type,
+            "mimeType": mime_type,
+            "uploadCategory": upload_category,
         }
 
         success, error_message, response_data = await self.api_utils.make_request(
-            method="GET",
+            method="POST",
             endpoint="/generateFileUploadUrl",
-            params=params,
+            data=payload,
         )
 
         if not success:
             raise Exception(error_message)
+
+        if response_data is None or not isinstance(response_data, dict):
+            raise Exception("Invalid response data from API")
 
         file_upload_url = response_data["fileUploadUrl"]
         file_id = response_data["fileId"]
@@ -53,16 +56,15 @@ class FileManagementClient(BaseClappiaClient, ABC):
 
         return file_id, public_file_url
 
-    async def upload_text_file(
+    async def upload_html_file(
         self,
         app_id: str,
-        text_content: str,
+        html_content: str,
         filename: str,
-        upload_type: str,
-        mime_type: str = "text/html",
+        upload_category: str = "printtemplate",
     ) -> tuple[Path, str, str]:
         file_path, detected_mime_type = FileUtils.save_text_file(
-            text_content, filename, mime_type=mime_type
+            text_content=html_content, filename=filename, mime_type="text/html"
         )
 
         file_id, public_file_url = await self.upload_file(
@@ -70,33 +72,17 @@ class FileManagementClient(BaseClappiaClient, ABC):
             file_bytes=file_path.read_bytes(),
             filename=filename,
             mime_type=detected_mime_type,
-            upload_type=upload_type,
+            upload_category=upload_category,
         )
 
         return file_path, file_id, public_file_url
-
-    async def upload_html_file(
-        self,
-        app_id: str,
-        html_content: str,
-        filename: str,
-        upload_type: str = "printtemplate",
-    ) -> tuple[Path, str, str]:
-        return await self.upload_text_file(
-            app_id=app_id,
-            text_content=html_content,
-            filename=filename,
-            upload_type=upload_type,
-            mime_type="text/html",
-        )
 
     async def upload_file_from_url(
         self,
         app_id: str,
         file_url: str,
         filename: str | None = None,
-        upload_type: str = "appicon",
-        allowed_mime_types: set[str] | None = None,
+        upload_category: str = "appicon",
     ) -> tuple[str, str]:
         async with httpx.AsyncClient() as client:
             response = await client.get(file_url)
@@ -110,11 +96,6 @@ class FileManagementClient(BaseClappiaClient, ABC):
                 "Content-Type", "application/octet-stream"
             )
 
-        if allowed_mime_types and content_type not in allowed_mime_types:
-            raise Exception(
-                f"Invalid file type: {content_type}. Allowed types: {allowed_mime_types}"
-            )
-
         if not filename:
             parsed_url = urlparse(file_url)
             filename = parsed_url.path.split("/")[-1] or "file"
@@ -126,7 +107,7 @@ class FileManagementClient(BaseClappiaClient, ABC):
             file_bytes=file_bytes,
             filename=filename,
             mime_type=content_type,
-            upload_type=upload_type,
+            upload_category=upload_category,
         )
 
         return file_id, public_file_url

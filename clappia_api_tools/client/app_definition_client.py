@@ -1,9 +1,8 @@
+import asyncio
 from abc import ABC
-from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-import asyncio
 from pydantic import BaseModel, EmailStr
 
 from clappia_api_tools.client.file_management_client import FileManagementClient
@@ -4348,15 +4347,6 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             if not icon_public_url:
                 raise Exception("Icon public URL is required")
 
-            ALLOWED_TYPES = {
-                "image/bmp",
-                "image/jpeg",
-                "image/png",
-                "image/gif",
-                "image/tiff",
-                "image/svg+xml",
-            }
-
             parsed_url = urlparse(icon_public_url)
             file_name = parsed_url.path.split("/")[-1] or "icon.png"
             if not file_name or "." not in file_name:
@@ -4366,8 +4356,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 file_url=icon_public_url,
                 filename=file_name,
-                upload_type="appicon",
-                allowed_mime_types=ALLOWED_TYPES,
+                upload_category="appicon"
             )
 
             if not public_file_url:
@@ -4393,7 +4382,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         except Exception as e:
             return ClientResponse(success=False, error=str(e))
 
-    async def get_app_templates(
+    async def get_print_templates(
         self, app_id: str, version_variable_name: str | None = None
     ) -> ClientResponse:
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4408,7 +4397,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = await self.api_utils.make_request(
             method="GET",
-            endpoint="/getAppTemplates",
+            endpoint="/getPrintTemplates",
             params=params,
         )
 
@@ -4417,7 +4406,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
 
         return ClientResponse(success=True, data=response_data)
 
-    async def add_new_app_template(
+    async def add_new_print_template(
         self,
         app_id: str,
         definition: ExternalTemplateDefinition,
@@ -4445,7 +4434,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                         app_id=app_id,
                         html_content=html_content,
                         filename=filename,
-                        upload_type="printtemplate",
+                        upload_category="printtemplate",
                     )
                     for _, html_content, filename in upload_tasks
                 ]
@@ -4453,25 +4442,26 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
 
             file_paths = [result[0] for result in upload_results]
             with FileUtils.temporary_files(*file_paths):
-                file_ids = {}
+                file_ids: dict[str, str] = {}
                 for (file_type, _, _), (_, file_id, _) in zip(
-                    upload_tasks, upload_results
+                    upload_tasks, upload_results, strict=False
                 ):
                     file_ids[file_type] = file_id
 
                 definition_json = definition.to_json()
-                payload = {
+                template_definition: dict[str, Any] = {
+                    **definition_json,
+                    "bodyKey": file_ids["body"],
+                }
+                payload: dict[str, Any] = {
                     "appId": app_id,
-                    "templateDefinition": {
-                        **definition_json,
-                        "bodyKey": file_ids["body"],
-                    },
+                    "templateDefinition": template_definition,
                 }
 
                 if "header" in file_ids:
-                    payload["templateDefinition"]["headerKey"] = file_ids["header"]
+                    template_definition["headerKey"] = file_ids["header"]
                 if "footer" in file_ids:
-                    payload["templateDefinition"]["footerKey"] = file_ids["footer"]
+                    template_definition["footerKey"] = file_ids["footer"]
 
                 if version_variable_name is not None:
                     payload["versionVariableName"] = version_variable_name
@@ -4479,7 +4469,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 success, error_message, response_data = (
                     await self.api_utils.make_request(
                         method="POST",
-                        endpoint="/addNewAppTemplate",
+                        endpoint="/addNewPrintTemplate",
                         data=payload,
                     )
                 )
@@ -4492,7 +4482,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         except Exception as e:
             return ClientResponse(success=False, error=str(e))
 
-    async def update_app_template(
+    async def update_print_template(
         self,
         app_id: str,
         index: int,
@@ -4521,7 +4511,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                         app_id=app_id,
                         html_content=html_content,
                         filename=filename,
-                        upload_type="printtemplate",
+                        upload_category="printtemplate",
                     )
                     for _, html_content, filename in upload_tasks
                 ]
@@ -4529,27 +4519,28 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
 
             file_paths = [result[0] for result in upload_results]
             with FileUtils.temporary_files(*file_paths):
-                file_ids = {}
+                file_ids: dict[str, str] = {}
                 for (file_type, _, _), (_, file_id, _) in zip(
-                    upload_tasks, upload_results
+                    upload_tasks, upload_results, strict=False
                 ):
                     file_ids[file_type] = file_id
 
                 definition_json = definition.to_json()
-                payload = {
+                template_definition: dict[str, Any] = {
+                    **definition_json,
+                }
+                payload: dict[str, Any] = {
                     "appId": app_id,
                     "index": index,
-                    "templateDefinition": {
-                        **definition_json,
-                    },
+                    "templateDefinition": template_definition,
                 }
 
                 if "body" in file_ids:
-                    payload["templateDefinition"]["bodyKey"] = file_ids["body"]
+                    template_definition["bodyKey"] = file_ids["body"]
                 if "header" in file_ids:
-                    payload["templateDefinition"]["headerKey"] = file_ids["header"]
+                    template_definition["headerKey"] = file_ids["header"]
                 if "footer" in file_ids:
-                    payload["templateDefinition"]["footerKey"] = file_ids["footer"]
+                    template_definition["footerKey"] = file_ids["footer"]
 
                 if version_variable_name is not None:
                     payload["versionVariableName"] = version_variable_name
@@ -4557,7 +4548,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 success, error_message, response_data = (
                     await self.api_utils.make_request(
                         method="POST",
-                        endpoint="/updateAppTemplate",
+                        endpoint="/updatePrintTemplate",
                         data=payload,
                     )
                 )

@@ -1,10 +1,11 @@
 import base64
+import logging
 import os
 import tempfile
 import uuid
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Generator
 
 
 class FileUtils:
@@ -33,7 +34,7 @@ class FileUtils:
         try:
             file_bytes = base64.b64decode(data, validate=True)
         except Exception as e:
-            raise ValueError(f"Invalid base64 data: {str(e)}")
+            raise ValueError(f"Invalid base64 data: {e!s}") from e
 
         unique_id = uuid.uuid4().hex
         file_extension = filename.split(".")[-1] if "." in filename else ""
@@ -80,5 +81,7 @@ class FileUtils:
                 if file_path and file_path.exists():
                     try:
                         file_path.unlink()
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logging.warning(
+                            f"Failed to delete temporary file {file_path}: {e}"
+                        )

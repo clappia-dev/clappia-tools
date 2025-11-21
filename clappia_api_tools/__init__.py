@@ -15,6 +15,11 @@ from .client.app_definition_client import (
     AppDefinitionClient,
 )
 from .client.base_client import BaseClappiaClient
+from .client.file_management_client import (
+    FileManagementAPIKeyClient,
+    FileManagementAuthTokenClient,
+    FileManagementClient,
+)
 from .client.submission_client import (
     SubmissionAPIKeyClient,
     SubmissionAuthTokenClient,
@@ -29,11 +34,6 @@ from .client.workplace_client import (
     WorkplaceAPIKeyClient,
     WorkplaceAuthTokenClient,
     WorkplaceClient,
-)
-from .client.file_management_client import (
-    FileManagementAPIKeyClient,
-    FileManagementAuthTokenClient,
-    FileManagementClient,
 )
 
 __version__ = "1.0.2"

@@ -53,7 +53,7 @@ class CreateSubmissionRequest(BaseFieldComponent):
         "Example: {'employee_name': 'Jane Doe', 'department': 'HR', 'salary': 60000, 'start_date': '10-02-2024', "
         "'location':'23.456789, 45.678901', 'image_field_name': "
         '[{"s3Path": {"bucket": "my-files-bucket", "key": "images/photo.jpg", "makePublic": false}}]}'
-    ),
+    )
     # TODO: Remove requesting_user_email_address field once the API is updated
     requesting_user_email_address: EmailStr = Field(
         description="Email of requesting user. Example: 'support@clappia.com'"
