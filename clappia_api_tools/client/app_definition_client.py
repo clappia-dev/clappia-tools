@@ -4410,9 +4410,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         self,
         app_id: str,
         definition: ExternalTemplateDefinition,
-        body_file_id: str,
-        header_file_id: str | None = None,
-        footer_file_id: str | None = None,
+        body_html_string: str,
+        header_html_string: str | None = None,
+        footer_html_string: str | None = None,
         version_variable_name: str | None = None,
     ) -> ClientResponse:
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4421,12 +4421,12 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
 
         try:
             upload_tasks = [
-                ("body", body_file_id, "body.html"),
+                ("body", body_html_string, "body.html"),
             ]
-            if header_file_id is not None:
-                upload_tasks.append(("header", header_file_id, "header.html"))
-            if footer_file_id is not None:
-                upload_tasks.append(("footer", footer_file_id, "footer.html"))
+            if header_html_string is not None:
+                upload_tasks.append(("header", header_html_string, "header.html"))
+            if footer_html_string is not None:
+                upload_tasks.append(("footer", footer_html_string, "footer.html"))
 
             upload_results = await asyncio.gather(
                 *[
@@ -4489,9 +4489,9 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         app_id: str,
         index: int,
         definition: ExternalTemplateDefinition,
-        body_file_id: str | None = None,
-        header_file_id: str | None = None,
-        footer_file_id: str | None = None,
+        body_html_string: str | None = None,
+        header_html_string: str | None = None,
+        footer_html_string: str | None = None,
         version_variable_name: str | None = None,
     ) -> ClientResponse:
         env_valid, env_error = self.api_utils.validate_environment()
@@ -4500,12 +4500,12 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
 
         try:
             upload_tasks = []
-            if body_file_id is not None:
-                upload_tasks.append(("body", body_file_id, "body.html"))
-            if header_file_id is not None:
-                upload_tasks.append(("header", header_file_id, "header.html"))
-            if footer_file_id is not None:
-                upload_tasks.append(("footer", footer_file_id, "footer.html"))
+            if body_html_string is not None:
+                upload_tasks.append(("body", body_html_string, "body.html"))
+            if header_html_string is not None:
+                upload_tasks.append(("header", header_html_string, "header.html"))
+            if footer_html_string is not None:
+                upload_tasks.append(("footer", footer_html_string, "footer.html"))
 
             upload_results = await asyncio.gather(
                 *[
