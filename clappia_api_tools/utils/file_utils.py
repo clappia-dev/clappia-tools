@@ -9,7 +9,6 @@ from pathlib import Path
 
 
 class FileUtils:
-
     @staticmethod
     def save_base64_file(
         b64_string: str,

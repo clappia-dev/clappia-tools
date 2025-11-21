@@ -133,7 +133,6 @@ class FileManagementAPIKeyClient(BaseAPIKeyClient, FileManagementClient):
 
 
 class FileManagementAuthTokenClient(BaseAuthTokenClient, FileManagementClient):
-
     def __init__(
         self,
         auth_token: str,

@@ -49,13 +49,13 @@ dev = [
     "types-requests>=2.31.0",
 ]
 docs = [
-    "mkdocs>=1.4.0", 
+    "mkdocs>=1.4.0",
     "mkdocs-material>=9.0.0",
     "mkdocs-swagger-ui-tag>=0.6.0",
 ]
 security = [
     "bandit>=1.7.5",
-    "safety>=2.3.0", 
+    "safety>=2.3.0",
     "pip-audit>=2.6.0",
 ]
 
@@ -128,7 +128,7 @@ skips = ["B101", "B601"]
 [dependency-groups]
 dev = [
     "ruff>=0.1.6",
-    "mypy>=1.16.1", 
+    "mypy>=1.16.1",
     "pre-commit>=4.2.0",
     "bandit>=1.7.5",
     "safety>=2.3.0",

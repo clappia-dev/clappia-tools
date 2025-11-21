@@ -4356,7 +4356,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 app_id=app_id,
                 file_url=icon_public_url,
                 filename=file_name,
-                upload_category="appicon"
+                upload_category="appicon",
             )
 
             if not public_file_url:
@@ -4466,12 +4466,14 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 if version_variable_name is not None:
                     payload["versionVariableName"] = version_variable_name
 
-                success, error_message, response_data = (
-                    await self.api_utils.make_request(
-                        method="POST",
-                        endpoint="/addNewPrintTemplate",
-                        data=payload,
-                    )
+                (
+                    success,
+                    error_message,
+                    response_data,
+                ) = await self.api_utils.make_request(
+                    method="POST",
+                    endpoint="/addNewPrintTemplate",
+                    data=payload,
                 )
 
                 if not success:
@@ -4545,12 +4547,14 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
                 if version_variable_name is not None:
                     payload["versionVariableName"] = version_variable_name
 
-                success, error_message, response_data = (
-                    await self.api_utils.make_request(
-                        method="POST",
-                        endpoint="/updatePrintTemplate",
-                        data=payload,
-                    )
+                (
+                    success,
+                    error_message,
+                    response_data,
+                ) = await self.api_utils.make_request(
+                    method="POST",
+                    endpoint="/updatePrintTemplate",
+                    data=payload,
                 )
 
                 if not success:
