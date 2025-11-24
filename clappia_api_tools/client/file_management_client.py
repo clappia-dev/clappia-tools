@@ -14,7 +14,7 @@ from clappia_api_tools.utils import FileUtils
 class FileManagementClient(BaseClappiaClient, ABC):
     """Client for managing Clappia file management."""
 
-    async def upload_file(
+    async def upload_file_via_bytes(
         self,
         app_id: str,
         file_bytes: bytes,
@@ -55,33 +55,12 @@ class FileManagementClient(BaseClappiaClient, ABC):
 
         return file_id, public_file_url
 
-    async def upload_html_file(
-        self,
-        app_id: str,
-        html_content: str,
-        file_name: str,
-        upload_category: str = "printtemplate",
-    ) -> tuple[Path, str, str]:
-        file_path, detected_mime_type = FileUtils.save_text_file(
-            text_content=html_content, file_name=file_name, mime_type="text/html"
-        )
-
-        file_id, public_file_url = await self.upload_file(
-            app_id=app_id,
-            file_bytes=file_path.read_bytes(),
-            file_name=file_name,
-            mime_type=detected_mime_type,
-            upload_category=upload_category,
-        )
-
-        return file_path, file_id, public_file_url
-
-    async def upload_app_icon_file(
+    async def upload_app_icon(
         self,
         app_id: str,
         file_url: str,
         file_name: str,
-        upload_category: str = "appicon",
+        upload_category: str = "appIcon",
     ) -> tuple[str, str]:
         async with httpx.AsyncClient() as client:
             response = await client.get(file_url)
@@ -98,7 +77,7 @@ class FileManagementClient(BaseClappiaClient, ABC):
             if not content_type.startswith("image/"):
                 raise Exception(f"Content type is not an image: {content_type}")
 
-        file_id, public_file_url = await self.upload_file(
+        file_id, public_file_url = await self.upload_file_via_bytes(
             app_id=app_id,
             file_bytes=file_bytes,
             file_name=file_name,
@@ -108,12 +87,33 @@ class FileManagementClient(BaseClappiaClient, ABC):
 
         return file_id, public_file_url
 
-    async def upload_public_file(
+    async def upload_html_file(
+        self,
+        app_id: str,
+        html_content: str,
+        file_name: str,
+        upload_category: str = "printTemplateHtml",
+    ) -> tuple[Path, str, str]:
+        file_path, detected_mime_type = FileUtils.save_text_file(
+            text_content=html_content, file_name=file_name, mime_type="text/html"
+        )
+
+        file_id, public_file_url = await self.upload_file_via_bytes(
+            app_id=app_id,
+            file_bytes=file_path.read_bytes(),
+            file_name=file_name,
+            mime_type=detected_mime_type,
+            upload_category=upload_category,
+        )
+
+        return file_path, file_id, public_file_url
+
+    async def upload_attached_file(
         self,
         app_id: str,
         file_url: str,
         file_name: str,
-        upload_category: str = "attachedfile",
+        upload_category: str = "attachedFile",
     ) -> tuple[str, str]:
         async with httpx.AsyncClient() as client:
             response = await client.get(file_url)
@@ -127,7 +127,7 @@ class FileManagementClient(BaseClappiaClient, ABC):
                 "Content-Type", "application/octet-stream"
             )
 
-        file_id, public_file_url = await self.upload_file(
+        file_id, public_file_url = await self.upload_file_via_bytes(
             app_id=app_id,
             file_bytes=file_bytes,
             file_name=file_name,
@@ -137,12 +137,12 @@ class FileManagementClient(BaseClappiaClient, ABC):
 
         return file_id, public_file_url
 
-    async def upload_public_video_file(
+    async def upload_video_viewer_file(
         self,
         app_id: str,
         file_url: str,
         file_name: str,
-        upload_category: str = "attachedfile",
+        upload_category: str = "videoAttachedFile",
     ) -> tuple[str, str]:
         async with httpx.AsyncClient() as client:
             response = await client.get(file_url)
@@ -158,7 +158,7 @@ class FileManagementClient(BaseClappiaClient, ABC):
             if not content_type.startswith("video/"):
                 raise Exception(f"Content type is not a video: {content_type}")
 
-        file_id, public_file_url = await self.upload_file(
+        file_id, public_file_url = await self.upload_file_via_bytes(
             app_id=app_id,
             file_bytes=file_bytes,
             file_name=file_name,
@@ -168,12 +168,12 @@ class FileManagementClient(BaseClappiaClient, ABC):
 
         return file_id, public_file_url
 
-    async def upload_public_pdf_file(
+    async def upload_pdf_viewer_file(
         self,
         app_id: str,
         file_url: str,
         file_name: str,
-        upload_category: str = "attachedfile",
+        upload_category: str = "pdfAttachedFile",
     ) -> tuple[str, str]:
         async with httpx.AsyncClient() as client:
             response = await client.get(file_url)
@@ -189,7 +189,7 @@ class FileManagementClient(BaseClappiaClient, ABC):
             if not content_type.startswith("application/pdf"):
                 raise Exception(f"Content type is not a PDF: {content_type}")
 
-        file_id, public_file_url = await self.upload_file(
+        file_id, public_file_url = await self.upload_file_via_bytes(
             app_id=app_id,
             file_bytes=file_bytes,
             file_name=file_name,
@@ -199,12 +199,12 @@ class FileManagementClient(BaseClappiaClient, ABC):
 
         return file_id, public_file_url
 
-    async def upload_public_image_file(
+    async def upload_image_viewer_file(
         self,
         app_id: str,
         file_url: str,
         file_name: str,
-        upload_category: str = "attachedfile",
+        upload_category: str = "imageAttachedFile",
     ) -> tuple[str, str]:
         async with httpx.AsyncClient() as client:
             response = await client.get(file_url)
@@ -221,7 +221,7 @@ class FileManagementClient(BaseClappiaClient, ABC):
             if not content_type.startswith("image/"):
                 raise Exception(f"Content type is not an image: {content_type}")
 
-        file_id, public_file_url = await self.upload_file(
+        file_id, public_file_url = await self.upload_file_via_bytes(
             app_id=app_id,
             file_bytes=file_bytes,
             file_name=file_name,
@@ -231,7 +231,9 @@ class FileManagementClient(BaseClappiaClient, ABC):
 
         return file_id, public_file_url
 
-    async def download_file(self, app_id: str, file_id: str, upload_category: str) -> str:
+    async def download_file_via_file_id(
+        self, app_id: str, file_id: str, upload_category: str
+    ) -> str:
         payload: dict[str, str] = {
             "appId": app_id,
             "fileId": file_id,
@@ -250,14 +252,29 @@ class FileManagementClient(BaseClappiaClient, ABC):
         url: str = response_data["url"]
         return url
 
-    async def get_app_icon_url(self, app_id: str, file_id: str) -> str:
-        return await self.download_file(app_id, file_id, "appicon")
+    async def get_app_icon__file_url(self, app_id: str, file_id: str) -> str:
+        return await self.download_file_via_file_id(app_id, file_id, "appIcon")
 
-    async def get_print_template_url(self, app_id: str, file_id: str) -> str:
-        return await self.download_file(app_id, file_id, "printtemplate")
+    async def get_print_template_file_url(self, app_id: str, file_id: str) -> str:
+        return await self.download_file_via_file_id(
+            app_id, file_id, "printTemplateHtml"
+        )
 
-    async def get_attached_file_url(self, app_id: str, file_id: str) -> str:
-        return await self.download_file(app_id, file_id, "attachedfile")
+    async def get_attached_file_file_url(self, app_id: str, file_id: str) -> str:
+        return await self.download_file_via_file_id(app_id, file_id, "attachedFile")
+
+    async def get_video_viewer_file_url(self, app_id: str, file_id: str) -> str:
+        return await self.download_file_via_file_id(
+            app_id, file_id, "videoAttachedFile"
+        )
+
+    async def get_pdf_viewer_file_url(self, app_id: str, file_id: str) -> str:
+        return await self.download_file_via_file_id(app_id, file_id, "pdfAttachedFile")
+
+    async def get_image_viewer_file_url(self, app_id: str, file_id: str) -> str:
+        return await self.download_file_via_file_id(
+            app_id, file_id, "imageAttachedFile"
+        )
 
     async def close(self) -> None:
         await self.api_utils.close()

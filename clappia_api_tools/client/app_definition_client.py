@@ -2576,7 +2576,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
-        file_id, _ = await self.file_management_client.upload_public_video_file(
+        file_id, _ = await self.file_management_client.upload_video_viewer_file(
             app_id=app_id,
             file_url=request.public_file_url,
             file_name=request.file_name,
@@ -2621,7 +2621,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
-        file_id, _ = await self.file_management_client.upload_public_video_file(
+        file_id, _ = await self.file_management_client.upload_video_viewer_file(
             app_id=app_id,
             file_url=request.public_file_url,
             file_name=request.file_name,
@@ -2805,7 +2805,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
-        file_id, _ = await self.file_management_client.upload_public_image_file(
+        file_id, _ = await self.file_management_client.upload_image_viewer_file(
             app_id=app_id,
             file_url=request.public_file_url,
             file_name=request.file_name,
@@ -2850,7 +2850,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
-        file_id, _ = await self.file_management_client.upload_public_image_file(
+        file_id, _ = await self.file_management_client.upload_image_viewer_file(
             app_id=app_id,
             file_url=request.public_file_url,
             file_name=request.file_name,
@@ -3101,7 +3101,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
-        file_id, _ = await self.file_management_client.upload_public_pdf_file(
+        file_id, _ = await self.file_management_client.upload_pdf_viewer_file(
             app_id=app_id,
             file_url=request.public_file_url,
             file_name=request.file_name,
@@ -3146,7 +3146,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
-        file_id, _ = await self.file_management_client.upload_public_pdf_file(
+        file_id, _ = await self.file_management_client.upload_pdf_viewer_file(
             app_id=app_id,
             file_url=request.public_file_url,
             file_name=request.file_name,
@@ -3190,7 +3190,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
-        file_id, _ = await self.file_management_client.upload_public_file(
+        file_id, _ = await self.file_management_client.upload_attached_file(
             app_id=app_id,
             file_url=request.public_file_url,
             file_name=request.file_name,
@@ -3235,7 +3235,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         if not env_valid:
             return ClientResponse(success=False, error=env_error)
 
-        file_id, _ = await self.file_management_client.upload_public_file(
+        file_id, _ = await self.file_management_client.upload_attached_file(
             app_id=app_id,
             file_url=request.public_file_url,
             file_name=request.file_name,
@@ -4428,7 +4428,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
             if not icon_public_url:
                 raise Exception("Icon public URL is required")
 
-            _, public_file_url = await self.file_management_client.upload_app_icon_file(
+            _, public_file_url = await self.file_management_client.upload_app_icon(
                 app_id=app_id,
                 file_url=icon_public_url,
                 file_name=file_name,
@@ -4652,7 +4652,7 @@ class AppDefinitionClient(BaseClappiaClient, ABC):
         async def fetch_content_from_file_id(file_id: str | None) -> str:
             if not file_id:
                 return ""
-            url = await self.file_management_client.get_print_template_url(app_id, file_id)
+            url = await self.file_management_client.get_print_template_file_url(app_id, file_id)
             async with httpx.AsyncClient() as client:
                 response = await client.get(url)
                 response.raise_for_status()
