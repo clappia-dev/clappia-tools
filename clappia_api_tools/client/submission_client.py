@@ -52,7 +52,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
             payload["filters"] = request.filters.to_dict()
 
         success, error_message, response_data = await self.api_utils.make_request(
-            method="POST", endpoint="submissions/getSubmissions", data=payload
+            method="POST", endpoint="/getSubmissions", data=payload
         )
 
         if not success:
@@ -92,7 +92,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
 
         success, error_message, response_data = await self.api_utils.make_request(
             method="POST",
-            endpoint="submissions/getSubmissionsAggregation",
+            endpoint="/getSubmissionsAggregation",
             data=payload,
         )
 
@@ -117,7 +117,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
         }
 
         success, error_message, response_data = await self.api_utils.make_request(
-            method="POST", endpoint="submissions/create", data=payload
+            method="POST", endpoint="/create", data=payload
         )
 
         if not success:
@@ -141,7 +141,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
         }
 
         success, error_message, response_data = await self.api_utils.make_request(
-            method="POST", endpoint="submissions/edit", data=payload
+            method="POST", endpoint="/edit", data=payload
         )
 
         if not success:
@@ -170,7 +170,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
         }
 
         success, error_message, response_data = await self.api_utils.make_request(
-            method="POST", endpoint="submissions/updateStatus", data=payload
+            method="POST", endpoint="/updateStatus", data=payload
         )
 
         if not success:
@@ -195,7 +195,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
         }
 
         success, error_message, response_data = await self.api_utils.make_request(
-            method="POST", endpoint="submissions/updateSubmissionOwners", data=payload
+            method="POST", endpoint="/updateSubmissionOwners", data=payload
         )
         if not success:
             return ClientResponse(success=False, error=error_message)
@@ -223,7 +223,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
             payload["fieldNames"] = request.field_names
 
         success, error_message, response_data = await self.api_utils.make_request(
-            method="POST", endpoint="submissions/getSubmissionsExcel", data=payload
+            method="POST", endpoint="/getSubmissionsExcel", data=payload
         )
 
         if not success:
@@ -251,7 +251,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
             payload["filters"] = request.filters.to_dict()
 
         success, error_message, response_data = await self.api_utils.make_request(
-            method="POST", endpoint="submissions/getSubmissionsCount", data=payload
+            method="POST", endpoint="/getSubmissionsCount", data=payload
         )
 
         if not success:
@@ -274,7 +274,7 @@ class SubmissionClient(BaseClappiaClient, ABC):
         }
 
         success, error_message, response_data = await self.api_utils.make_request(
-            method="GET", endpoint="submissions/getSubmission", params=params
+            method="GET", endpoint="/getSubmission", params=params
         )
 
         if not success:

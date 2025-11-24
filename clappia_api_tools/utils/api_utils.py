@@ -80,6 +80,7 @@ class ClappiaAPIUtils:
         try:
             client = await self.get_client()
             try:
+                print(f"Making API Call: URL: {url}, Method: {method}, Headers: {headers}, Data: {data}, Params: {params}")
                 response = await client.request(
                     method=method,
                     url=url,
