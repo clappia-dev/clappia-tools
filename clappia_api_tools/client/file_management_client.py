@@ -49,7 +49,11 @@ class FileManagementClient(BaseClappiaClient, ABC):
             raise Exception(f"Failed to generate {file_name} file upload URL")
 
         async with httpx.AsyncClient() as client:
-            response = await client.put(file_upload_url, content=file_bytes)
+            response = await client.put(
+                file_upload_url, 
+                content=file_bytes,
+                headers={"Content-Type": mime_type}
+            )
             if response.status_code != 200:
                 raise Exception(f"Failed to upload {file_name} file")
 
