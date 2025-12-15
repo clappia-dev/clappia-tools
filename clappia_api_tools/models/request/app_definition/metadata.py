@@ -36,6 +36,9 @@ class UpdateAppMetadataRequest(BaseFieldComponent):
         description="Statuses of the app, they can be used to review submissions. "
         "Example: [{'name': 'Pending', 'color': '#000000'}, {'name': 'Approved', 'color': '#000000'}]",
     )
+    default_status: str | None = Field(
+        default=None, description="Default status of the app. Should be provided if statuses are provided."
+    )
     post_submission_message_text: str | None = Field(
         default=None,
         description="Post submission message text, can contain field references. "
@@ -111,3 +114,10 @@ class UpdateAppMetadataRequest(BaseFieldComponent):
             if len(names) != len(set(names)):
                 raise ValueError("statuses must not contain duplicate names")
         return self
+    
+    @model_validator(mode="after")
+    def validate_default_status(self) -> "UpdateAppMetadataRequest":
+        if self.default_status and self.statuses:
+            if self.default_status not in [s.name for s in self.statuses]:
+                raise ValueError("default_status must be one of the statuses")
+        
