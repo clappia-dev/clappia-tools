@@ -50,6 +50,10 @@ class SubmissionClient(BaseClappiaClient, ABC):
 
         if request.filters:
             payload["filters"] = request.filters.to_dict()
+        if request.last_submission_id:
+            payload["lastSubmissionId"] = request.last_submission_id
+        if request.fields:
+            payload["fields"] = request.fields
 
         success, error_message, response_data = await self.api_utils.make_request(
             method="POST", endpoint="/getSubmissions", data=payload
