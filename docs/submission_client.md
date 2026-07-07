@@ -158,6 +158,27 @@ Aggregates Clappia submission data for analytics and reporting.
 -  At least one dimension or aggregation_dimension is required.
 -  The response format is a 2D array where the first row contains headers and subsequent rows contain data.
 
+---
+
+### get_submission
+
+```python
+def get_submission(app_id: str, submission_id: str) -> str
+```
+
+Retrieves a single Clappia submission by its ID.
+
+**Args:**
+
+-  `app_id` (str): Application ID in uppercase letters and numbers format (e.g., MFX093412).
+-  `submission_id` (str): Unique identifier of the submission to retrieve (e.g., HGO51464561).
+
+**Returns:**
+
+-  `str`: JSON string with submission data, or error message if the request fails.
+
+---
+
 ### get_submissions_in_excel
 
 ```python
@@ -311,6 +332,7 @@ sum_agg = AggregationDimension(
 ```python
 from clappia_api_tools.client.submission_client import SubmissionClient
 from clappia_api_tools.models.model import Condition, Query, QueryGroup, Filters, Dimension, AggregationDimension, AggregationOperand
+from clappia_api_tools.models import GetSubmissionRequest
 from clappia_api_tools.enums.enums import FilterOperator, FilterKeyType, AggregationType
 
 client = SubmissionClient(
@@ -358,6 +380,13 @@ result = client.get_submissions_aggregation(
     dimensions=[region_dimension],
     aggregation_dimensions=[count_aggregation],
     x_axis_labels=["Region", "Count"],
+)
+print(result)
+
+# Get a single submission
+result = client.get_submission(
+    app_id="MFX093412",
+    request=GetSubmissionRequest(submission_id="HGO51464561"),
 )
 print(result)
 ```
